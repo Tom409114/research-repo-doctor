@@ -2,15 +2,15 @@
 
 ## 1. Repository URL
 
-Planned public URL: https://github.com/research-repo-doctor/research-repo-doctor
+Public URL: https://github.com/Tom409114/research-repo-doctor
 
-Status: pending external GitHub publication from this environment because GitHub CLI (`gh`) is not installed or authenticated.
+Status: public GitHub repository created under `Tom409114`.
 
 ## 2. Release URL
 
-Planned release URL: https://github.com/research-repo-doctor/research-repo-doctor/releases/tag/v0.1.0
+Release URL: https://github.com/Tom409114/research-repo-doctor/releases/tag/v0.1.0
 
-Status: pending GitHub release creation.
+Status: verify with `gh release view v0.1.0`.
 
 ## 3. Current version
 
@@ -38,7 +38,7 @@ Local release state is prepared:
 - Issue templates and initial roadmap issue drafts.
 - Local v0.1.0 package artifacts can be built from source.
 
-GitHub publication is pending until `gh` is installed and authenticated.
+GitHub repository publication is complete. CI and release status should be verified with GitHub CLI before submission.
 
 ## 6. What is intentionally not yet claimed
 
@@ -51,7 +51,7 @@ GitHub publication is pending until `gh` is installed and authenticated.
 
 - Stars: fill after launch
 - Forks: fill after launch
-- Issues: fill after roadmap issues are created
+- Issues: at least 1 roadmap issue created; update after creating the remaining roadmap issues
 - PRs: fill after real PR activity exists
 - Downloads: fill after PyPI release, if any
 - Release URL: fill after GitHub release creation
@@ -70,13 +70,13 @@ API 额度只用于维护者工作流，不会让终端用户调用 API。计划
 
 ## 11. Evidence checklist
 
-- Public repo: pending GitHub publication
-- CI passing: pending GitHub workflow run
-- Release created: pending GitHub release
+- Public repo: ready
+- CI passing: verify with `gh run list --limit 5`
+- Release created: verify with `gh release view v0.1.0`
 - GitHub Action metadata: ready in `action.yml`
 - README: ready
 - Docs: ready
-- Roadmap issues: drafts ready in `docs/initial-issues.md`; GitHub issue creation pending
+- Roadmap issues: 1 created; drafts for the remaining issues are ready in `docs/initial-issues.md`
 - Contribution guide: ready
 - Security policy: ready
 - Changelog: ready

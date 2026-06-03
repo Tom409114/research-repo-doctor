@@ -50,9 +50,7 @@ def render_sarif(report: ScanReport) -> str:
                 "tool": {
                     "driver": {
                         "name": "Research Repo Doctor",
-                        "informationUri": (
-                            "https://github.com/research-repo-doctor/research-repo-doctor"
-                        ),
+                        "informationUri": ("https://github.com/Tom409114/research-repo-doctor"),
                         "rules": rules,
                     }
                 },

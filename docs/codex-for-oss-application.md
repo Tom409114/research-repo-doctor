@@ -6,7 +6,7 @@
 
 English: Research Repo Doctor is an open-source CLI and GitHub Action for auditing research repositories before public release. It checks reproducibility, data documentation, environments, experiment entrypoints, notebooks, citation metadata, licensing, CI, tests, and release readiness. The core scanner is deterministic and local-first.
 
-Planned repository URL: https://github.com/research-repo-doctor/research-repo-doctor
+Planned repository URL: https://github.com/Tom409114/research-repo-doctor
 
 ## Why this repository qualifies?
 

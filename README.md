@@ -1,6 +1,6 @@
 # Research Repo Doctor
 
-[![CI](https://github.com/research-repo-doctor/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/research-repo-doctor/research-repo-doctor/actions/workflows/ci.yml)
+[![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/badge/PyPI-after%20v0.1.0-blue)](https://pypi.org/project/rrdoctor/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -23,7 +23,7 @@ Research Repo Doctor turns those recurring release blockers into deterministic c
 Install from source for the initial release:
 
 ```bash
-git clone https://github.com/research-repo-doctor/research-repo-doctor.git
+git clone https://github.com/Tom409114/research-repo-doctor.git
 cd research-repo-doctor
 python -m pip install -e ".[dev]"
 rrdoctor scan .
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: research-repo-doctor/research-repo-doctor@v0.1.0
+      - uses: Tom409114/research-repo-doctor@v0.1.0
         with:
           profile: standard
           fail-on: warning

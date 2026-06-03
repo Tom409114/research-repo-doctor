@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: research-repo-doctor/research-repo-doctor@v0.1.0
+      - uses: Tom409114/research-repo-doctor@v0.1.0
         with:
           profile: standard
           fail-on: warning

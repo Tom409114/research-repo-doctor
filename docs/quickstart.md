@@ -5,7 +5,7 @@
 For the initial source release:
 
 ```bash
-git clone https://github.com/research-repo-doctor/research-repo-doctor.git
+git clone https://github.com/Tom409114/research-repo-doctor.git
 cd research-repo-doctor
 python -m pip install -e ".[dev]"
 ```
@@ -37,7 +37,7 @@ Fix errors first, then warnings that affect setup, data access, experiment entry
 ## Add the GitHub Action
 
 ```yaml
-- uses: research-repo-doctor/research-repo-doctor@v0.1.0
+- uses: Tom409114/research-repo-doctor@v0.1.0
   with:
     profile: standard
     fail-on: warning
