@@ -1,0 +1,6 @@
+cff-version: 1.2.0
+message: "Citation example."
+title: "ML Paper Repo"
+authors:
+  - family-names: "Example"
+    given-names: "Researcher"

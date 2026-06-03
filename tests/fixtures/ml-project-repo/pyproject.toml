@@ -1,0 +1,6 @@
+[project]
+name = "ml-project-repo"
+version = "0.1.0"
+description = "ML fixture"
+requires-python = ">=3.10"
+license = { text = "MIT" }

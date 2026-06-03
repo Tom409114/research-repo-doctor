@@ -1,0 +1,37 @@
+name: False negative report
+description: Report a reproducibility risk that Research Repo Doctor missed.
+title: "[False negative]: "
+labels: ["false-negative", "rules"]
+body:
+  - type: textarea
+    id: missed-risk
+    attributes:
+      label: Missed reproducibility risk
+      description: What should rrdoctor have flagged?
+    validations:
+      required: true
+  - type: textarea
+    id: repository-shape
+    attributes:
+      label: Minimal repository shape
+      description: Share a sanitized tree, fixture, or public example.
+    validations:
+      required: true
+  - type: input
+    id: expected-rule
+    attributes:
+      label: Existing or proposed rule ID
+      placeholder: RRD043 or new rule
+  - type: textarea
+    id: expected-finding
+    attributes:
+      label: Expected finding and remediation
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed real secrets, private data, and confidential repository content.
+          required: true

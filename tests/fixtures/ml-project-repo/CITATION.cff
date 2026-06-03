@@ -1,0 +1,6 @@
+cff-version: 1.2.0
+message: "Citation fixture."
+title: "ML Project Repo"
+authors:
+  - family-names: "Example"
+    given-names: "ML"
