@@ -97,9 +97,9 @@ Recommended form wording for metrics:
 | --- | --- |
 | Public repository | https://github.com/Tom409114/research-repo-doctor |
 | v0.1.0 release | https://github.com/Tom409114/research-repo-doctor/releases/tag/v0.1.0 |
-| CI latest successful run | https://github.com/Tom409114/research-repo-doctor/actions/runs/26871883328 |
-| Action smoke test latest successful run | https://github.com/Tom409114/research-repo-doctor/actions/runs/26871883360 |
-| Release workflow successful run | https://github.com/Tom409114/research-repo-doctor/actions/runs/26870808579 |
+| CI workflow status | https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml |
+| Action smoke test workflow status | https://github.com/Tom409114/research-repo-doctor/actions/workflows/action-smoke-test.yml |
+| Release workflow | https://github.com/Tom409114/research-repo-doctor/actions/workflows/release.yml |
 | README | https://github.com/Tom409114/research-repo-doctor/blob/main/README.md |
 | Contribution guide | https://github.com/Tom409114/research-repo-doctor/blob/main/CONTRIBUTING.md |
 | Security policy | https://github.com/Tom409114/research-repo-doctor/blob/main/SECURITY.md |
