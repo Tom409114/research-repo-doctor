@@ -1,0 +1,961 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "properties": {
+        "heuristicNote": "Research Repo Doctor uses deterministic heuristics. The score is a guide, not a substitute for peer review or maintainer judgment.",
+        "profile": "standard",
+        "score": 12
+      },
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No README file was found at the repository root."
+          },
+          "properties": {
+            "category": "documentation",
+            "recommendation": "Add a README with project scope, setup, usage, and reproducibility instructions."
+          },
+          "ruleId": "RRD001"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No LICENSE file was found."
+          },
+          "properties": {
+            "category": "governance",
+            "recommendation": "Add an OSI-approved license such as MIT, BSD-3-Clause, or Apache-2.0."
+          },
+          "ruleId": "RRD010"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No CITATION.cff or citation guidance was found."
+          },
+          "properties": {
+            "category": "citation",
+            "recommendation": "Add CITATION.cff or a clear citation section in the README."
+          },
+          "ruleId": "RRD020"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No supported dependency manifest was found."
+          },
+          "properties": {
+            "category": "environment",
+            "recommendation": "Add pyproject.toml, requirements.txt, environment.yml, or another supported manifest."
+          },
+          "ruleId": "RRD030"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No data availability documentation was found."
+          },
+          "properties": {
+            "category": "data",
+            "recommendation": "Add DATA.md, docs/data.md, data/README.md, or a README data availability section."
+          },
+          "ruleId": "RRD040"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No experiment or reproduction entrypoint was detected."
+          },
+          "properties": {
+            "category": "experiments",
+            "recommendation": "Add scripts/reproduce.sh, scripts/run*.sh, a Makefile, or documented train/eval scripts."
+          },
+          "ruleId": "RRD050"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No tests directory or test files were detected."
+          },
+          "properties": {
+            "category": "testing",
+            "recommendation": "Add tests/ or at least one test_*.py / *_test.py file."
+          },
+          "ruleId": "RRD070"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No obvious test runner or test command configuration was detected."
+          },
+          "properties": {
+            "category": "testing",
+            "recommendation": "Document or configure a test runner such as pytest, tox, nox, or package scripts."
+          },
+          "ruleId": "RRD071"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No CI configuration was detected."
+          },
+          "properties": {
+            "category": "ci",
+            "recommendation": "Add a GitHub Actions workflow or another CI configuration that runs tests/linting."
+          },
+          "ruleId": "RRD080"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": ".gitignore is missing."
+          },
+          "properties": {
+            "category": "security",
+            "recommendation": "Add entries for .env, caches, raw data, checkpoints, wandb, and mlruns."
+          },
+          "ruleId": "RRD091"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No CHANGELOG file was found."
+          },
+          "properties": {
+            "category": "release",
+            "recommendation": "Add CHANGELOG.md with at least an initial v0.1.0 entry."
+          },
+          "ruleId": "RRD100"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "No version metadata was detected."
+          },
+          "properties": {
+            "category": "release",
+            "recommendation": "Add package version metadata, VERSION file, or release tags."
+          },
+          "ruleId": "RRD101"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://github.com/research-repo-doctor/research-repo-doctor",
+          "name": "Research Repo Doctor",
+          "rules": [
+            {
+              "help": {
+                "text": "Add a README with project scope, setup, usage, and reproducibility instructions."
+              },
+              "id": "RRD001",
+              "name": "README missing",
+              "properties": {
+                "category": "documentation",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "error"
+              },
+              "shortDescription": {
+                "text": "Checks that the repository has a README."
+              }
+            },
+            {
+              "help": {
+                "text": "Add an Installation or Setup section with exact commands."
+              },
+              "id": "RRD002",
+              "name": "README lacks installation/setup section",
+              "properties": {
+                "category": "documentation",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks README for setup or installation guidance."
+              }
+            },
+            {
+              "help": {
+                "text": "Add a Quickstart or Usage section with a minimal command."
+              },
+              "id": "RRD003",
+              "name": "README lacks quickstart or usage section",
+              "properties": {
+                "category": "documentation",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks README for quickstart or usage guidance."
+              }
+            },
+            {
+              "help": {
+                "text": "Add a Reproducibility or How to reproduce results section."
+              },
+              "id": "RRD004",
+              "name": "README lacks reproducibility section",
+              "properties": {
+                "category": "reproducibility",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks README for how to reproduce results."
+              }
+            },
+            {
+              "help": {
+                "text": "Add an OSI-approved license such as MIT, BSD-3-Clause, or Apache-2.0."
+              },
+              "id": "RRD010",
+              "name": "LICENSE missing",
+              "properties": {
+                "category": "governance",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "error"
+              },
+              "shortDescription": {
+                "text": "Checks for a repository license."
+              }
+            },
+            {
+              "help": {
+                "text": "Add CONTRIBUTING.md with setup, tests, rule contribution guidance, and review norms."
+              },
+              "id": "RRD011",
+              "name": "CONTRIBUTING guide missing",
+              "properties": {
+                "category": "governance",
+                "profiles": [
+                  "strict"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for a contribution guide."
+              }
+            },
+            {
+              "help": {
+                "text": "Add SECURITY.md with vulnerability reporting guidance."
+              },
+              "id": "RRD012",
+              "name": "SECURITY policy missing",
+              "properties": {
+                "category": "governance",
+                "profiles": [
+                  "strict"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for a security policy."
+              }
+            },
+            {
+              "help": {
+                "text": "Add CODE_OF_CONDUCT.md or link to a lab/community policy."
+              },
+              "id": "RRD013",
+              "name": "CODE_OF_CONDUCT missing",
+              "properties": {
+                "category": "governance",
+                "profiles": [
+                  "strict"
+                ],
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "Checks for a code of conduct."
+              }
+            },
+            {
+              "help": {
+                "text": "Add CITATION.cff or a clear citation section in the README."
+              },
+              "id": "RRD020",
+              "name": "Citation instructions missing",
+              "properties": {
+                "category": "citation",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for CITATION.cff or citation instructions."
+              }
+            },
+            {
+              "help": {
+                "text": "Document DOI, arXiv ID, paper title, or reference metadata in README or CITATION.cff."
+              },
+              "id": "RRD021",
+              "name": "Paper metadata not documented",
+              "properties": {
+                "category": "citation",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks paper-like repositories for DOI, arXiv, or reference metadata."
+              }
+            },
+            {
+              "help": {
+                "text": "Add pyproject.toml, requirements.txt, environment.yml, or another supported manifest."
+              },
+              "id": "RRD030",
+              "name": "No dependency manifest found",
+              "properties": {
+                "category": "environment",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "error"
+              },
+              "shortDescription": {
+                "text": "Checks for dependency manifests."
+              }
+            },
+            {
+              "help": {
+                "text": "Add requires-python, python=, runtime.txt, or a documented environment version."
+              },
+              "id": "RRD031",
+              "name": "Dependency manifest lacks version hint",
+              "properties": {
+                "category": "environment",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks dependency manifests for Python or environment version hints."
+              }
+            },
+            {
+              "help": {
+                "text": "Add a Dockerfile, .devcontainer/devcontainer.json, or document why one is not needed."
+              },
+              "id": "RRD032",
+              "name": "Dockerfile or devcontainer missing",
+              "properties": {
+                "category": "environment",
+                "profiles": [
+                  "strict"
+                ],
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "Checks strict-profile repositories for containerized environment docs."
+              }
+            },
+            {
+              "help": {
+                "text": "Add DATA.md, docs/data.md, data/README.md, or a README data availability section."
+              },
+              "id": "RRD040",
+              "name": "Data availability documentation missing",
+              "properties": {
+                "category": "data",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "error"
+              },
+              "shortDescription": {
+                "text": "Checks for data availability documentation."
+              }
+            },
+            {
+              "help": {
+                "text": "Add data/README.md describing expected contents and access instructions."
+              },
+              "id": "RRD041",
+              "name": "data directory lacks README",
+              "properties": {
+                "category": "data",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks data/ directories for local documentation."
+              }
+            },
+            {
+              "help": {
+                "text": "Move large data to documented external storage or Git LFS, and document retrieval."
+              },
+              "id": "RRD042",
+              "name": "Large data files detected",
+              "properties": {
+                "category": "data",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for large files that may be committed data artifacts."
+              }
+            },
+            {
+              "help": {
+                "text": "Replace local absolute paths with relative paths, configs, or environment variables."
+              },
+              "id": "RRD043",
+              "name": "Potential local absolute data path detected",
+              "properties": {
+                "category": "data",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks scripts and notebooks for machine-specific absolute paths."
+              }
+            },
+            {
+              "help": {
+                "text": "Add scripts/reproduce.sh, scripts/run*.sh, a Makefile, or documented train/eval scripts."
+              },
+              "id": "RRD050",
+              "name": "No experiment entrypoint found",
+              "properties": {
+                "category": "experiments",
+                "profiles": [
+                  "minimal",
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "error"
+              },
+              "shortDescription": {
+                "text": "Checks for scripts or commands that reproduce experiments."
+              }
+            },
+            {
+              "help": {
+                "text": "Add configs/*.yaml, config/*.toml, JSON config files, or document fixed parameters."
+              },
+              "id": "RRD051",
+              "name": "No configuration files found",
+              "properties": {
+                "category": "experiments",
+                "profiles": [
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks ML/research projects for experiment configuration files."
+              }
+            },
+            {
+              "help": {
+                "text": "Set and document seeds for Python, NumPy, PyTorch, TensorFlow, or other random sources."
+              },
+              "id": "RRD052",
+              "name": "Randomness used without obvious seed setting",
+              "properties": {
+                "category": "reproducibility",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for common randomness APIs without visible seed setting."
+              }
+            },
+            {
+              "help": {
+                "text": "Add results/README.md with command, commit, data version, and environment details."
+              },
+              "id": "RRD053",
+              "name": "Results provenance documentation missing",
+              "properties": {
+                "category": "experiments",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks results/ directories for provenance documentation."
+              }
+            },
+            {
+              "help": {
+                "text": "Clear outputs before committing or keep a documented rendered artifact separately."
+              },
+              "id": "RRD060",
+              "name": "Notebook files detected with large outputs",
+              "properties": {
+                "category": "notebooks",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks notebook output payload size."
+              }
+            },
+            {
+              "help": {
+                "text": "Restart the kernel and execute notebooks top-to-bottom before committing."
+              },
+              "id": "RRD061",
+              "name": "Notebook execution counts appear out of order",
+              "properties": {
+                "category": "notebooks",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks execution counts for non-monotonic order."
+              }
+            },
+            {
+              "help": {
+                "text": "Use relative paths, configs, or environment variables for data locations."
+              },
+              "id": "RRD062",
+              "name": "Notebook contains absolute local paths",
+              "properties": {
+                "category": "notebooks",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks notebook cells for local absolute paths."
+              }
+            },
+            {
+              "help": {
+                "text": "Clear notebook outputs, rotate exposed credentials, and add secret scanning to CI."
+              },
+              "id": "RRD063",
+              "name": "Notebook contains possible secret-like output",
+              "properties": {
+                "category": "security",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "error"
+              },
+              "shortDescription": {
+                "text": "Checks notebook outputs for conservative secret-like patterns."
+              }
+            },
+            {
+              "help": {
+                "text": "Add a paired script, jupytext file, or README instructions for notebook execution order."
+              },
+              "id": "RRD064",
+              "name": "Notebook has no paired script or execution instructions",
+              "properties": {
+                "category": "notebooks",
+                "profiles": [
+                  "strict"
+                ],
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "Checks strict-profile notebooks for paired scripts or instructions."
+              }
+            },
+            {
+              "help": {
+                "text": "Add tests/ or at least one test_*.py / *_test.py file."
+              },
+              "id": "RRD070",
+              "name": "No tests directory or test files found",
+              "properties": {
+                "category": "testing",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for tests or test files."
+              }
+            },
+            {
+              "help": {
+                "text": "Document or configure a test runner such as pytest, tox, nox, or package scripts."
+              },
+              "id": "RRD071",
+              "name": "No test runner/configuration detected",
+              "properties": {
+                "category": "testing",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for pytest/tox/nox/package scripts or CI test invocation."
+              }
+            },
+            {
+              "help": {
+                "text": "Add a GitHub Actions workflow or another CI configuration that runs tests/linting."
+              },
+              "id": "RRD080",
+              "name": "No CI workflow detected",
+              "properties": {
+                "category": "ci",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for GitHub Actions or other CI configuration."
+              }
+            },
+            {
+              "help": {
+                "text": "Add test, lint, or rrdoctor scan steps to CI."
+              },
+              "id": "RRD081",
+              "name": "CI lacks obvious test or lint step",
+              "properties": {
+                "category": "ci",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks CI workflows for test or lint commands."
+              }
+            },
+            {
+              "help": {
+                "text": "Remove and rotate the secret; store credentials in env vars or secret managers."
+              },
+              "id": "RRD090",
+              "name": "Potential committed secret detected",
+              "properties": {
+                "category": "security",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "error"
+              },
+              "shortDescription": {
+                "text": "Checks text files for conservative secret-like patterns."
+              }
+            },
+            {
+              "help": {
+                "text": "Add entries for .env, caches, raw data, checkpoints, wandb, and mlruns."
+              },
+              "id": "RRD091",
+              "name": ".gitignore missing common research artifacts",
+              "properties": {
+                "category": "security",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks .gitignore for common generated research artifacts."
+              }
+            },
+            {
+              "help": {
+                "text": "Add CHANGELOG.md with at least an initial v0.1.0 entry."
+              },
+              "id": "RRD100",
+              "name": "CHANGELOG missing",
+              "properties": {
+                "category": "release",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for release history documentation."
+              }
+            },
+            {
+              "help": {
+                "text": "Add package version metadata, VERSION file, or release tags."
+              },
+              "id": "RRD101",
+              "name": "No version metadata found",
+              "properties": {
+                "category": "release",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for version metadata in common project files."
+              }
+            },
+            {
+              "help": {
+                "text": "Add a release workflow, packaging workflow, or documented manual release checklist."
+              },
+              "id": "RRD102",
+              "name": "No release or packaging workflow found",
+              "properties": {
+                "category": "release",
+                "profiles": [
+                  "strict"
+                ],
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "Checks strict-profile repositories for release automation."
+              }
+            },
+            {
+              "help": {
+                "text": "Fill project name, version, description, license, authors, and requires-python."
+              },
+              "id": "RRD110",
+              "name": "Python project metadata incomplete",
+              "properties": {
+                "category": "metadata",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks Python project metadata when pyproject.toml exists."
+              }
+            },
+            {
+              "help": {
+                "text": "Add a sentence naming the research area, methods, datasets, and intended users."
+              },
+              "id": "RRD111",
+              "name": "Repository lacks topic/keyword guidance in README",
+              "properties": {
+                "category": "metadata",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "Checks README for domain keywords or topic guidance."
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

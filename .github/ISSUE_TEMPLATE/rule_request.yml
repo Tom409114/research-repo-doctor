@@ -1,0 +1,36 @@
+name: New rule request
+description: Propose a deterministic reproducibility rule.
+title: "[Rule]: "
+labels: ["rule-request"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Reproducibility problem
+    validations:
+      required: true
+  - type: textarea
+    id: heuristic
+    attributes:
+      label: Proposed deterministic heuristic
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and files to inspect
+      description: What files, patterns, or metadata should the rule use?
+    validations:
+      required: true
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Suggested remediation
+      description: What should maintainers do when the rule fires?
+    validations:
+      required: true
+  - type: textarea
+    id: false-positives
+    attributes:
+      label: Likely false positives
+      description: Describe cases where the rule should stay quiet or be configurable.

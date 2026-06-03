@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If Research Repo Doctor helps your research software release process, please cite it."
+title: "Research Repo Doctor"
+authors:
+  - family-names: "Maintainers"
+    given-names: "Research Repo Doctor"
+version: 0.1.0
+date-released: 2026-06-03
+license: MIT
+repository-code: "https://github.com/Tom409114/research-repo-doctor"

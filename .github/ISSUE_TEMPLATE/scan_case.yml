@@ -1,0 +1,32 @@
+name: Research repository scan case
+description: Share a public or sanitized repository scan case for rule evaluation.
+title: "[Scan case]: "
+labels: ["scan-case", "research-repo"]
+body:
+  - type: input
+    id: repo-type
+    attributes:
+      label: Repository type
+      placeholder: ML paper repo, bioinformatics pipeline, R analysis project
+    validations:
+      required: true
+  - type: textarea
+    id: public-link
+    attributes:
+      label: Public link or sanitized fixture
+      description: Use a public URL only if you have permission to share it.
+    validations:
+      required: true
+  - type: textarea
+    id: scan-summary
+    attributes:
+      label: Scan summary
+      description: Paste relevant rrdoctor findings or attach a report.
+    validations:
+      required: true
+  - type: textarea
+    id: maintainer-notes
+    attributes:
+      label: What should maintainers learn from this case?
+    validations:
+      required: true
