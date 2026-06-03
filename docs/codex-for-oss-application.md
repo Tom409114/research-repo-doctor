@@ -1,8 +1,5 @@
 # Codex for Open Source Application Draft
 
-For the current single-file application packet, use
-[`CODEX_FOR_OSS_APPLICATION_PACKET.md`](../CODEX_FOR_OSS_APPLICATION_PACKET.md). This page keeps the compact form answers in the docs tree.
-
 ## Project summary
 
 中文：Research Repo Doctor 是面向科研代码仓库的开源 CLI 与 GitHub Action，帮助研究者和实验室团队在发布前检查可复现性、数据说明、环境依赖、实验入口、Notebook 卫生、引用信息、许可、CI、测试和发布准备。核心扫描器确定性、本地优先，不需要 OpenAI API key。
