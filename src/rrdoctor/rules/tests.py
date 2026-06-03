@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import find_files
 
@@ -19,7 +19,7 @@ class TestsMissingRule(Rule):
         "Add tests/ or at least one test_*.py / *_test.py file.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not find_files(context, ["tests/**", "test_*.py", "**/test_*.py", "**/*_test.py"]):
             return [
                 self.finding(context, message="No tests directory or test files were detected.")
@@ -39,7 +39,7 @@ class TestRunnerMissingRule(Rule):
         "Document or configure a test runner such as pytest, tox, nox, or package scripts.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         markers = []
         for name in ("pyproject.toml", "tox.ini", "noxfile.py", "package.json"):
             path = context.root / name

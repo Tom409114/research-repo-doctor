@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.readme import readme_path
 
@@ -21,7 +21,7 @@ class PyprojectMetadataRule(Rule):
         "Fill project name, version, description, license, authors, and requires-python.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         pyproject = context.root / "pyproject.toml"
         if not pyproject.exists():
             return []
@@ -54,7 +54,7 @@ class ReadmeTopicsRule(Rule):
         "Add a sentence naming the research area, methods, datasets, and intended users.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         path = readme_path(context)
         if path is None:
             return []

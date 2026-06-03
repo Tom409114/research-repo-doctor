@@ -8,7 +8,7 @@ from typing import Any
 
 import nbformat
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, mask_secret
 from rrdoctor.rules.paths import ABSOLUTE_PATH_RE, find_files
 
@@ -23,7 +23,7 @@ def read_notebook(path: Path) -> Any | None:
     """Best-effort notebook read."""
 
     try:
-        return nbformat.read(path, as_version=4)
+        return nbformat.read(path, as_version=4)  # type: ignore[no-untyped-call]
     except (OSError, nbformat.reader.NotJSONError, json.JSONDecodeError, ValueError):
         return None
 
@@ -40,7 +40,7 @@ class NotebookLargeOutputsRule(Rule):
         "Clear outputs before committing or keep a documented rendered artifact separately.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         threshold_kb = float(
             context.config.get("thresholds", {}).get("large_notebook_output_kb", 1024)
         )
@@ -78,7 +78,7 @@ class NotebookExecutionOrderRule(Rule):
         "Restart the kernel and execute notebooks top-to-bottom before committing.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         for path in notebooks(context):
             nb = read_notebook(path)
             if nb is None:
@@ -113,7 +113,7 @@ class NotebookAbsolutePathRule(Rule):
         "Use relative paths, configs, or environment variables for data locations.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         for path in notebooks(context):
             nb = read_notebook(path)
             if nb is None:
@@ -154,7 +154,7 @@ class NotebookSecretOutputRule(Rule):
         "Clear notebook outputs, rotate exposed credentials, and add secret scanning to CI.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         for path in notebooks(context):
             nb = read_notebook(path)
             if nb is None:
@@ -191,7 +191,7 @@ class NotebookPairedScriptRule(Rule):
         "Add a paired script, jupytext file, or README instructions for notebook execution order.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not notebooks(context):
             return []
         if find_files(context, ["*.py", "scripts/*.py", "notebooks/*.py"]):

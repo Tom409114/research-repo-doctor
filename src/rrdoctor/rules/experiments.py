@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import find_files, text_files
 
@@ -21,7 +21,7 @@ class ExperimentEntrypointMissingRule(Rule):
         "Add scripts/reproduce.sh, scripts/run*.sh, a Makefile, or documented train/eval scripts.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         patterns = [
             "scripts/run*.sh",
             "scripts/reproduce*.sh",
@@ -52,7 +52,7 @@ class ConfigFilesMissingRule(Rule):
         "Add configs/*.yaml, config/*.toml, JSON config files, or document fixed parameters.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         patterns = [
             "configs/*.yml",
             "configs/*.yaml",
@@ -80,7 +80,7 @@ class RandomnessWithoutSeedRule(Rule):
         "Set and document seeds for Python, NumPy, PyTorch, TensorFlow, or other random sources.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         combined = []
         for path in text_files(context):
             if path.suffix.lower() in {".py", ".ipynb", ".r", ".jl"}:
@@ -110,7 +110,7 @@ class ResultsProvenanceMissingRule(Rule):
         "Add results/README.md with command, commit, data version, and environment details.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         results = context.root / "results"
         if results.exists() and not (results / "README.md").exists():
             return [

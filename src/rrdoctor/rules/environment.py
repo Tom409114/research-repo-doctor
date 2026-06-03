@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import has_file
 
@@ -33,7 +33,7 @@ class DependencyManifestMissingRule(Rule):
         "Add pyproject.toml, requirements.txt, environment.yml, or another supported manifest.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not has_file(context.root, DEPENDENCY_FILES):
             return [self.finding(context, message="No supported dependency manifest was found.")]
         return []
@@ -51,7 +51,7 @@ class PythonVersionHintMissingRule(Rule):
         "Add requires-python, python=, runtime.txt, or a documented environment version.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         existing = [
             context.root / name for name in DEPENDENCY_FILES if (context.root / name).exists()
         ]
@@ -90,7 +90,7 @@ class ContainerMissingStrictRule(Rule):
         "Add a Dockerfile, .devcontainer/devcontainer.json, or document why one is not needed.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not has_file(context.root, ["Dockerfile", ".devcontainer/devcontainer.json"]):
             return [
                 self.finding(

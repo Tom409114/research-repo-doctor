@@ -1,12 +1,15 @@
 # Codex for Open Source Application Draft
 
+For the current single-file application packet, use
+[`CODEX_FOR_OSS_APPLICATION_PACKET.md`](../CODEX_FOR_OSS_APPLICATION_PACKET.md). This page keeps the compact form answers in the docs tree.
+
 ## Project summary
 
 中文：Research Repo Doctor 是面向科研代码仓库的开源 CLI 与 GitHub Action，帮助研究者和实验室团队在发布前检查可复现性、数据说明、环境依赖、实验入口、Notebook 卫生、引用信息、许可、CI、测试和发布准备。核心扫描器确定性、本地优先，不需要 OpenAI API key。
 
 English: Research Repo Doctor is an open-source CLI and GitHub Action for auditing research repositories before public release. It checks reproducibility, data documentation, environments, experiment entrypoints, notebooks, citation metadata, licensing, CI, tests, and release readiness. The core scanner is deterministic and local-first.
 
-Planned repository URL: https://github.com/Tom409114/research-repo-doctor
+Repository URL: https://github.com/Tom409114/research-repo-doctor
 
 ## Why this repository qualifies?
 
@@ -18,33 +21,32 @@ API 额度只用于维护者工作流，不会让终端用户调用 API。计划
 
 ## Additional notes
 
-项目将公开维护路线图、贡献指南、规则作者规范、issue 模板、PR 模板、CI、发布流程和安全政策。我会按误报、漏报、新规则、扫描案例和 bug 分类 triage，要求规则变更配套 fixture 与测试。申请前会补充真实指标占位、v0.1.0 发布、self-scan 报告、示例扫描和可复核的 GitHub Action 运行记录，不伪造 stars、下载量或用户采用。
+项目将持续公开维护路线图、贡献指南、规则作者规范、issue 模板、PR 模板、CI、发布流程和安全政策。我会按误报、漏报、新规则、扫描案例和 bug 分类 triage，要求规则变更配套 fixture 与测试。当前 v0.1.0 已公开发布，CI 通过，self-scan 为 100/100；指标只填写真实数据，不伪造 stars、下载量或用户采用。
 
 ## Metrics checklist
 
-- GitHub stars: fill after launch
-- forks: fill after launch
-- monthly downloads: fill after PyPI release
-- issues/PRs: 12 maintainer roadmap issues created; PRs 0 until community or maintainer PR activity begins
-- early user feedback links: fill after outreach
+- GitHub stars: 1
+- forks: 0
+- monthly downloads: PyPI publication deferred
+- release asset downloads: 0
+- issues/PRs: 12 maintainer roadmap issues created; PRs 0
+- early user feedback links: not collected yet; planned after outreach
 - CI status link: https://github.com/Tom409114/research-repo-doctor/actions
 - v0.1.0 release link: https://github.com/Tom409114/research-repo-doctor/releases/tag/v0.1.0
 
 ## Honest early-stage wording
 
-This is an early-stage OSS project prepared for public launch. It does not yet claim adoption, stars, downloads, or production users. Its ecosystem value comes from addressing a common, recurring maintenance problem in research software with a reusable local CLI and GitHub Action.
+This is an early-stage OSS project with a public v0.1.0 release. It does not yet claim adoption, downloads, or production users. Its ecosystem value comes from addressing a common, recurring maintenance problem in research software with a reusable local CLI and GitHub Action.
 
-## Suggested launch checklist before application
+## Application evidence checklist
 
-- Public GitHub repo
-- README complete
-- v0.1.0 release
-- At least 5 issues created from real test repos
-- At least 3 example scans
-- Self-scan report committed under `examples/reports/`
-- GitHub Action working
-- CI green
-- One changelog entry
-- Project board or milestone
-- Pinned issue for rule requests
-- Discussion/feedback channel if enabled
+- Public GitHub repo.
+- README complete.
+- v0.1.0 release.
+- 12 maintainer roadmap issues.
+- Self-scan report committed under `examples/reports/`.
+- GitHub Action working.
+- CI green.
+- Changelog entry.
+- Security policy.
+- Citation metadata.

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -70,7 +70,7 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
         loaded = yaml.safe_load(handle) or {}
     if not isinstance(loaded, dict):
         raise ValueError(f"Configuration must be a mapping: {path}")
-    return deep_merge(config, loaded)
+    return deep_merge(config, cast(dict[str, Any], loaded))
 
 
 def apply_cli_overrides(
@@ -100,4 +100,4 @@ def default_config_text(profile: str = "standard") -> str:
 
     config = deepcopy(DEFAULT_CONFIG)
     config["profile"] = profile
-    return yaml.safe_dump(config, sort_keys=False)
+    return str(yaml.safe_dump(config, sort_keys=False))

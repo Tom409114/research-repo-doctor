@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import has_file
 from rrdoctor.rules.readme import readme_path
@@ -20,7 +20,7 @@ class CitationMissingRule(Rule):
         "Add CITATION.cff or a clear citation section in the README.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         path = readme_path(context)
         readme = read_text(path).lower() if path else ""
         if not has_file(context.root, ["CITATION.cff", "CITATION.md"]) and "citation" not in readme:
@@ -42,7 +42,7 @@ class PaperMetadataMissingRule(Rule):
         "Document DOI, arXiv ID, paper title, or reference metadata in README or CITATION.cff.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         path = readme_path(context)
         text = read_text(path) if path else ""
         lower = text.lower()

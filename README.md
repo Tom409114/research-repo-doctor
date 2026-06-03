@@ -172,7 +172,7 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 
 ## Citation
 
-Use the included [CITATION.cff](CITATION.cff). Citation metadata will be updated after v0.1.0 is released.
+Use the included [CITATION.cff](CITATION.cff). The metadata is aligned with the published v0.1.0 release.
 
 ## License
 

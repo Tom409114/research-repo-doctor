@@ -29,32 +29,32 @@ Primary maintainer for release engineering, deterministic rule design, issue tri
 
 ## 5. What has been published
 
-Local release state is prepared:
+The public release state is complete:
 
 - Python package and CLI.
 - GitHub Action metadata.
 - CI and release workflow definitions.
 - Documentation, examples, fixtures, and reports.
 - Issue templates and initial roadmap issue drafts.
-- Local v0.1.0 package artifacts can be built from source.
+- v0.1.0 GitHub release with wheel and source distribution assets.
 
-GitHub repository publication is complete. CI and release status should be verified with GitHub CLI before submission.
+GitHub repository publication is complete. CI and Action smoke tests were verified with GitHub CLI on 2026-06-03.
 
 ## 6. What is intentionally not yet claimed
 
 - No fabricated stars, forks, downloads, users, or adoption.
 - No claim that PyPI is published unless it is actually published.
-- No claim that CI is passing on GitHub until the public workflow run is visible.
-- No claim that the GitHub Release exists until `v0.1.0` is created on GitHub.
+- No claim of community adoption or community PR activity yet.
+- No claim that release asset downloads imply usage.
 
 ## 7. Metrics to fill in the form
 
-- Stars: fill after launch
-- Forks: fill after launch
+- Stars: 1
+- Forks: 0
 - Issues: 12 roadmap issues created
-- PRs: fill after real PR activity exists
-- Downloads: fill after PyPI release, if any
-- Release URL: fill after GitHub release creation
+- PRs: 0
+- Downloads: 0 GitHub release asset downloads; PyPI publication deferred
+- Release URL: https://github.com/Tom409114/research-repo-doctor/releases/tag/v0.1.0
 
 ## 8. Copy-ready answer: why this repository qualifies
 
@@ -66,21 +66,21 @@ API 额度只用于维护者工作流，不会让终端用户调用 API。计划
 
 ## 10. Copy-ready answer: additional notes
 
-项目将公开维护路线图、贡献指南、规则作者规范、issue 模板、PR 模板、CI、发布流程和安全政策。我会按误报、漏报、新规则、扫描案例和 bug 分类 triage，要求规则变更配套 fixture 与测试。申请前会补充真实指标占位、v0.1.0 发布、self-scan 报告、示例扫描和可复核的 GitHub Action 运行记录，不伪造 stars、下载量或用户采用。
+项目将持续公开维护路线图、贡献指南、规则作者规范、issue 模板、PR 模板、CI、发布流程和安全政策。我会按误报、漏报、新规则、扫描案例和 bug 分类 triage，要求规则变更配套 fixture 与测试。当前 v0.1.0 已公开发布，CI 通过，self-scan 为 100/100；指标只填写真实数据，不伪造 stars、下载量或用户采用。
 
 ## 11. Evidence checklist
 
-- Public repo: ready
-- CI passing: ready
-- Release created: ready
-- GitHub Action metadata: ready in `action.yml`
-- README: ready
-- Docs: ready
+- Public repo: complete
+- CI passing: complete
+- Release created: complete
+- GitHub Action metadata: complete in `action.yml`
+- README: complete
+- Docs: complete
 - Roadmap issues: 12 created
-- Contribution guide: ready
-- Security policy: ready
-- Changelog: ready
-- Citation file: ready
+- Contribution guide: complete
+- Security policy: complete
+- Changelog: complete
+- Citation file: complete
 
 ## 12. Remaining optional improvements
 

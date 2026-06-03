@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rrdoctor.models import Category, ScanContext, Severity
+from rrdoctor.models import Category, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition
 from rrdoctor.rules.paths import has_file
 
@@ -19,7 +19,7 @@ class LicenseMissingRule(Rule):
         "Add an OSI-approved license such as MIT, BSD-3-Clause, or Apache-2.0.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not has_file(context.root, ["LICENSE", "LICENSE.md", "COPYING"]):
             return [self.finding(context, message="No LICENSE file was found.")]
         return []

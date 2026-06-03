@@ -27,9 +27,10 @@ def render_sarif(report: ScanReport) -> str:
     ]
     results = []
     for finding in report.findings:
-        location = {"physicalLocation": {"artifactLocation": {"uri": finding.file or "."}}}
+        physical_location: dict[str, object] = {"artifactLocation": {"uri": finding.file or "."}}
         if finding.line:
-            location["physicalLocation"]["region"] = {"startLine": finding.line}
+            physical_location["region"] = {"startLine": finding.line}
+        location: dict[str, object] = {"physicalLocation": physical_location}
         results.append(
             {
                 "ruleId": finding.rule_id,

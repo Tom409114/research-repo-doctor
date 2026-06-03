@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import find_files
 
@@ -19,7 +19,7 @@ class CiMissingRule(Rule):
         "Add a GitHub Actions workflow or another CI configuration that runs tests/linting.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not find_files(
             context,
             [
@@ -45,7 +45,7 @@ class CiNoTestsRule(Rule):
         "Add test, lint, or rrdoctor scan steps to CI.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         workflows = find_files(
             context, [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]
         )

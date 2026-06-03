@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from rrdoctor.models import Category, ScanContext, Severity
+from rrdoctor.models import Category, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import find_files, has_file
 
@@ -21,7 +21,7 @@ class ChangelogMissingRule(Rule):
         "Add CHANGELOG.md with at least an initial v0.1.0 entry.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not has_file(context.root, ["CHANGELOG.md", "HISTORY.md"]):
             return [self.finding(context, message="No CHANGELOG file was found.")]
         return []
@@ -39,7 +39,7 @@ class VersionMetadataMissingRule(Rule):
         "Add package version metadata, VERSION file, or release tags.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         candidates = [
             context.root / "pyproject.toml",
             context.root / "package.json",
@@ -66,7 +66,7 @@ class ReleaseWorkflowMissingRule(Rule):
         "Add a release workflow, packaging workflow, or documented manual release checklist.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         workflows = find_files(context, [".github/workflows/*.yml", ".github/workflows/*.yaml"])
         text = "\n".join(read_text(path).lower() for path in workflows)
         if not any(

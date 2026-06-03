@@ -5,6 +5,7 @@ from __future__ import annotations
 import fnmatch
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from rrdoctor.models import Finding, RuleResult, ScanContext, ScanReport, Severity
 from rrdoctor.rules.registry import all_rules
@@ -26,7 +27,7 @@ def _is_excluded(path: Path, root: Path, excludes: list[str]) -> bool:
     return False
 
 
-def collect_files(root: Path, config: dict) -> list[Path]:
+def collect_files(root: Path, config: dict[str, Any]) -> list[Path]:
     """Collect files under root while respecting configured excludes."""
 
     excludes = list(config.get("paths", {}).get("exclude", []))
@@ -62,7 +63,11 @@ class Scanner:
     """Run deterministic rules over a repository."""
 
     def __init__(
-        self, config: dict, *, include: set[str] | None = None, exclude: set[str] | None = None
+        self,
+        config: dict[str, Any],
+        *,
+        include: set[str] | None = None,
+        exclude: set[str] | None = None,
     ):
         self.config = config
         self.include = include or set()

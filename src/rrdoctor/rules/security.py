@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import SECRET_PATTERNS, Rule, definition, mask_secret, read_text
 from rrdoctor.rules.paths import text_files
 
@@ -30,7 +30,7 @@ class PotentialSecretRule(Rule):
         "Remove and rotate the secret; store credentials in env vars or secret managers.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         for path in text_files(context):
             if path.suffix.lower() in {".cff"}:
                 continue
@@ -69,7 +69,7 @@ class GitignoreResearchArtifactsRule(Rule):
         "Add entries for .env, caches, raw data, checkpoints, wandb, and mlruns.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         gitignore = context.root / ".gitignore"
         if not gitignore.exists():
             return [self.finding(context, message=".gitignore is missing.")]

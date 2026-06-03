@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rrdoctor.models import Category, Evidence, ScanContext, Severity
+from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, mask_secret, read_text
 from rrdoctor.rules.paths import first_absolute_path, text_files
 
@@ -19,7 +19,7 @@ class DataDocsMissingRule(Rule):
         "Add DATA.md, docs/data.md, data/README.md, or a README data availability section.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         candidates = [
             context.root / "DATA.md",
             context.root / "docs" / "data.md",
@@ -44,7 +44,7 @@ class DataDirReadmeMissingRule(Rule):
         "Add data/README.md describing expected contents and access instructions.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         data_dir = context.root / "data"
         if data_dir.exists() and not (data_dir / "README.md").exists():
             return [
@@ -67,7 +67,7 @@ class LargeDataFileRule(Rule):
         "Move large data to documented external storage or Git LFS, and document retrieval.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         threshold_mb = float(context.config.get("thresholds", {}).get("large_file_mb", 50))
         threshold = threshold_mb * 1024 * 1024
         findings = []
@@ -101,7 +101,7 @@ class LocalAbsoluteDataPathRule(Rule):
         "Replace local absolute paths with relative paths, configs, or environment variables.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         for path in text_files(context):
             text = read_text(path)
             result = first_absolute_path(text)

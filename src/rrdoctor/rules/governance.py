@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rrdoctor.models import Category, ScanContext, Severity
+from rrdoctor.models import Category, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition
 from rrdoctor.rules.paths import has_file
 
@@ -19,7 +19,7 @@ class ContributingMissingRule(Rule):
         "Add CONTRIBUTING.md with setup, tests, rule contribution guidance, and review norms.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not has_file(context.root, ["CONTRIBUTING.md", ".github/CONTRIBUTING.md"]):
             return [self.finding(context, message="No CONTRIBUTING guide was found.")]
         return []
@@ -37,7 +37,7 @@ class SecurityPolicyMissingRule(Rule):
         "Add SECURITY.md with vulnerability reporting guidance.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not has_file(context.root, ["SECURITY.md", ".github/SECURITY.md"]):
             return [self.finding(context, message="No SECURITY policy was found.")]
         return []
@@ -55,7 +55,7 @@ class CodeOfConductMissingRule(Rule):
         "Add CODE_OF_CONDUCT.md or link to a lab/community policy.",
     )
 
-    def check(self, context: ScanContext):
+    def check(self, context: ScanContext) -> list[Finding]:
         if not has_file(context.root, ["CODE_OF_CONDUCT.md", ".github/CODE_OF_CONDUCT.md"]):
             return [self.finding(context, message="No CODE_OF_CONDUCT file was found.")]
         return []
