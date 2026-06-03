@@ -1,0 +1,14 @@
+# Research Repo Doctor
+
+Research Repo Doctor is a deterministic CLI and GitHub Action for checking whether research code repositories are reproducible, reviewable, citable, and ready for public release.
+
+Start with the quickstart, then read the checks and configuration reference.
+
+- [Quickstart](quickstart.md)
+- [Checks](checks.md)
+- [Configuration](configuration.md)
+- [GitHub Action](github-action.md)
+- [Report formats](report-format.md)
+- [Rule authoring](rule-authoring.md)
+- [Research reproducibility](research-reproducibility.md)
+- [Maintainer workflows](maintainer-workflows.md)

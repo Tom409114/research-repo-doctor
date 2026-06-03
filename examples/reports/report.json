@@ -1,0 +1,15 @@
+{
+  "category_scores": [],
+  "findings": [],
+  "generated_at": "2026-06-03T07:02:59.779685+00:00",
+  "heuristic_note": "Research Repo Doctor uses deterministic heuristics. The score is a guide, not a substitute for peer review or maintainer judgment.",
+  "profile": "standard",
+  "repository_path": "C:/Users/thuah/Documents/Codex/2026-06-03/files-mentioned-by-the-user-txt/research-repo-doctor/tests/fixtures/healthy-research-repo",
+  "rules_evaluated": 30,
+  "score": 100,
+  "summary": {
+    "error": 0,
+    "info": 0,
+    "warning": 0
+  }
+}

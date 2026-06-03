@@ -1,0 +1,40 @@
+name: False positive
+description: Report a rule that flagged acceptable repository content.
+title: "[False positive]: "
+labels: ["false-positive", "rules"]
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: Rule ID
+      placeholder: RRD060
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Why this is a false positive
+      description: Explain why the finding is misleading for this repository.
+    validations:
+      required: true
+  - type: textarea
+    id: repository-shape
+    attributes:
+      label: Minimal repository shape
+      description: Share a sanitized tree, fixture, or public example.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Should the rule be quiet, lower severity, or provide different guidance?
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed real secrets, private data, and confidential repository content.
+          required: true

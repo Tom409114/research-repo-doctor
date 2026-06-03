@@ -1,0 +1,17 @@
+name: Research Repo Doctor
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  rrdoctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: research-repo-doctor/research-repo-doctor@v0.1.0
+        with:
+          profile: standard
+          fail-on: warning
+          output: rrdoctor-report.md
