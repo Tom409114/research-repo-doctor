@@ -8,5 +8,5 @@
 - Added Markdown, JSON, and experimental SARIF-compatible reports.
 - Added GitHub Action metadata and example workflows.
 - Added tests, fixtures, docs, issue templates, PR template, roadmap, security policy, citation metadata, and maintainer workflow notes.
-- Added example reports, including a self-scan report for OSS readiness review.
+- Added example reports, including a self-scan report for release review.
 - Completed v0.1.0 release-readiness pass covering YAML validity, package metadata, docs consistency, local Markdown links, and refreshed self-scan output.
