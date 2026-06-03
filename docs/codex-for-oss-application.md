@@ -25,10 +25,10 @@ API 额度只用于维护者工作流，不会让终端用户调用 API。计划
 - GitHub stars: fill after launch
 - forks: fill after launch
 - monthly downloads: fill after PyPI release
-- issues/PRs: fill after community testing
+- issues/PRs: 12 maintainer roadmap issues created; PRs 0 until community or maintainer PR activity begins
 - early user feedback links: fill after outreach
-- CI status link: fill after public GitHub workflow runs
-- v0.1.0 release link: fill after tag and release notes
+- CI status link: https://github.com/Tom409114/research-repo-doctor/actions
+- v0.1.0 release link: https://github.com/Tom409114/research-repo-doctor/releases/tag/v0.1.0
 
 ## Honest early-stage wording
 

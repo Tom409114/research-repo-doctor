@@ -10,7 +10,7 @@ Status: public GitHub repository created under `Tom409114`.
 
 Release URL: https://github.com/Tom409114/research-repo-doctor/releases/tag/v0.1.0
 
-Status: verify with `gh release view v0.1.0`.
+Status: GitHub Release created and published.
 
 ## 3. Current version
 
@@ -51,7 +51,7 @@ GitHub repository publication is complete. CI and release status should be verif
 
 - Stars: fill after launch
 - Forks: fill after launch
-- Issues: at least 1 roadmap issue created; update after creating the remaining roadmap issues
+- Issues: 12 roadmap issues created
 - PRs: fill after real PR activity exists
 - Downloads: fill after PyPI release, if any
 - Release URL: fill after GitHub release creation
@@ -71,12 +71,12 @@ API 额度只用于维护者工作流，不会让终端用户调用 API。计划
 ## 11. Evidence checklist
 
 - Public repo: ready
-- CI passing: verify with `gh run list --limit 5`
-- Release created: verify with `gh release view v0.1.0`
+- CI passing: ready
+- Release created: ready
 - GitHub Action metadata: ready in `action.yml`
 - README: ready
 - Docs: ready
-- Roadmap issues: 1 created; drafts for the remaining issues are ready in `docs/initial-issues.md`
+- Roadmap issues: 12 created
 - Contribution guide: ready
 - Security policy: ready
 - Changelog: ready
