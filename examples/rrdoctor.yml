@@ -1,0 +1,20 @@
+version: 1
+profile: standard
+paths:
+  include:
+    - "."
+  exclude:
+    - ".git"
+    - ".venv"
+    - "node_modules"
+    - "__pycache__"
+thresholds:
+  large_file_mb: 50
+  large_notebook_output_kb: 1024
+rules:
+  RRD032:
+    enabled: false
+fail_on: error
+report:
+  format: markdown
+  output: rrdoctor-report.md
