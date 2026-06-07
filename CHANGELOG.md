@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.2.0 - 2026-06-08
+
+- Added `rrdoctor fix`: deterministic, idempotent auto-fix that scaffolds common gaps
+  (LICENSE, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, AGENTS.md, CITATION.cff, DATA.md,
+  data/README.md, results/README.md, CHANGELOG.md, and .gitignore entries). Existing files
+  are never overwritten and no code from the scanned repository is executed.
+- Added `rrdoctor plan` and the `agent` report format: a tool-agnostic fix plan where each
+  task names the deterministic check that verifies it.
+- Added baseline comparison to `rrdoctor scan` via `--baseline` and `--fail-on-new`, so CI
+  can gate only on newly introduced findings.
+- Added `rrdoctor badge`: a Shields.io endpoint document or a self-contained SVG score badge.
+- Enhanced the GitHub Action with sticky pull request comments, job summaries, an optional
+  fix-plan artifact, baseline gating, and artifact upload, all using the built-in token.
+- Added rules: RRD014 (AGENTS.md task guide), RRD033 (unpinned dependencies), RRD065
+  (committed notebook checkpoints), and RRD082 (pre-commit configuration).
+- Added the `autofix_available` flag and a stable finding fingerprint to the report model.
+- Expanded documentation, examples, and tests; refreshed the self-scan report and badge.
+
 ## v0.1.0 - 2026-06-03
 
 - Initial public-release-ready repository structure.

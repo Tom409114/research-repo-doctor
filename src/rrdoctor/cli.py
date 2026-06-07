@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
 
@@ -13,6 +14,7 @@ from rich.console import Console
 from rich.table import Table
 
 from rrdoctor import __version__
+from rrdoctor.baseline import diff_against_baseline
 from rrdoctor.config import (
     FORMAT_VALUES,
     PROFILES,
@@ -20,7 +22,10 @@ from rrdoctor.config import (
     default_config_text,
     load_config,
 )
-from rrdoctor.models import ScanReport
+from rrdoctor.fixers import FixContext, apply_fix, fixable_rule_ids
+from rrdoctor.models import DiffResult, ScanReport
+from rrdoctor.reporting.agent import render_agent_json, render_agent_markdown
+from rrdoctor.reporting.badge import render_badge_endpoint, render_badge_svg
 from rrdoctor.reporting.json_report import render_json
 from rrdoctor.reporting.markdown import render_markdown
 from rrdoctor.reporting.sarif import render_sarif
@@ -47,6 +52,8 @@ def _render(report: ScanReport, output_format: str) -> str:
         return render_json(report)
     if output_format == "sarif":
         return render_sarif(report)
+    if output_format == "agent":
+        return render_agent_markdown(report)
     raise typer.BadParameter(f"Unsupported format: {output_format}")
 
 
@@ -73,6 +80,31 @@ def _should_fail(report: ScanReport, fail_on: str) -> bool:
     return False
 
 
+def _print_diff(diff: DiffResult) -> None:
+    table = Table(title="Baseline comparison")
+    table.add_column("Change")
+    table.add_column("Count", justify="right")
+    table.add_row("New findings", str(len(diff.new)))
+    table.add_row("Fixed findings", str(len(diff.fixed)))
+    table.add_row("Unchanged findings", str(len(diff.unchanged)))
+    base = "n/a" if diff.baseline_score is None else str(diff.baseline_score)
+    table.add_row("Score", f"{base} -> {diff.current_score}")
+    err_console.print(table)
+    for finding in diff.new:
+        err_console.print(f"[red]NEW[/red] {finding.rule_id} {finding.title}")
+
+
+def _diff_should_fail(diff: DiffResult, fail_on_new: str) -> bool:
+    if fail_on_new == "none":
+        return False
+    levels = {finding.severity.value for finding in diff.new}
+    if fail_on_new == "error":
+        return "error" in levels
+    if fail_on_new == "warning":
+        return "error" in levels or "warning" in levels
+    return False
+
+
 @app.command()
 def scan(
     path: Annotated[Path, typer.Argument(help="Repository path to scan.")] = Path("."),
@@ -80,7 +112,9 @@ def scan(
     output_format: Annotated[
         str,
         typer.Option(
-            "--format", help="Report format: markdown, json, or sarif.", rich_help_panel="Report"
+            "--format",
+            help="Report format: markdown, json, sarif, or agent.",
+            rich_help_panel="Report",
         ),
     ] = "markdown",
     output: Annotated[
@@ -89,6 +123,19 @@ def scan(
     fail_on: Annotated[
         str, typer.Option("--fail-on", help="Failure threshold: none, error, warning.")
     ] = "error",
+    fail_on_new: Annotated[
+        str | None,
+        typer.Option(
+            "--fail-on-new",
+            help="With --baseline, fail only on newly introduced findings (none/error/warning).",
+        ),
+    ] = None,
+    baseline: Annotated[
+        Path | None,
+        typer.Option(
+            "--baseline", help="Compare against a JSON report and show new/fixed findings."
+        ),
+    ] = None,
     profile: Annotated[
         str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
     ] = "standard",
@@ -109,6 +156,10 @@ def scan(
         raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
     if fail_on not in ("none", "error", "warning"):
         raise typer.BadParameter("--fail-on must be one of: none, error, warning")
+    if fail_on_new is not None and fail_on_new not in ("none", "error", "warning"):
+        raise typer.BadParameter("--fail-on-new must be one of: none, error, warning")
+    if fail_on_new is not None and baseline is None:
+        raise typer.BadParameter("--fail-on-new requires --baseline.")
 
     loaded = load_config(config)
     effective = apply_cli_overrides(
@@ -135,8 +186,173 @@ def scan(
     else:
         typer.echo(rendered)
 
+    diff: DiffResult | None = None
+    if baseline is not None:
+        if not baseline.exists():
+            err_console.print(f"[red]Baseline not found:[/red] {baseline}")
+            raise typer.Exit(2)
+        diff = diff_against_baseline(report, baseline)
+        if not quiet:
+            _print_diff(diff)
+
+    if diff is not None and fail_on_new is not None:
+        if _diff_should_fail(diff, fail_on_new):
+            raise typer.Exit(1)
+        return
+
     if _should_fail(report, fail_on):
         raise typer.Exit(1)
+
+
+@app.command()
+def fix(
+    path: Annotated[Path, typer.Argument(help="Repository path to fix.")] = Path("."),
+    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    profile: Annotated[
+        str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
+    ] = "standard",
+    write: Annotated[
+        bool, typer.Option("--write", help="Apply fixes (default is a dry-run preview).")
+    ] = False,
+    only: Annotated[
+        str | None, typer.Option("--only", help="Comma-separated rule IDs to fix.")
+    ] = None,
+    project_name: Annotated[
+        str | None, typer.Option("--project-name", help="Project name for scaffolded files.")
+    ] = None,
+    author: Annotated[
+        str, typer.Option("--author", help="Author/copyright holder for scaffolded files.")
+    ] = "The Authors",
+) -> None:
+    """Apply deterministic, idempotent auto-fixes for common reproducibility gaps.
+
+    Only safe scaffolding is created (governance docs, citation metadata, data and
+    results provenance notes, changelog, and ignore entries). Existing files are
+    never overwritten. Run without --write to preview, then re-run with --write.
+    """
+
+    if profile not in PROFILES:
+        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
+
+    loaded = load_config(config)
+    effective = apply_cli_overrides(loaded, profile=profile)
+    scanner = Scanner(effective)
+    report = scanner.scan(path)
+    root = Path(path).resolve()
+
+    fixable = fixable_rule_ids()
+    only_ids = _parse_rule_ids(only)
+    target_ids: list[str] = []
+    for finding in report.findings:
+        rid = finding.rule_id
+        if rid in fixable and rid not in target_ids and (not only_ids or rid in only_ids):
+            target_ids.append(rid)
+
+    if not target_ids:
+        console.print("No auto-fixable findings. Run `rrdoctor plan` for the remaining work.")
+        return
+
+    ctx = FixContext(
+        root=root,
+        project_name=project_name or root.name,
+        author=author,
+        year=datetime.now(timezone.utc).year,
+    )
+
+    table = Table(title="rrdoctor fix" + ("" if write else " (dry-run)"))
+    table.add_column("Rule")
+    table.add_column("Action")
+    table.add_column("Detail")
+    applied = 0
+    for rid in target_ids:
+        if write:
+            result = apply_fix(rid, ctx)
+            if result is None:
+                continue
+            if result.action in ("created", "updated"):
+                applied += 1
+            table.add_row(result.rule_id, result.action, result.detail)
+        else:
+            rule = get_rule(rid)
+            detail = rule.definition.remediation if rule else ""
+            table.add_row(rid, "would fix", detail)
+    console.print(table)
+    if write:
+        err_console.print(
+            f"Applied {applied} fix(es). Re-run `rrdoctor scan` to verify, then review the diff."
+        )
+    else:
+        err_console.print("Dry-run only. Re-run with --write to apply these fixes.")
+
+
+@app.command()
+def plan(
+    path: Annotated[Path, typer.Argument(help="Repository path to plan.")] = Path("."),
+    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    profile: Annotated[
+        str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
+    ] = "standard",
+    output_format: Annotated[
+        str, typer.Option("--format", help="Plan format: markdown or json.")
+    ] = "markdown",
+    output: Annotated[
+        Path | None, typer.Option("--output", help="Write the plan to this path.")
+    ] = None,
+) -> None:
+    """Emit a tool-agnostic fix plan for any coding agent or human to execute."""
+
+    if profile not in PROFILES:
+        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
+    if output_format not in ("markdown", "json"):
+        raise typer.BadParameter("--format must be one of: markdown, json")
+
+    loaded = load_config(config)
+    effective = apply_cli_overrides(loaded, profile=profile)
+    report = Scanner(effective).scan(path)
+    rendered = (
+        render_agent_json(report) if output_format == "json" else render_agent_markdown(report)
+    )
+
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(rendered, encoding="utf-8")
+        err_console.print(f"Wrote plan to [bold]{output}[/bold]")
+    else:
+        typer.echo(rendered)
+
+
+@app.command()
+def badge(
+    path: Annotated[Path, typer.Argument(help="Repository path to score.")] = Path("."),
+    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    profile: Annotated[
+        str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
+    ] = "standard",
+    output_format: Annotated[
+        str, typer.Option("--format", help="Badge format: endpoint (Shields.io JSON) or svg.")
+    ] = "endpoint",
+    output: Annotated[
+        Path | None, typer.Option("--output", help="Write the badge to this path.")
+    ] = None,
+) -> None:
+    """Emit a reproducibility score badge (Shields.io endpoint JSON or SVG)."""
+
+    if profile not in PROFILES:
+        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
+    if output_format not in ("endpoint", "svg"):
+        raise typer.BadParameter("--format must be one of: endpoint, svg")
+
+    loaded = load_config(config)
+    effective = apply_cli_overrides(loaded, profile=profile)
+    report = Scanner(effective).scan(path)
+    rendered = render_badge_svg(report) if output_format == "svg" else render_badge_endpoint(report)
+
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(rendered, encoding="utf-8")
+        err_console.print(f"Wrote badge to [bold]{output}[/bold]")
+    else:
+        typer.echo(rendered)
 
 
 @app.command()

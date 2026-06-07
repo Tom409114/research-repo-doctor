@@ -6,8 +6,11 @@ Start with the quickstart, then read the checks and configuration reference.
 
 - [Quickstart](quickstart.md)
 - [Checks](checks.md)
+- [Auto-fix](autofix.md)
+- [Agent workflows](agent-workflows.md)
 - [Configuration](configuration.md)
 - [GitHub Action](github-action.md)
+- [Pull request automation](pull-request-automation.md)
 - [Report formats](report-format.md)
 - [Rule authoring](rule-authoring.md)
 - [Research reproducibility](research-reproducibility.md)

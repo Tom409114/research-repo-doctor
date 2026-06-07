@@ -29,8 +29,40 @@ Top-level fields include:
 
 ## SARIF-compatible JSON
 
-SARIF output is experimental. It is valid JSON shaped for future code-scanning integration, but v0.1.0 does not claim full SARIF coverage.
+SARIF output is experimental. It is valid JSON shaped for future code-scanning integration, but it does not yet claim full SARIF coverage.
 
 ```bash
 rrdoctor scan . --format sarif --output rrdoctor.sarif --fail-on none
+```
+
+## Agent fix plan
+
+The `agent` format renders a tool-agnostic fix plan: an ordered, verifiable work
+order that any coding agent or human can execute. The same output is available via
+the `plan` command.
+
+```bash
+rrdoctor scan . --format agent --output fix-plan.md
+rrdoctor plan . --format json --output fix-plan.json
+```
+
+See [agent workflows](agent-workflows.md).
+
+## Score badge
+
+`rrdoctor badge` emits a Shields.io endpoint document or a self-contained SVG.
+
+```bash
+rrdoctor badge . --output .rrdoctor-badge.json
+rrdoctor badge . --format svg --output rrdoctor-badge.svg
+```
+
+## Baseline comparison
+
+Any JSON report can act as a baseline. `--baseline` reports new and resolved
+findings, and `--fail-on-new` gates only on newly introduced ones.
+
+```bash
+rrdoctor scan . --format json --output baseline.json --fail-on none
+rrdoctor scan . --baseline baseline.json --fail-on-new error
 ```

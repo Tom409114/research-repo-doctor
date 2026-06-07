@@ -210,10 +210,39 @@ class NotebookPairedScriptRule(Rule):
         ]
 
 
+class NotebookCheckpointsCommittedRule(Rule):
+    definition = definition(
+        "RRD065",
+        "Jupyter checkpoint artifacts committed",
+        Category.NOTEBOOKS,
+        Severity.WARNING,
+        ("standard", "strict", "ml"),
+        "Checks for committed .ipynb_checkpoints artifacts.",
+        "Checkpoint files are editor state, not reproducible artifacts, and can leak "
+        "stale outputs or secrets.",
+        "Delete committed .ipynb_checkpoints files and add .ipynb_checkpoints to .gitignore.",
+    )
+
+    def check(self, context: ScanContext) -> list[Finding]:
+        for path in context.files:
+            if ".ipynb_checkpoints" in path.parts or path.name.endswith("-checkpoint.ipynb"):
+                rel = context.rel(path)
+                return [
+                    self.finding(
+                        context,
+                        message="A Jupyter checkpoint artifact appears to be committed.",
+                        evidence=[Evidence("Checkpoint artifact in version control.", rel)],
+                        file=rel,
+                    )
+                ]
+        return []
+
+
 RULES = [
     NotebookLargeOutputsRule(),
     NotebookExecutionOrderRule(),
     NotebookAbsolutePathRule(),
     NotebookSecretOutputRule(),
     NotebookPairedScriptRule(),
+    NotebookCheckpointsCommittedRule(),
 ]
