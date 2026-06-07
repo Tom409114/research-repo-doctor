@@ -251,7 +251,7 @@
       ],
       "tool": {
         "driver": {
-          "informationUri": "https://github.com/research-repo-doctor/research-repo-doctor",
+          "informationUri": "https://github.com/Tom409114/research-repo-doctor",
           "name": "Research Repo Doctor",
           "rules": [
             {
@@ -407,6 +407,23 @@
             },
             {
               "help": {
+                "text": "Add AGENTS.md with setup, test/lint commands, conventions, and how to verify changes."
+              },
+              "id": "RRD014",
+              "name": "Agent/contributor task guide (AGENTS.md) missing",
+              "properties": {
+                "category": "governance",
+                "profiles": [
+                  "strict"
+                ],
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "Checks for an AGENTS.md task guide for automated and human contributors."
+              }
+            },
+            {
+              "help": {
                 "text": "Add CITATION.cff or a clear citation section in the README."
               },
               "id": "RRD020",
@@ -498,6 +515,25 @@
               },
               "shortDescription": {
                 "text": "Checks strict-profile repositories for containerized environment docs."
+              }
+            },
+            {
+              "help": {
+                "text": "Pin versions (prefer ==) or document a tested version range and a lockfile."
+              },
+              "id": "RRD033",
+              "name": "Unpinned dependencies in requirements file",
+              "properties": {
+                "category": "environment",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks requirements.txt files for dependencies declared without any version."
               }
             },
             {
@@ -747,6 +783,25 @@
             },
             {
               "help": {
+                "text": "Delete committed .ipynb_checkpoints files and add .ipynb_checkpoints to .gitignore."
+              },
+              "id": "RRD065",
+              "name": "Jupyter checkpoint artifacts committed",
+              "properties": {
+                "category": "notebooks",
+                "profiles": [
+                  "standard",
+                  "strict",
+                  "ml"
+                ],
+                "severity": "warning"
+              },
+              "shortDescription": {
+                "text": "Checks for committed .ipynb_checkpoints artifacts."
+              }
+            },
+            {
+              "help": {
                 "text": "Add tests/ or at least one test_*.py / *_test.py file."
               },
               "id": "RRD070",
@@ -819,6 +874,23 @@
               },
               "shortDescription": {
                 "text": "Checks CI workflows for test or lint commands."
+              }
+            },
+            {
+              "help": {
+                "text": "Add .pre-commit-config.yaml with formatting, linting, and basic hygiene hooks."
+              },
+              "id": "RRD082",
+              "name": "No pre-commit configuration found",
+              "properties": {
+                "category": "ci",
+                "profiles": [
+                  "strict"
+                ],
+                "severity": "info"
+              },
+              "shortDescription": {
+                "text": "Checks strict-profile repositories for a pre-commit configuration."
               }
             },
             {

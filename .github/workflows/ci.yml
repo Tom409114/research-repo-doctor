@@ -19,9 +19,18 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: ruff format --check .
       - run: ruff check .
+      - run: mypy src/rrdoctor
       - run: pytest
-      - run: rrdoctor scan . --profile standard --format markdown --output rrdoctor-self-report.md --fail-on none
+      - name: Self-scan
+        run: rrdoctor scan . --profile standard --format markdown --output rrdoctor-self-report.md --fail-on none
+      - name: Command smoke tests
+        run: |
+          rrdoctor fix .
+          rrdoctor plan . --output rrdoctor-plan.md
+          rrdoctor badge . --output rrdoctor-badge-check.json
       - uses: actions/upload-artifact@v4
         with:
           name: rrdoctor-self-report-${{ matrix.python-version }}
-          path: rrdoctor-self-report.md
+          path: |
+            rrdoctor-self-report.md
+            rrdoctor-plan.md

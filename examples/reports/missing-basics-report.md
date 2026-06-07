@@ -1,10 +1,10 @@
 # Research Repo Doctor Report
 
-- Repository path: `/path/to/research-repo-doctor/tests/fixtures/missing-basics-repo`
-- Generated: `2026-06-03T07:02:59.240656+00:00`
+- Repository path: `/path/to/missing-basics-repo`
+- Generated: `2026-06-08T00:00:00+00:00`
 - Profile: `standard`
 - Overall score: **12/100**
-- Rules evaluated: `30`
+- Rules evaluated: `32`
 
 > Heuristic note: Research Repo Doctor uses deterministic heuristics. The score is a guide, not a substitute for peer review or maintainer judgment.
 

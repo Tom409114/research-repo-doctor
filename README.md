@@ -1,26 +1,58 @@
 # Research Repo Doctor
 
 [![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/badge/PyPI-after%20v0.1.0-blue)](https://pypi.org/project/rrdoctor/)
+[![rrdoctor score](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tom409114/research-repo-doctor/main/.rrdoctor-badge.json)](https://github.com/Tom409114/research-repo-doctor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 
-Research Repo Doctor (`rrdoctor`) is research reproducibility infrastructure: a local-first CLI and GitHub Action for auditing whether a research code repository is reproducible, reviewable, citable, and ready for public release.
+Research Repo Doctor (`rrdoctor`) is reproducibility infrastructure for research code: a
+local-first CLI and GitHub Action that **audits** whether a repository is reproducible,
+reviewable, citable, and release-ready — then **fixes** the mechanical gaps and hands the
+rest to any coding agent as a verifiable plan.
 
-It is not a generic repository health checker. It focuses on the practical things that often decide whether research code can be reused: environment files, data documentation, experiment entrypoints, notebooks, citation metadata, README quality, tests, CI, security hygiene, and release readiness.
+The audit is deterministic and runs without an AI API key, network access, or hosted
+service. That same determinism makes it an honest grader: it can verify fixes made by a
+person *or* a coding agent.
 
-The scanner is deterministic and works without an AI API key, network access, or hosted service.
+```text
+audit ──▶ fix ──▶ plan ──▶ (your coding agent / you) ──▶ verify ──▶ PR
+  │         │        │                                      │
+  └ rrdoctor scan    └ rrdoctor fix --write                 └ rrdoctor scan --baseline
+            └ rrdoctor plan (tool-agnostic work order)        --fail-on-new error
+```
 
-Keywords: research software, reproducibility, GitHub Action, repository audit, notebooks, data availability, citation metadata.
+Keywords: research software, reproducibility, repository audit, auto-fix, coding agents,
+AGENTS.md, GitHub Action, notebooks, data availability, citation metadata.
 
 ## Why this matters
 
-Research code often lands on GitHub under deadline pressure. A reviewer or future lab member may find a promising repository, then lose time because the environment is underspecified, data paths are local, notebooks contain stale outputs, or the paper citation is unclear.
+Research code often lands on GitHub under deadline pressure. A reviewer or future lab
+member finds a promising repository and then loses hours because the environment is
+underspecified, data paths are local, notebooks contain stale outputs, dependencies are
+unpinned, or the citation is unclear.
 
-Research Repo Doctor turns those recurring release blockers into deterministic checks with concrete remediation. It is meant to sit in the ordinary maintenance path for research software: run locally while preparing a release, then run automatically in pull requests through GitHub Actions.
+Research Repo Doctor turns those recurring release blockers into deterministic checks with
+concrete remediation — and, where it is safe to do so, fixes them for you. It is built to
+sit in the ordinary maintenance path: run locally while preparing a release, then run
+automatically on pull requests through GitHub Actions.
 
-## Installation and setup
+## What's new in 0.2.0
 
-Install from source for the initial release:
+- **`rrdoctor fix`** — deterministic, idempotent auto-fix for common gaps (governance docs,
+  citation metadata, data/results provenance, changelog, ignore entries). Never overwrites.
+- **`rrdoctor plan`** — a tool-agnostic fix plan you can hand to any coding agent; every task
+  names the deterministic check that verifies it.
+- **Baseline gating** — `rrdoctor scan --baseline report.json --fail-on-new error` fails only
+  on *newly introduced* findings, so large repos can adopt the audit incrementally.
+- **`rrdoctor badge`** — a Shields.io endpoint or SVG reproducibility-score badge.
+- **First-class PR automation** — the Action posts a sticky PR comment, writes a job summary,
+  and can attach the fix plan, using only the built-in `GITHUB_TOKEN`.
+- **New rules** — unpinned dependencies, committed notebook checkpoints, pre-commit config,
+  and an AGENTS.md task guide for agent and human contributors.
+
+## Install
+
+From source (current release path):
 
 ```bash
 git clone https://github.com/Tom409114/research-repo-doctor.git
@@ -29,37 +61,86 @@ python -m pip install -e ".[dev]"
 rrdoctor scan .
 ```
 
-After the PyPI release:
+After PyPI publishing:
 
 ```bash
 python -m pip install rrdoctor
 rrdoctor scan .
 ```
 
-Create a config file:
+## Quickstart
 
 ```bash
-rrdoctor init --profile standard
+rrdoctor scan .                 # deterministic audit (Markdown report)
+rrdoctor fix . --write          # apply safe scaffolding for the easy gaps
+rrdoctor plan . --output plan.md  # tool-agnostic work order for the rest
+rrdoctor scan . --format json --output baseline.json --fail-on none
+rrdoctor scan . --baseline baseline.json --fail-on-new error  # gate regressions
 ```
 
-Scan with a stricter gate:
+Stricter gate and report file:
 
 ```bash
 rrdoctor scan . --profile strict --fail-on warning --output rrdoctor-report.md
 ```
 
-Machine-readable output:
+Machine-readable and agent output:
 
 ```bash
-rrdoctor scan . --format json --quiet
 rrdoctor scan . --format sarif --output rrdoctor.sarif --fail-on none
+rrdoctor scan . --format agent --output fix-plan.md
 ```
 
-## Reproducibility stance
+## The audit → fix → verify loop
 
-Research Repo Doctor does not claim to prove a paper is reproducible. It checks release hygiene that makes reproduction possible to attempt: documented setup, dependency metadata, data availability, experiment entrypoints, notebook state, citation metadata, CI, tests, and security hygiene. Reports are heuristic and should be reviewed by maintainers.
+A deterministic checker is reproducible and trustworthy but cannot write prose or judge
+intent. A coding agent edits well but needs a precise specification and an objective
+definition of done. Research Repo Doctor gives you both:
 
-## Example output excerpt
+1. **Audit** — `rrdoctor scan` produces deterministic findings.
+2. **Fix the easy ones** — `rrdoctor fix --write` scaffolds governance docs, citation
+   metadata, provenance notes, a changelog, and ignore entries (idempotent, never
+   overwriting).
+3. **Plan the rest** — `rrdoctor plan` emits a tool-agnostic work order. Paste it into the
+   coding agent of your choice, attach it to an issue, or work it by hand.
+4. **Verify** — re-run the audit against a baseline. Because verification is deterministic
+   and key-free, it works as an honest grader for changes from any source.
+
+See [docs/agent-workflows.md](docs/agent-workflows.md) and [docs/autofix.md](docs/autofix.md).
+
+## GitHub Action
+
+Add one workflow to many repositories and get consistent reproducibility reports on pull
+requests and pushes. The Action requires no API key.
+
+```yaml
+name: Reproducibility audit
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  rrdoctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Tom409114/research-repo-doctor@v0.2.0
+        with:
+          profile: standard
+          fail-on: none
+          comment-pr: "true"     # sticky PR comment with the report
+          step-summary: "true"   # report in the job summary
+          plan: "true"           # attach an agent-ready fix plan
+```
+
+For new-finding gating and a committed baseline, see
+[docs/pull-request-automation.md](docs/pull-request-automation.md).
+
+## Example output
 
 ```text
 Research Repo Doctor Summary
@@ -67,63 +148,48 @@ Profile: standard
 Score: 76/100
 Errors: 1
 Warnings: 5
-Rules evaluated: 25
+Rules evaluated: 32
 
 How to fix first:
-- RRD030 No dependency manifest found: Add pyproject.toml, requirements.txt, environment.yml, or another supported manifest.
-- RRD040 Data availability documentation missing: Add DATA.md, docs/data.md, data/README.md, or a README data availability section.
+- RRD030 No dependency manifest found: Add pyproject.toml, requirements.txt, or another manifest.
+- RRD040 Data availability documentation missing: Add DATA.md, docs/data.md, or a README section.
 ```
 
-## GitHub Action
+Worked examples live in [examples/reports/](examples/reports/), including a
+[fix plan](examples/reports/fix-plan.md) and a [self-scan report](examples/reports/self-scan-report.md).
 
-GitHub Action integration is the main adoption path. A lab can add one workflow to many repositories and get consistent reproducibility reports on pull requests and pushes.
+## Commands
 
-Use the action in another repository:
-
-```yaml
-name: Research Repo Doctor
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-jobs:
-  rrdoctor:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.1.0
-        with:
-          profile: standard
-          fail-on: warning
-          output: rrdoctor-report.md
-```
-
-The action does not require an API key. It installs the package from the checked-out action repository and runs `rrdoctor scan`.
-
-## For maintainers
-
-Research Repo Doctor is designed to be maintainable as an OSS rule project:
-
-- Rules are deterministic, documented, and fixture-tested.
-- False positives and false negatives have dedicated issue templates.
-- New rules require a clear reproducibility risk, evidence model, remediation text, and tests.
-- Releases are expected to run tests, linting, action smoke tests, and a self-scan report.
-- Security hygiene is part of the product: reports mask secret-like evidence and the scanner avoids network calls.
+| Command | Purpose |
+| --- | --- |
+| `rrdoctor scan` | Run the deterministic audit; supports `--baseline` and `--fail-on-new`. |
+| `rrdoctor fix` | Apply safe, idempotent scaffolding for common gaps (`--write` to apply). |
+| `rrdoctor plan` | Emit a tool-agnostic fix plan (Markdown or JSON). |
+| `rrdoctor badge` | Emit a reproducibility-score badge (Shields.io endpoint or SVG). |
+| `rrdoctor init` | Write a documented `.rrdoctor.yml`. |
+| `rrdoctor list-rules` | List all registered rules. |
+| `rrdoctor explain RRD0xx` | Explain a rule and how to remediate it. |
+| `rrdoctor doctor` | Self-diagnostics. |
 
 ## Rule categories
 
-- Documentation: README setup, usage, and reproduction guidance.
-- Environment: dependency manifests, runtime versions, optional containers.
-- Data: data availability, large files, local absolute paths.
-- Experiments: entrypoints, configs, seeds, results provenance.
-- Notebooks: large outputs, execution order, paths, secrets, paired scripts.
-- Citation: CITATION.cff and paper metadata.
-- Governance: contribution, security, and conduct policies.
-- Testing and CI: test files, test runners, and workflow quality gates.
-- Security: conservative secret detection and research artifact ignores.
-- Release and metadata: changelog, version metadata, package metadata, topic guidance.
+Documentation, environment, data, experiments, notebooks, citation, governance, testing,
+CI, security, release, and metadata. The full table is in [docs/checks.md](docs/checks.md);
+auto-fixable rules are marked there.
+
+## Reproducibility stance
+
+Research Repo Doctor does not claim to prove a paper is reproducible. It checks release
+hygiene that makes reproduction possible to attempt. Reports are heuristic and should be
+reviewed by maintainers. Generated fixes are starting points and contain placeholders to
+complete before release.
+
+## Philosophy
+
+Deterministic first. The scanner is understandable, testable, and useful with no network
+access. The core scanner will not add network calls, require a hosted-service API key, or
+fabricate adoption metrics. AI is something you bring to *act on* the output — never a
+dependency of the audit itself, and never tied to a single tool.
 
 ## Configuration
 
@@ -131,13 +197,7 @@ Research Repo Doctor is designed to be maintainable as an OSS rule project:
 version: 1
 profile: standard
 paths:
-  include:
-    - "."
-  exclude:
-    - ".git"
-    - ".venv"
-    - "node_modules"
-    - "__pycache__"
+  exclude: [".git", ".venv", "node_modules", "__pycache__"]
 thresholds:
   large_file_mb: 50
   large_notebook_output_kb: 1024
@@ -147,24 +207,14 @@ rules:
   RRD042:
     severity: warning
 fail_on: error
-report:
-  format: markdown
-  output: rrdoctor-report.md
 ```
 
-Rules can be enabled or disabled, severities can be overridden, and thresholds can be tuned for a repository's domain.
-
-## Philosophy
-
-Research Repo Doctor is deterministic first. The scanner should be understandable, testable, and useful on an airplane with no network access. The core scanner will not add network calls, require a hosted-service API key, or fabricate adoption metrics.
-
-## Roadmap
-
-See [ROADMAP.md](ROADMAP.md). The first release focuses on stable deterministic checks and GitHub Action support. Future work includes stronger SARIF support, more language ecosystems, richer rule authoring docs, and carefully reviewed optional maintainer automations.
+See [docs/configuration.md](docs/configuration.md).
 
 ## Contributing
 
-Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), open a rule request or false positive report, and include a minimal fixture when possible.
+Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md),
+open a rule request or false-positive report, and include a minimal fixture when possible.
 
 ## Security
 
@@ -172,7 +222,7 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 
 ## Citation
 
-Use the included [CITATION.cff](CITATION.cff). The metadata is aligned with the published v0.1.0 release.
+Use the included [CITATION.cff](CITATION.cff).
 
 ## License
 

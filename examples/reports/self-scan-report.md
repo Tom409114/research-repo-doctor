@@ -1,10 +1,10 @@
 # Research Repo Doctor Report
 
 - Repository path: `/path/to/research-repo-doctor`
-- Generated: `2026-06-03T08:20:51.422622+00:00`
+- Generated: `2026-06-08T00:00:00+00:00`
 - Profile: `standard`
 - Overall score: **100/100**
-- Rules evaluated: `30`
+- Rules evaluated: `32`
 
 > Heuristic note: Research Repo Doctor uses deterministic heuristics. The score is a guide, not a substitute for peer review or maintainer judgment.
 

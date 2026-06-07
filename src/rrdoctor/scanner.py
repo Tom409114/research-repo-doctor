@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import fnmatch
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from rrdoctor.fixers import fixable_rule_ids
 from rrdoctor.models import Finding, RuleResult, ScanContext, ScanReport, Severity
 from rrdoctor.rules.registry import all_rules
 from rrdoctor.scoring import score_findings
@@ -109,6 +111,12 @@ class Scanner:
                 ]
             findings.extend(rule_findings)
             results.append(RuleResult(rule=rule.definition, findings=rule_findings))
+
+        fixable = fixable_rule_ids()
+        findings = [
+            finding if finding.rule_id not in fixable else replace(finding, autofix_available=True)
+            for finding in findings
+        ]
 
         score, category_scores, summary = score_findings(findings)
         return ScanReport(

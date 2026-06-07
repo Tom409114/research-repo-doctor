@@ -7,6 +7,25 @@ from rrdoctor.rules.base import Rule, definition
 from rrdoctor.rules.paths import has_file
 
 
+class AgentGuideMissingRule(Rule):
+    definition = definition(
+        "RRD014",
+        "Agent/contributor task guide (AGENTS.md) missing",
+        Category.GOVERNANCE,
+        Severity.INFO,
+        ("strict",),
+        "Checks for an AGENTS.md task guide for automated and human contributors.",
+        "A short, machine-readable task guide makes a repo easy to contribute to "
+        "consistently, whether the contributor is a person or a coding agent.",
+        "Add AGENTS.md with setup, test/lint commands, conventions, and how to verify changes.",
+    )
+
+    def check(self, context: ScanContext) -> list[Finding]:
+        if not has_file(context.root, ["AGENTS.md", ".github/AGENTS.md"]):
+            return [self.finding(context, message="No AGENTS.md task guide was found.")]
+        return []
+
+
 class ContributingMissingRule(Rule):
     definition = definition(
         "RRD011",
@@ -61,4 +80,9 @@ class CodeOfConductMissingRule(Rule):
         return []
 
 
-RULES = [ContributingMissingRule(), SecurityPolicyMissingRule(), CodeOfConductMissingRule()]
+RULES = [
+    AgentGuideMissingRule(),
+    ContributingMissingRule(),
+    SecurityPolicyMissingRule(),
+    CodeOfConductMissingRule(),
+]

@@ -63,6 +63,17 @@ class Finding:
     line: int | None = None
     autofix_available: bool = False
 
+    @property
+    def fingerprint(self) -> str:
+        """Stable identity for diffing a finding across scans.
+
+        Uses the rule and the location it points at, which is stable across runs
+        even when the human-readable message changes (for example, when a file
+        size or count is embedded in the message).
+        """
+
+        return f"{self.rule_id}|{self.file or ''}|{self.line if self.line else ''}"
+
 
 @dataclass(frozen=True)
 class RuleDefinition:
@@ -157,6 +168,64 @@ class ScanReport:
             rules_evaluated=0,
             summary={"error": 0, "warning": 0, "info": 0},
         )
+
+
+@dataclass(frozen=True)
+class FixTask:
+    """A single actionable task in an agent-ready fix plan.
+
+    Tasks are tool-agnostic: they describe *what* to change, *where*, and how to
+    *verify* the change with the deterministic scanner. Any coding agent or human
+    can execute them, and ``rrdoctor scan`` is the acceptance check.
+    """
+
+    rule_id: str
+    title: str
+    category: Category
+    severity: Severity
+    instruction: str
+    verification: str
+    targets: list[str] = field(default_factory=list)
+    autofix_available: bool = False
+
+
+@dataclass(frozen=True)
+class FixPlan:
+    """An ordered, tool-agnostic plan derived from a scan report."""
+
+    repository_path: str
+    generated_at: str
+    profile: str
+    score: int
+    tasks: list[FixTask]
+    autofixable: int = 0
+
+
+@dataclass(frozen=True)
+class FixResult:
+    """Outcome of applying a deterministic fixer to a repository."""
+
+    rule_id: str
+    path: str
+    action: str  # "created", "updated", "skipped"
+    detail: str
+
+
+@dataclass(frozen=True)
+class DiffResult:
+    """Difference between a baseline scan and a current scan."""
+
+    new: list[Finding] = field(default_factory=list)
+    fixed: list[Finding] = field(default_factory=list)
+    unchanged: list[Finding] = field(default_factory=list)
+    baseline_score: int | None = None
+    current_score: int = 0
+
+    @property
+    def regressed(self) -> bool:
+        """Return true when the current scan introduces findings not in baseline."""
+
+        return bool(self.new)
 
 
 def to_jsonable(value: Any) -> Any:
