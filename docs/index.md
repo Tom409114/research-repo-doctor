@@ -7,6 +7,7 @@ Start with the quickstart, then read the checks and configuration reference.
 - [Quickstart](quickstart.md)
 - [Checks](checks.md)
 - [Configuration](configuration.md)
+- [Pre-commit hook](pre-commit.md)
 - [GitHub Action](github-action.md)
 - [Report formats](report-format.md)
 - [Rule authoring](rule-authoring.md)
