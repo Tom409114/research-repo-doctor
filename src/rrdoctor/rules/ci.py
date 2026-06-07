@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
-from rrdoctor.rules.paths import find_files
+from rrdoctor.rules.paths import find_files, has_file
 
 
 class CiMissingRule(Rule):
@@ -69,4 +69,23 @@ class CiNoTestsRule(Rule):
         return []
 
 
-RULES = [CiMissingRule(), CiNoTestsRule()]
+class PreCommitMissingRule(Rule):
+    definition = definition(
+        "RRD082",
+        "No pre-commit configuration found",
+        Category.CI,
+        Severity.INFO,
+        ("strict",),
+        "Checks strict-profile repositories for a pre-commit configuration.",
+        "Local pre-commit hooks catch formatting, lint, and secret issues before they "
+        "reach review, lowering maintainer load.",
+        "Add .pre-commit-config.yaml with formatting, linting, and basic hygiene hooks.",
+    )
+
+    def check(self, context: ScanContext) -> list[Finding]:
+        if not has_file(context.root, [".pre-commit-config.yaml", ".pre-commit-config.yml"]):
+            return [self.finding(context, message="No pre-commit configuration was detected.")]
+        return []
+
+
+RULES = [CiMissingRule(), CiNoTestsRule(), PreCommitMissingRule()]

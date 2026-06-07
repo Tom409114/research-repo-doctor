@@ -1,15 +1,274 @@
 {
-  "category_scores": [],
-  "findings": [],
-  "generated_at": "2026-06-03T07:02:59.779685+00:00",
+  "category_scores": [
+    {
+      "category": "ci",
+      "errors": 0,
+      "infos": 0,
+      "score": 92,
+      "warnings": 1
+    },
+    {
+      "category": "citation",
+      "errors": 0,
+      "infos": 0,
+      "score": 92,
+      "warnings": 1
+    },
+    {
+      "category": "data",
+      "errors": 1,
+      "infos": 0,
+      "score": 80,
+      "warnings": 0
+    },
+    {
+      "category": "documentation",
+      "errors": 1,
+      "infos": 0,
+      "score": 80,
+      "warnings": 0
+    },
+    {
+      "category": "environment",
+      "errors": 1,
+      "infos": 0,
+      "score": 80,
+      "warnings": 0
+    },
+    {
+      "category": "experiments",
+      "errors": 1,
+      "infos": 0,
+      "score": 80,
+      "warnings": 0
+    },
+    {
+      "category": "governance",
+      "errors": 1,
+      "infos": 0,
+      "score": 80,
+      "warnings": 0
+    },
+    {
+      "category": "release",
+      "errors": 0,
+      "infos": 0,
+      "score": 84,
+      "warnings": 2
+    },
+    {
+      "category": "security",
+      "errors": 0,
+      "infos": 0,
+      "score": 92,
+      "warnings": 1
+    },
+    {
+      "category": "testing",
+      "errors": 0,
+      "infos": 0,
+      "score": 84,
+      "warnings": 2
+    }
+  ],
+  "findings": [
+    {
+      "autofix_available": false,
+      "category": "documentation",
+      "docs_anchor": "#rrd001",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD001-001",
+      "line": null,
+      "message": "No README file was found at the repository root.",
+      "recommendation": "Add a README with project scope, setup, usage, and reproducibility instructions.",
+      "rule_id": "RRD001",
+      "severity": "error",
+      "title": "README missing"
+    },
+    {
+      "autofix_available": true,
+      "category": "governance",
+      "docs_anchor": "#rrd010",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD010-001",
+      "line": null,
+      "message": "No LICENSE file was found.",
+      "recommendation": "Add an OSI-approved license such as MIT, BSD-3-Clause, or Apache-2.0.",
+      "rule_id": "RRD010",
+      "severity": "error",
+      "title": "LICENSE missing"
+    },
+    {
+      "autofix_available": true,
+      "category": "citation",
+      "docs_anchor": "#rrd020",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD020-001",
+      "line": null,
+      "message": "No CITATION.cff or citation guidance was found.",
+      "recommendation": "Add CITATION.cff or a clear citation section in the README.",
+      "rule_id": "RRD020",
+      "severity": "warning",
+      "title": "Citation instructions missing"
+    },
+    {
+      "autofix_available": false,
+      "category": "environment",
+      "docs_anchor": "#rrd030",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD030-001",
+      "line": null,
+      "message": "No supported dependency manifest was found.",
+      "recommendation": "Add pyproject.toml, requirements.txt, environment.yml, or another supported manifest.",
+      "rule_id": "RRD030",
+      "severity": "error",
+      "title": "No dependency manifest found"
+    },
+    {
+      "autofix_available": true,
+      "category": "data",
+      "docs_anchor": "#rrd040",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD040-001",
+      "line": null,
+      "message": "No data availability documentation was found.",
+      "recommendation": "Add DATA.md, docs/data.md, data/README.md, or a README data availability section.",
+      "rule_id": "RRD040",
+      "severity": "error",
+      "title": "Data availability documentation missing"
+    },
+    {
+      "autofix_available": false,
+      "category": "experiments",
+      "docs_anchor": "#rrd050",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD050-001",
+      "line": null,
+      "message": "No experiment or reproduction entrypoint was detected.",
+      "recommendation": "Add scripts/reproduce.sh, scripts/run*.sh, a Makefile, or documented train/eval scripts.",
+      "rule_id": "RRD050",
+      "severity": "error",
+      "title": "No experiment entrypoint found"
+    },
+    {
+      "autofix_available": false,
+      "category": "testing",
+      "docs_anchor": "#rrd070",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD070-001",
+      "line": null,
+      "message": "No tests directory or test files were detected.",
+      "recommendation": "Add tests/ or at least one test_*.py / *_test.py file.",
+      "rule_id": "RRD070",
+      "severity": "warning",
+      "title": "No tests directory or test files found"
+    },
+    {
+      "autofix_available": false,
+      "category": "testing",
+      "docs_anchor": "#rrd071",
+      "docs_url": null,
+      "evidence": [
+        {
+          "file": null,
+          "line": null,
+          "message": "Searched pyproject, tox/nox, package scripts, and workflows.",
+          "value": null
+        }
+      ],
+      "file": null,
+      "id": "RRD071-001",
+      "line": null,
+      "message": "No obvious test runner or test command configuration was detected.",
+      "recommendation": "Document or configure a test runner such as pytest, tox, nox, or package scripts.",
+      "rule_id": "RRD071",
+      "severity": "warning",
+      "title": "No test runner/configuration detected"
+    },
+    {
+      "autofix_available": false,
+      "category": "ci",
+      "docs_anchor": "#rrd080",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD080-001",
+      "line": null,
+      "message": "No CI configuration was detected.",
+      "recommendation": "Add a GitHub Actions workflow or another CI configuration that runs tests/linting.",
+      "rule_id": "RRD080",
+      "severity": "warning",
+      "title": "No CI workflow detected"
+    },
+    {
+      "autofix_available": true,
+      "category": "security",
+      "docs_anchor": "#rrd091",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD091-001",
+      "line": null,
+      "message": ".gitignore is missing.",
+      "recommendation": "Add entries for .env, caches, raw data, checkpoints, wandb, and mlruns.",
+      "rule_id": "RRD091",
+      "severity": "warning",
+      "title": ".gitignore missing common research artifacts"
+    },
+    {
+      "autofix_available": true,
+      "category": "release",
+      "docs_anchor": "#rrd100",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD100-001",
+      "line": null,
+      "message": "No CHANGELOG file was found.",
+      "recommendation": "Add CHANGELOG.md with at least an initial v0.1.0 entry.",
+      "rule_id": "RRD100",
+      "severity": "warning",
+      "title": "CHANGELOG missing"
+    },
+    {
+      "autofix_available": false,
+      "category": "release",
+      "docs_anchor": "#rrd101",
+      "docs_url": null,
+      "evidence": [],
+      "file": null,
+      "id": "RRD101-001",
+      "line": null,
+      "message": "No version metadata was detected.",
+      "recommendation": "Add package version metadata, VERSION file, or release tags.",
+      "rule_id": "RRD101",
+      "severity": "warning",
+      "title": "No version metadata found"
+    }
+  ],
+  "generated_at": "2026-06-08T00:00:00+00:00",
   "heuristic_note": "Research Repo Doctor uses deterministic heuristics. The score is a guide, not a substitute for peer review or maintainer judgment.",
   "profile": "standard",
-  "repository_path": "/path/to/research-repo-doctor/tests/fixtures/healthy-research-repo",
-  "rules_evaluated": 30,
-  "score": 100,
+  "repository_path": "/path/to/missing-basics-repo",
+  "rules_evaluated": 32,
+  "score": 12,
   "summary": {
-    "error": 0,
+    "error": 5,
     "info": 0,
-    "warning": 0
+    "warning": 7
   }
 }

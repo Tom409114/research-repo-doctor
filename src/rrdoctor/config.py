@@ -42,7 +42,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
 
 PROFILES = ("minimal", "standard", "strict", "ml")
 FAIL_ON_VALUES = ("none", "error", "warning")
-FORMAT_VALUES = ("markdown", "json", "sarif")
+FORMAT_VALUES = ("markdown", "json", "sarif", "agent")
 
 
 def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:

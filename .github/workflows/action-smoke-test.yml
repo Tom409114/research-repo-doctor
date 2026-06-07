@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   action-smoke-test:
     runs-on: ubuntu-latest
@@ -16,3 +20,6 @@ jobs:
           profile: minimal
           fail-on: none
           output: rrdoctor-action-report.md
+          plan: "true"
+          comment-pr: "true"
+          step-summary: "true"

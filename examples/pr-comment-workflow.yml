@@ -1,0 +1,27 @@
+# Reproducibility audit that comments on pull requests and gates on new findings.
+#
+# Commit a baseline once so the gate only fails on newly introduced findings:
+#   rrdoctor scan . --format json --output .rrdoctor-baseline.json --fail-on none
+# Remove the `baseline` and `fail-on-new` inputs to gate on all findings instead.
+name: Reproducibility audit
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  rrdoctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Tom409114/research-repo-doctor@v0.2.0
+        with:
+          profile: standard
+          baseline: .rrdoctor-baseline.json
+          fail-on-new: error
+          plan: "true"
+          comment-pr: "true"
+          step-summary: "true"

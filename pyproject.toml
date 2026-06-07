@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rrdoctor"
-version = "0.1.0"
-description = "Local-first reproducibility audits for research code repositories."
+version = "0.2.0"
+description = "Local-first reproducibility audits for research code, with auto-fix and an agent-ready fix plan."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
