@@ -40,9 +40,51 @@ DEFAULT_CONFIG: dict[str, Any] = {
     },
 }
 
-PROFILES = ("minimal", "standard", "strict", "ml")
+PROFILES = (
+    "minimal",
+    "standard",
+    "strict",
+    "ml",
+    "ml-paper",
+    "neurips",
+    "icml",
+    "acm",
+    "fair4rs",
+    "joss",
+)
 FAIL_ON_VALUES = ("none", "error", "warning")
 FORMAT_VALUES = ("markdown", "json", "sarif", "agent")
+
+# Each profile activates a set of rule "tags". Base profiles map to themselves.
+# Composite profiles (the submission-deadline profiles) inherit base tags so they
+# reuse the existing rule set without every rule having to enumerate them.
+PROFILE_TAGS: dict[str, tuple[str, ...]] = {
+    "minimal": ("minimal",),
+    "standard": ("standard",),
+    "strict": ("strict",),
+    "ml": ("ml",),
+    # ML paper artifact: everything strict + ml, plus paper-specific rules.
+    "ml-paper": ("ml-paper", "ml", "strict", "standard"),
+    # NeurIPS reproducibility checklist superset of ml-paper.
+    "neurips": ("neurips", "ml-paper", "ml", "strict", "standard"),
+    # ICML shares the ML reproducibility expectations.
+    "icml": ("icml", "ml-paper", "ml", "strict", "standard"),
+    # ACM Artifact Evaluation (Available / Functional / Reproduced).
+    "acm": ("acm", "strict", "standard"),
+    # FAIR for Research Software: license, citation, metadata, governance.
+    "fair4rs": ("fair4rs", "strict", "standard"),
+    # JOSS review checklist: docs, tests, license, contributing.
+    "joss": ("joss", "strict", "standard"),
+}
+
+
+def profile_tags(profile: str) -> tuple[str, ...]:
+    """Return the rule tags activated by a profile.
+
+    Unknown profiles map to themselves so custom profiles keep working.
+    """
+
+    return PROFILE_TAGS.get(profile, (profile,))
 
 
 def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:

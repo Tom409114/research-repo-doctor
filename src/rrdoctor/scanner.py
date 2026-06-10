@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from rrdoctor.config import profile_tags
 from rrdoctor.fixers import fixable_rule_ids
 from rrdoctor.models import Finding, RuleResult, ScanContext, ScanReport, Severity
 from rrdoctor.rules.registry import all_rules
@@ -58,7 +59,7 @@ def rule_enabled(
         return rule_id in include
     if "enabled" in rule_config:
         return bool(rule_config["enabled"])
-    return context.profile in profiles
+    return bool(set(profile_tags(context.profile)).intersection(profiles))
 
 
 class Scanner:
