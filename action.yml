@@ -14,7 +14,7 @@ inputs:
     required: false
     default: ""
   profile:
-    description: "Scan profile: minimal, standard, strict, or ml."
+    description: "Profile: minimal, standard, strict, ml, ml-paper, neurips, icml, acm, fair4rs, joss."
     required: false
     default: standard
   format:

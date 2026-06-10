@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rrdoctor"
-version = "0.2.0"
-description = "Local-first reproducibility audits for research code, with auto-fix and an agent-ready fix plan."
+version = "0.3.0"
+description = "Get your research artifact reviewer-ready before you submit: reproducibility audits, dynamic verify, auto-fix, an agent-ready fix plan, and an ACM/NeurIPS Artifact Appendix generator."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -13,6 +13,7 @@ authors = [{ name = "Research Repo Doctor Maintainers" }]
 keywords = [
   "research",
   "reproducibility",
+  "artifact-evaluation",
   "open-source",
   "github-action",
   "notebooks",
@@ -43,6 +44,9 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.5",
   "types-PyYAML>=6.0",
+]
+mcp = [
+  "mcp>=1.0",
 ]
 
 [project.scripts]

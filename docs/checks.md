@@ -21,6 +21,7 @@ covered by the agent fix plan (`rrdoctor plan`).
 | RRD031 | Dependency manifest lacks version hint | environment | warning | minimal, standard, strict, ml |  |
 | RRD032 | Dockerfile or devcontainer missing | environment | info | strict |  |
 | RRD033 | Unpinned dependencies in requirements file | environment | warning | standard, strict, ml |  |
+| RRD034 | Imported package not in dependency manifest | environment | warning | standard, strict, ml |  |
 | RRD040 | Data availability documentation missing | data | error | minimal, standard, strict, ml | yes |
 | RRD041 | data directory lacks README | data | warning | standard, strict, ml | yes |
 | RRD042 | Large data files detected | data | warning | standard, strict, ml |  |
@@ -29,6 +30,7 @@ covered by the agent fix plan (`rrdoctor plan`).
 | RRD051 | No configuration files found | experiments | warning | ml |  |
 | RRD052 | Randomness used without obvious seed setting | reproducibility | warning | standard, strict, ml |  |
 | RRD053 | Results provenance documentation missing | experiments | warning | standard, strict, ml | yes |
+| RRD054 | Hardcoded GPU/CUDA assumption without a documented requirement | reproducibility | warning | ml |  |
 | RRD060 | Notebook files detected with large outputs | notebooks | warning | standard, strict, ml |  |
 | RRD061 | Notebook execution counts appear out of order | notebooks | warning | standard, strict, ml |  |
 | RRD062 | Notebook contains absolute local paths | notebooks | warning | standard, strict, ml |  |

@@ -124,9 +124,63 @@ class ResultsProvenanceMissingRule(Rule):
         return []
 
 
+class CudaAssumptionRule(Rule):
+    definition = definition(
+        "RRD054",
+        "Hardcoded GPU/CUDA assumption without a documented requirement",
+        Category.REPRODUCIBILITY,
+        Severity.WARNING,
+        ("ml",),
+        "Checks for code that assumes a CUDA GPU without a fallback or a documented requirement.",
+        "A pinned GPU device with no CPU fallback or stated hardware requirement is a "
+        "frequent reason reviewers cannot reproduce ML results on their machines.",
+        "Guard device selection with torch.cuda.is_available() (or similar) and document the "
+        "required GPU/CUDA version in the README.",
+    )
+
+    _USES_CUDA = re.compile(
+        r"(\.cuda\(|['\"]cuda(:\d+)?['\"]|cuda_visible_devices|\.to\(\s*['\"]cuda)"
+    )
+    _HAS_FALLBACK = re.compile(
+        r"(cuda\.is_available|is_available\(\)|device\s*=.*cpu|torch\.device)"
+    )
+
+    def check(self, context: ScanContext) -> list[Finding]:
+        uses_cuda = False
+        evidence_file = None
+        for path in text_files(context):
+            if path.suffix.lower() not in {".py", ".ipynb", ".r", ".jl"}:
+                continue
+            text = read_text(path)
+            if self._USES_CUDA.search(text):
+                uses_cuda = True
+                evidence_file = context.rel(path)
+                if self._HAS_FALLBACK.search(text):
+                    return []  # A guarded usage somewhere is good enough.
+        if not uses_cuda:
+            return []
+
+        # Allow an explicit, documented hardware requirement to satisfy the rule.
+        readme = context.root / "README.md"
+        documented = readme.exists() and re.search(r"(?i)(cuda|gpu|nvidia)", read_text(readme))
+        if documented:
+            return []
+
+        return [
+            self.finding(
+                context,
+                message="GPU/CUDA usage was detected with no CPU fallback or documented "
+                "hardware requirement.",
+                evidence=[Evidence("Hardcoded CUDA usage", evidence_file)] if evidence_file else [],
+                file=evidence_file,
+            )
+        ]
+
+
 RULES = [
     ExperimentEntrypointMissingRule(),
     ConfigFilesMissingRule(),
     RandomnessWithoutSeedRule(),
     ResultsProvenanceMissingRule(),
+    CudaAssumptionRule(),
 ]
