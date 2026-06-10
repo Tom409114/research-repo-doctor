@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import re
+import sys
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import has_file
 
 DEPENDENCY_FILES = [
+    # Python
     "pyproject.toml",
     "requirements.txt",
     "environment.yml",
@@ -16,9 +18,30 @@ DEPENDENCY_FILES = [
     "Pipfile",
     "poetry.lock",
     "uv.lock",
+    # JavaScript
     "package.json",
+    # R
     "renv.lock",
+    "DESCRIPTION",
+    "install.R",
+    "install.r",
+    # Julia
+    "Project.toml",
+    "Manifest.toml",
 ]
+
+# Patterns that indicate a documented runtime/language version across ecosystems.
+RUNTIME_VERSION_RE = re.compile(
+    r"(?i)("
+    r"requires-python"  # pyproject
+    r"|python\s*[<>=~!]|python="  # requirements / conda
+    r"|runtime"  # runtime.txt
+    r"|node\s*[:=]"  # package.json engines
+    r"|depends:\s*r\s*\(|r\s*\(\s*>="  # R DESCRIPTION: "Depends: R (>= 4.1)"
+    r"|rversion|r-version"  # renv.lock R version field
+    r"|julia\s*[<>=~]|\[compat\]"  # Julia Project.toml compat
+    r")"
+)
 
 
 class DependencyManifestMissingRule(Rule):
@@ -46,9 +69,10 @@ class PythonVersionHintMissingRule(Rule):
         Category.ENVIRONMENT,
         Severity.WARNING,
         ("minimal", "standard", "strict", "ml"),
-        "Checks dependency manifests for Python or environment version hints.",
-        "Language/runtime versions are part of the experimental environment.",
-        "Add requires-python, python=, runtime.txt, or a documented environment version.",
+        "Checks dependency manifests for a language/runtime version hint.",
+        "Language/runtime versions (Python, R, Julia, Node) are part of the environment.",
+        "Add requires-python, an R version in DESCRIPTION, [compat] in Project.toml, "
+        "runtime.txt, or another documented runtime version.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
@@ -58,9 +82,7 @@ class PythonVersionHintMissingRule(Rule):
         if not existing:
             return []
         combined = "\n".join(read_text(path) for path in existing)
-        if not re.search(
-            r"(?i)(requires-python|python\s*[<>=~!]|python=|runtime|node\s*[:=])", combined
-        ):
+        if not RUNTIME_VERSION_RE.search(combined):
             evidence = [
                 Evidence(
                     "Manifest exists but no runtime version hint was detected.",
@@ -151,9 +173,151 @@ class ContainerMissingStrictRule(Rule):
         return []
 
 
+# Maps the name used in `import X` to the distribution name on PyPI when they differ.
+IMPORT_TO_DISTRIBUTION = {
+    "cv2": "opencv-python",
+    "sklearn": "scikit-learn",
+    "skimage": "scikit-image",
+    "pil": "pillow",
+    "yaml": "pyyaml",
+    "bs4": "beautifulsoup4",
+    "dateutil": "python-dateutil",
+    "dotenv": "python-dotenv",
+    "torch": "torch",
+    "tensorflow": "tensorflow",
+    "google": "protobuf",
+    "OpenSSL": "pyopenssl",
+}
+
+_IMPORT_RE = re.compile(r"^\s*(?:import|from)\s+([A-Za-z0-9_.]+)", re.MULTILINE)
+_REQ_NAME_RE = re.compile(r"^[A-Za-z0-9_.\-]+")
+
+
+def _normalize(name: str) -> str:
+    """PEP 503-style normalization so cv2/CV2/c.v.2 compare equal."""
+
+    return re.sub(r"[-_.]+", "-", name.strip().lower())
+
+
+def _declared_distributions(context: ScanContext) -> set[str]:
+    """Best-effort set of declared dependency distribution names (normalized)."""
+
+    declared: set[str] = set()
+
+    req = context.root / "requirements.txt"
+    if req.exists():
+        for line in read_text(req).splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith(("#", "-")):
+                continue
+            match = _REQ_NAME_RE.match(stripped)
+            if match:
+                declared.add(_normalize(match.group(0)))
+
+    pyproject = context.root / "pyproject.toml"
+    if pyproject.exists():
+        text = read_text(pyproject)
+        # Pull quoted requirement specs out of any dependency array, which covers
+        # PEP 621 [project] and Poetry-style tables without a full TOML parser.
+        for block in re.findall(r"dependencies\s*=\s*\[(.*?)\]", text, re.DOTALL):
+            for spec in re.findall(r"['\"]([^'\"]+)['\"]", block):
+                match = _REQ_NAME_RE.match(spec)
+                if match:
+                    declared.add(_normalize(match.group(0)))
+
+    for env_name in ("environment.yml", "conda.yml"):
+        env = context.root / env_name
+        if env.exists():
+            for line in read_text(env).splitlines():
+                stripped = line.strip().lstrip("-").strip()
+                match = _REQ_NAME_RE.match(stripped)
+                if match and match.group(0) not in {"dependencies", "pip", "name", "channels"}:
+                    declared.add(_normalize(match.group(0)))
+
+    return declared
+
+
+def _local_modules(context: ScanContext) -> set[str]:
+    """Top-level module/package names defined inside the repository."""
+
+    local: set[str] = set()
+    for path in context.files:
+        if path.suffix != ".py":
+            continue
+        parts = context.rel(path).split("/")
+        if not parts:
+            continue
+        first = parts[0]
+        if first == "src" and len(parts) > 1:
+            local.add(_normalize(parts[1].removesuffix(".py")))
+        else:
+            local.add(_normalize(first.removesuffix(".py")))
+    return local
+
+
+class UndeclaredImportRule(Rule):
+    definition = definition(
+        "RRD034",
+        "Imported package not in dependency manifest",
+        Category.ENVIRONMENT,
+        Severity.WARNING,
+        ("standard", "strict", "ml"),
+        "Cross-checks third-party imports against declared dependencies (deptry-style).",
+        "Importing a package that no manifest declares is the most common reason a "
+        "fresh environment fails to reproduce results.",
+        "Add the missing package to requirements.txt/pyproject.toml, or remove the import.",
+    )
+
+    def check(self, context: ScanContext) -> list[Finding]:
+        declared = _declared_distributions(context)
+        if not declared:
+            # No parseable manifest to compare against; RRD030 covers that case.
+            return []
+
+        stdlib: frozenset[str] = getattr(sys, "stdlib_module_names", frozenset())
+        local = _local_modules(context)
+
+        seen: dict[str, str] = {}
+        for path in context.files:
+            if path.suffix.lower() not in {".py"}:
+                continue
+            text = read_text(path)
+            for raw in _IMPORT_RE.findall(text):
+                top = raw.split(".")[0]
+                if not top or top.startswith("_"):
+                    continue
+                if top in stdlib:
+                    continue
+                norm = _normalize(top)
+                if norm in local:
+                    continue
+                distribution = IMPORT_TO_DISTRIBUTION.get(top, norm)
+                if _normalize(distribution) in declared:
+                    continue
+                seen.setdefault(top, context.rel(path))
+
+        if not seen:
+            return []
+
+        names = sorted(seen)
+        evidence = [
+            Evidence(f"`import {name}` is not declared in any manifest.", seen[name])
+            for name in names[:5]
+        ]
+        listed = ", ".join(names[:8])
+        return [
+            self.finding(
+                context,
+                message=f"Imported package(s) not found in any dependency manifest: {listed}.",
+                evidence=evidence,
+            )
+        ]
+
+
 RULES = [
     DependencyManifestMissingRule(),
     PythonVersionHintMissingRule(),
     UnpinnedDependenciesRule(),
+    UndeclaredImportRule(),
     ContainerMissingStrictRule(),
 ]

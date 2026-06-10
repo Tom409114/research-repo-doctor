@@ -25,12 +25,14 @@ from rrdoctor.config import (
 from rrdoctor.fixers import FixContext, apply_fix, fixable_rule_ids
 from rrdoctor.models import DiffResult, ScanReport
 from rrdoctor.reporting.agent import render_agent_json, render_agent_markdown
+from rrdoctor.reporting.appendix import render_appendix, render_checklist
 from rrdoctor.reporting.badge import render_badge_endpoint, render_badge_svg
 from rrdoctor.reporting.json_report import render_json
 from rrdoctor.reporting.markdown import render_markdown
 from rrdoctor.reporting.sarif import render_sarif
 from rrdoctor.rules.registry import all_rules, get_rule
 from rrdoctor.scanner import Scanner
+from rrdoctor.verification import render_verification, verification_failed
 
 app = typer.Typer(
     help="Audit research repositories for reproducibility readiness.", no_args_is_help=True
@@ -103,6 +105,23 @@ def _diff_should_fail(diff: DiffResult, fail_on_new: str) -> bool:
     if fail_on_new == "warning":
         return "error" in levels or "warning" in levels
     return False
+
+
+def _build_report(path: Path, profile: str, config: Path | None = None) -> ScanReport:
+    """Load config, apply the profile, and scan a path into a report."""
+
+    loaded = load_config(config)
+    effective = apply_cli_overrides(loaded, profile=profile)
+    return Scanner(effective).scan(path)
+
+
+def _write_or_echo(rendered: str, output: Path | None, label: str) -> None:
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(rendered, encoding="utf-8")
+        err_console.print(f"Wrote {label} to [bold]{output}[/bold]")
+    else:
+        typer.echo(rendered)
 
 
 @app.command()
@@ -377,6 +396,99 @@ def init(
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(default_config_text(profile), encoding="utf-8")
     console.print(f"Created {output}")
+
+
+@app.command()
+def verify(
+    path: Annotated[Path, typer.Argument(help="Repository path to verify.")] = Path("."),
+    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    profile: Annotated[
+        str, typer.Option("--profile", help="Profile to scan with (default: standard).")
+    ] = "standard",
+    run: Annotated[
+        bool,
+        typer.Option(
+            "--run",
+            help="Actually resolve deps (L2) and execute the entrypoint (L3). Runs repo code.",
+        ),
+    ] = False,
+    timeout: Annotated[
+        int, typer.Option("--timeout", help="Per-step timeout in seconds for --run.")
+    ] = 300,
+    output: Annotated[
+        Path | None, typer.Option("--output", help="Write the report to this path.")
+    ] = None,
+    fail_on: Annotated[
+        str, typer.Option("--fail-on", help="Failure threshold: none, error.")
+    ] = "error",
+) -> None:
+    """Run the reproducibility verification ladder (L1 static, L2 build, L3 run).
+
+    L1 is deterministic. With --run, L2 resolves dependencies and L3 executes a
+    declared entrypoint under a timeout (only use --run on repositories you trust).
+    """
+
+    if profile not in PROFILES:
+        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
+    if fail_on not in ("none", "error"):
+        raise typer.BadParameter("--fail-on must be one of: none, error")
+
+    report = _build_report(path, profile, config)
+    rendered = render_verification(report, Path(path).resolve(), run, timeout)
+    _write_or_echo(rendered, output, "verification report")
+
+    if fail_on == "error" and verification_failed(report):
+        raise typer.Exit(1)
+
+
+@app.command()
+def appendix(
+    path: Annotated[Path, typer.Argument(help="Repository path to scan.")] = Path("."),
+    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    profile: Annotated[
+        str, typer.Option("--profile", help="Profile to scan with (default: acm).")
+    ] = "acm",
+    section: Annotated[
+        str,
+        typer.Option("--section", help="Which artifact to emit: appendix, checklist, or both."),
+    ] = "both",
+    output: Annotated[
+        Path | None, typer.Option("--output", help="Write output to this path.")
+    ] = None,
+) -> None:
+    """Generate an ACM-style Artifact Appendix and submission checklist mapping.
+
+    Maps findings to ACM Artifact Evaluation badges and the NeurIPS reproducibility
+    checklist so you can fill the artifact paperwork before a deadline.
+    """
+
+    if profile not in PROFILES:
+        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
+    if section not in ("appendix", "checklist", "both"):
+        raise typer.BadParameter("--section must be one of: appendix, checklist, both")
+
+    report = _build_report(path, profile, config)
+
+    parts: list[str] = []
+    if section in ("appendix", "both"):
+        parts.append(render_appendix(report))
+    if section in ("checklist", "both"):
+        parts.append(render_checklist(report))
+    rendered = "\n\n".join(parts)
+
+    _write_or_echo(rendered, output, "artifact appendix")
+
+
+@app.command()
+def mcp() -> None:
+    """Start the MCP server so coding agents can call scan/verify/appendix as tools.
+
+    Requires the optional dependency: pip install 'rrdoctor[mcp]'.
+    """
+
+    from rrdoctor.mcp_server import run as run_server
+
+    run_server()
 
 
 @app.command("list-rules")

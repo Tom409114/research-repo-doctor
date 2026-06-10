@@ -5,10 +5,14 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 
+**Get your research artifact reviewer-ready before you submit.**
+
 Research Repo Doctor (`rrdoctor`) is reproducibility infrastructure for research code: a
 local-first CLI and GitHub Action that **audits** whether a repository is reproducible,
-reviewable, citable, and release-ready — then **fixes** the mechanical gaps and hands the
-rest to any coding agent as a verifiable plan.
+reviewable, citable, and release-ready, **fixes** the mechanical gaps, hands the rest to any
+coding agent as a verifiable plan, and maps the result to the artifact checklists that have a
+deadline attached — ACM Artifact Evaluation (Available / Functional / Reproduced) and the
+NeurIPS reproducibility checklist.
 
 The audit is deterministic and runs without an AI API key, network access, or hosted
 service. That same determinism makes it an honest grader: it can verify fixes made by a
@@ -21,8 +25,15 @@ audit ──▶ fix ──▶ plan ──▶ (your coding agent / you) ──▶
             └ rrdoctor plan (tool-agnostic work order)        --fail-on-new error
 ```
 
-Keywords: research software, reproducibility, repository audit, auto-fix, coding agents,
-AGENTS.md, GitHub Action, notebooks, data availability, citation metadata.
+```bash
+# Zero-clone (needs uv or pipx):
+uvx --from git+https://github.com/Tom409114/research-repo-doctor rrdoctor scan .
+# Before a deadline: draft the Artifact Appendix + ACM/NeurIPS checklist mapping
+uvx --from git+https://github.com/Tom409114/research-repo-doctor rrdoctor appendix . --profile acm
+```
+
+Keywords: research software, reproducibility, artifact evaluation, repository audit, auto-fix,
+coding agents, AGENTS.md, GitHub Action, notebooks, data availability, citation metadata.
 
 ## Why this matters
 
@@ -35,6 +46,23 @@ Research Repo Doctor turns those recurring release blockers into deterministic c
 concrete remediation — and, where it is safe to do so, fixes them for you. It is built to
 sit in the ordinary maintenance path: run locally while preparing a release, then run
 automatically on pull requests through GitHub Actions.
+
+## What's new in 0.3.0
+
+- **`rrdoctor appendix`** — generates an ACM-style Artifact Appendix skeleton and maps findings
+  to ACM badge tiers and the NeurIPS reproducibility checklist, so you can fill the artifact
+  paperwork before a deadline.
+- **`rrdoctor verify`** — an L1 (static) / L2 (environment build) / L3 (entrypoint run)
+  reproducibility ladder. With `--run` it actually resolves dependencies (`uv`/`pip`/`conda`/`Rscript`)
+  and executes a declared entrypoint under a timeout. Only use `--run` on repositories you trust.
+- **Submission profiles** — `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss`, with
+  tag-based inheritance from the base tiers.
+- **Deeper static checks** — `RRD034` cross-checks imports against the dependency manifest
+  (deptry-style); `RRD054` flags hardcoded GPU/CUDA assumptions without a documented requirement.
+- **More ecosystems** — dependency/runtime checks now understand R (`DESCRIPTION`, `renv.lock`)
+  and Julia (`Project.toml`) in addition to Python and JavaScript.
+- **`rrdoctor mcp`** — an MCP server exposing `scan`/`verify`/`appendix` as tools for coding
+  agents (`pip install 'rrdoctor[mcp]'`).
 
 ## What's new in 0.2.0
 
@@ -52,19 +80,24 @@ automatically on pull requests through GitHub Actions.
 
 ## Install
 
-From source (current release path):
+Zero-clone (needs `uv` or `pipx`):
+
+```bash
+uvx --from git+https://github.com/Tom409114/research-repo-doctor rrdoctor scan .
+```
+
+After PyPI publishing this becomes:
+
+```bash
+uvx rrdoctor scan .        # or: pipx run rrdoctor scan .  /  pip install rrdoctor
+```
+
+From source (for development):
 
 ```bash
 git clone https://github.com/Tom409114/research-repo-doctor.git
 cd research-repo-doctor
 python -m pip install -e ".[dev]"
-rrdoctor scan .
-```
-
-After PyPI publishing:
-
-```bash
-python -m pip install rrdoctor
 rrdoctor scan .
 ```
 
@@ -90,6 +123,18 @@ Machine-readable and agent output:
 rrdoctor scan . --format sarif --output rrdoctor.sarif --fail-on none
 rrdoctor scan . --format agent --output fix-plan.md
 ```
+
+Before a submission deadline:
+
+```bash
+rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md   # appendix + checklist mapping
+rrdoctor verify . --profile neurips                               # L1/L2/L3 ladder (static)
+rrdoctor verify . --run --timeout 600                             # actually build + run (trusted repos)
+```
+
+Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss` (alongside the
+general `minimal`/`standard`/`strict`/`ml` tiers). Dependency and runtime checks also understand
+R (`DESCRIPTION`, `renv.lock`) and Julia (`Project.toml`), not just Python and JavaScript.
 
 ## The audit → fix → verify loop
 
@@ -165,7 +210,10 @@ Worked examples live in [examples/reports/](examples/reports/), including a
 | `rrdoctor scan` | Run the deterministic audit; supports `--baseline` and `--fail-on-new`. |
 | `rrdoctor fix` | Apply safe, idempotent scaffolding for common gaps (`--write` to apply). |
 | `rrdoctor plan` | Emit a tool-agnostic fix plan (Markdown or JSON). |
+| `rrdoctor verify` | Reproducibility ladder L1/L2/L3; `--run` actually builds and executes. |
+| `rrdoctor appendix` | Generate an ACM Artifact Appendix + ACM/NeurIPS checklist mapping. |
 | `rrdoctor badge` | Emit a reproducibility-score badge (Shields.io endpoint or SVG). |
+| `rrdoctor mcp` | Run the MCP server (`scan`/`verify`/`appendix` as agent tools). |
 | `rrdoctor init` | Write a documented `.rrdoctor.yml`. |
 | `rrdoctor list-rules` | List all registered rules. |
 | `rrdoctor explain RRD0xx` | Explain a rule and how to remediate it. |

@@ -2,18 +2,24 @@
 
 ## Install
 
-For the initial source release:
+Zero-clone (needs `uv` or `pipx`):
 
 ```bash
-git clone https://github.com/Tom409114/research-repo-doctor.git
-cd research-repo-doctor
-python -m pip install -e ".[dev]"
+uvx --from git+https://github.com/Tom409114/research-repo-doctor rrdoctor scan .
 ```
 
 After PyPI publishing:
 
 ```bash
-python -m pip install rrdoctor
+uvx rrdoctor scan .        # or: pipx run rrdoctor scan .  /  pip install rrdoctor
+```
+
+For development:
+
+```bash
+git clone https://github.com/Tom409114/research-repo-doctor.git
+cd research-repo-doctor
+python -m pip install -e ".[dev]"
 ```
 
 ## Scan
@@ -51,6 +57,27 @@ rrdoctor plan . --output fix-plan.md
 
 The plan is tool-agnostic: hand it to any coding agent or work through it by hand,
 then re-run `rrdoctor scan` to verify. See [agent workflows](agent-workflows.md).
+
+## Before a submission deadline
+
+```bash
+# ACM Artifact Appendix skeleton + ACM badge / NeurIPS checklist mapping:
+rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
+
+# Verification ladder. Static by default; --run actually resolves deps and runs the entrypoint:
+rrdoctor verify . --profile neurips
+rrdoctor verify . --run --timeout 600        # only on repositories you trust
+```
+
+Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss`. Dependency and
+runtime checks also understand R (`DESCRIPTION`, `renv.lock`) and Julia (`Project.toml`).
+
+## Use from a coding agent (MCP)
+
+```bash
+pip install 'rrdoctor[mcp]'
+rrdoctor mcp        # exposes scan/verify/appendix as MCP tools over stdio
+```
 
 ## Add the GitHub Action
 
