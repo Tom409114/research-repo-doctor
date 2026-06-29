@@ -14,6 +14,7 @@ paths:
     - "dist"
     - "build"
     - "tests/fixtures"
+    - "examples/unseeded-ml-repo"
     - "examples/reports"
     - "rrdoctor-report.md"
     - "rrdoctor-self-report.md"
