@@ -6,5 +6,6 @@ authors:
     given-names: "Research Repo Doctor"
 version: 0.2.0
 date-released: 2026-06-08
+doi: 10.5281/zenodo.21045373
 license: MIT
 repository-code: "https://github.com/Tom409114/research-repo-doctor"
