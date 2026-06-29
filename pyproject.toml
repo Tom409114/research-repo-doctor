@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rrdoctor"
-version = "0.3.0"
+version = "0.2.1"
 description = "Get your research artifact reviewer-ready before you submit: reproducibility audits, dynamic verify, auto-fix, an agent-ready fix plan, and an ACM/NeurIPS Artifact Appendix generator."
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Research Repo Doctor Maintainers" }]
@@ -55,7 +55,9 @@ rrdoctor = "rrdoctor.cli:app"
 [project.urls]
 Homepage = "https://github.com/Tom409114/research-repo-doctor"
 Documentation = "https://github.com/Tom409114/research-repo-doctor/tree/main/docs"
+Repository = "https://github.com/Tom409114/research-repo-doctor"
 Issues = "https://github.com/Tom409114/research-repo-doctor/issues"
+Changelog = "https://github.com/Tom409114/research-repo-doctor/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/rrdoctor"]
