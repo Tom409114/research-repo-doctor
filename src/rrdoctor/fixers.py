@@ -1,7 +1,7 @@
 """Deterministic, idempotent auto-fixers for common reproducibility gaps.
 
 Fixers create or extend small scaffolding files (governance docs, citation
-metadata, data and results provenance notes, changelog, and ignore entries).
+metadata, seed helpers, data and results provenance notes, changelog, and ignore entries).
 They never overwrite existing content, never make network calls, and never run
 code from the scanned repository. Anything that requires human judgement (for
 example, the actual content of a README reproducibility section) is intentionally
@@ -194,6 +194,63 @@ def _changelog(ctx: FixContext) -> str:
     )
 
 
+def _repro_seed_module(ctx: FixContext) -> str:
+    return (
+        '"""Project-level random seed helper for reproducible local runs.\n'
+        "\n"
+        "TODO: Call set_global_seed(...) from the main training or analysis\n"
+        "entrypoint before data splitting, random sampling, or model initialization.\n"
+        '"""\n'
+        "\n"
+        "from __future__ import annotations\n"
+        "\n"
+        "import importlib\n"
+        "import importlib.util\n"
+        "import random\n"
+        "\n"
+        "\n"
+        "def _optional_module(name: str):\n"
+        '    """Import an optional dependency only when it is installed."""\n'
+        "\n"
+        "    if importlib.util.find_spec(name) is None:\n"
+        "        return None\n"
+        "    return importlib.import_module(name)\n"
+        "\n"
+        "\n"
+        "def set_global_seed(seed: int) -> None:\n"
+        '    """Seed common pseudo-random number generators used in research code."""\n'
+        "\n"
+        "    random.seed(seed)\n"
+        "\n"
+        '    numpy = _optional_module("numpy")\n'
+        "    if numpy is not None:\n"
+        "        numpy.random.seed(seed)\n"
+        "\n"
+        '    torch = _optional_module("torch")\n'
+        "    if torch is not None:\n"
+        "        torch.manual_seed(seed)\n"
+        "        if torch.cuda.is_available():\n"
+        "            torch.cuda.manual_seed_all(seed)\n"
+        "\n"
+        '    tensorflow = _optional_module("tensorflow")\n'
+        "    if tensorflow is not None:\n"
+        "        tensorflow.random.set_seed(seed)\n"
+    )
+
+
+def _repro_seed_note(ctx: FixContext) -> str:
+    return (
+        "# Reproducible randomness seed scaffold\n\n"
+        "This project uses randomness. Add a deterministic seed call before data\n"
+        "splitting, random sampling, or model initialization.\n\n"
+        "TODO: Move this helper into the package or script that owns the main\n"
+        "training/analysis entrypoint, then call `set_global_seed(...)` there.\n\n"
+        "```python\n"
+        f"{_repro_seed_module(ctx)}"
+        "```\n"
+    )
+
+
 # --- Fixers that operate conditionally on the repository state ---------------
 
 
@@ -230,6 +287,50 @@ def _fix_data_dir_readme(ctx: FixContext) -> FixResult:
     )
 
 
+def _is_package_dir(path: Path) -> bool:
+    return path.is_dir() and path.name.isidentifier() and (path / "__init__.py").exists()
+
+
+def _single_python_package(root: Path) -> Path | None:
+    src_dir = root / "src"
+    if src_dir.is_dir():
+        src_packages = sorted(
+            (path for path in src_dir.iterdir() if _is_package_dir(path)),
+            key=lambda path: path.name,
+        )
+        if len(src_packages) == 1:
+            return src_packages[0]
+
+    ignored = {"docs", "notebooks", "scripts", "tests"}
+    root_packages = sorted(
+        (
+            path
+            for path in root.iterdir()
+            if path.name not in ignored and not path.name.startswith(".") and _is_package_dir(path)
+        ),
+        key=lambda path: path.name,
+    )
+    if len(root_packages) == 1:
+        return root_packages[0]
+    return None
+
+
+def _fix_repro_seed_helper(ctx: FixContext) -> FixResult:
+    rule_id = "RRD052"
+    package_dir = _single_python_package(ctx.root)
+    if package_dir is not None:
+        rel = (package_dir.relative_to(ctx.root) / "_repro_seed.py").as_posix()
+        return _write_if_missing(
+            package_dir / "_repro_seed.py", _repro_seed_module(ctx), rule_id, rel
+        )
+    return _write_if_missing(
+        ctx.root / "docs" / "reproducibility-seed.md",
+        _repro_seed_note(ctx),
+        rule_id,
+        "docs/reproducibility-seed.md",
+    )
+
+
 def _fix_results_readme(ctx: FixContext) -> FixResult:
     rule_id = "RRD053"
     results_dir = ctx.root / "results"
@@ -260,6 +361,7 @@ FIXERS: dict[str, Callable[[FixContext], FixResult]] = {
     "RRD020": _simple_file("CITATION.cff", _citation, "RRD020"),
     "RRD040": _simple_file("DATA.md", _data_md, "RRD040"),
     "RRD041": _fix_data_dir_readme,
+    "RRD052": _fix_repro_seed_helper,
     "RRD053": _fix_results_readme,
     "RRD091": _fix_gitignore,
     "RRD100": _simple_file("CHANGELOG.md", _changelog, "RRD100"),

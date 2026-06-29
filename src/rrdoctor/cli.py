@@ -245,9 +245,10 @@ def fix(
 ) -> None:
     """Apply deterministic, idempotent auto-fixes for common reproducibility gaps.
 
-    Only safe scaffolding is created (governance docs, citation metadata, data and
-    results provenance notes, changelog, and ignore entries). Existing files are
-    never overwritten. Run without --write to preview, then re-run with --write.
+    Only safe scaffolding is created (governance docs, citation metadata, seed
+    helpers, data and results provenance notes, changelog, and ignore entries).
+    Existing files are never overwritten. Run without --write to preview, then
+    re-run with --write.
     """
 
     if profile not in PROFILES:
