@@ -26,10 +26,10 @@ audit ──▶ fix ──▶ plan ──▶ (your coding agent / you) ──▶
 ```
 
 ```bash
-# Zero-clone (needs uv or pipx):
-uvx --from git+https://github.com/Tom409114/research-repo-doctor rrdoctor scan .
+# Run without installing:
+uvx rrdoctor scan .
 # Before a deadline: draft the Artifact Appendix + ACM/NeurIPS checklist mapping
-uvx --from git+https://github.com/Tom409114/research-repo-doctor rrdoctor appendix . --profile acm
+uvx rrdoctor appendix . --profile acm
 ```
 
 Keywords: research software, reproducibility, artifact evaluation, repository audit, auto-fix,
@@ -80,19 +80,26 @@ automatically on pull requests through GitHub Actions.
 
 ## Install
 
-Zero-clone (needs `uv` or `pipx`):
+Run without installing:
 
 ```bash
-uvx --from git+https://github.com/Tom409114/research-repo-doctor rrdoctor scan .
+uvx rrdoctor scan .
 ```
 
-After PyPI publishing this becomes:
+Alternative with `pipx`:
 
 ```bash
-uvx rrdoctor scan .        # or: pipx run rrdoctor scan .  /  pip install rrdoctor
+pipx run rrdoctor scan .
 ```
 
-From source (for development):
+Traditional install:
+
+```bash
+pip install rrdoctor
+rrdoctor scan .
+```
+
+Developer install from source:
 
 ```bash
 git clone https://github.com/Tom409114/research-repo-doctor.git
