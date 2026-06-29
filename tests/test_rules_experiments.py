@@ -1,7 +1,88 @@
 from __future__ import annotations
 
+import nbformat
+
 from rrdoctor.config import DEFAULT_CONFIG
 from rrdoctor.scanner import Scanner
+
+
+def test_unseeded_numpy_randomness_flagged(tmp_path) -> None:
+    (tmp_path / "train.py").write_text(
+        "import numpy as np\n\ndef train():\n    return np.random.randn(10)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+    finding = report.findings[0]
+    assert finding.rule_id == "RRD052"
+    assert finding.file == "train.py"
+    assert "no deterministic seed" in finding.message
+
+
+def test_seeded_numpy_randomness_passes(tmp_path) -> None:
+    (tmp_path / "train.py").write_text(
+        "import random\n"
+        "import numpy as np\n"
+        "\n"
+        "random.seed(7)\n"
+        "np.random.seed(7)\n"
+        "sample = np.random.randn(10)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_sklearn_randomness_without_random_state_flagged(tmp_path) -> None:
+    (tmp_path / "train.py").write_text(
+        "from sklearn.model_selection import train_test_split\n"
+        "\n"
+        "train_test_split(X, y, test_size=0.2)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+    assert "train_test_split" in report.findings[0].evidence[0].value
+
+
+def test_declared_seed_option_without_application_flagged(tmp_path) -> None:
+    (tmp_path / "train.py").write_text(
+        "import argparse\n"
+        "import random\n"
+        "\n"
+        "parser = argparse.ArgumentParser()\n"
+        "parser.add_argument('--seed', type=int, default=13)\n"
+        "random.shuffle(rows)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+    finding = report.findings[0]
+    assert "declared" in finding.message
+    assert len(finding.evidence) == 2
+
+
+def test_notebook_randomness_without_seed_flagged(tmp_path) -> None:
+    notebook_path = tmp_path / "analysis.ipynb"
+    notebook = nbformat.v4.new_notebook(
+        cells=[nbformat.v4.new_code_cell("import random\nrandom.random()")]
+    )
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+    finding = report.findings[0]
+    assert finding.file == "analysis.ipynb"
+    assert finding.line == 1
 
 
 def test_cuda_without_fallback_flagged(tmp_path) -> None:
