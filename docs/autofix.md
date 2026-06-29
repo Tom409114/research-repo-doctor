@@ -33,6 +33,7 @@ committing. Because fixers are idempotent, running them again is safe.
 | RRD020 | `CITATION.cff` |
 | RRD040 | `DATA.md` |
 | RRD041 | `data/README.md` (only when `data/` exists) |
+| RRD052 | `src/<package>/_repro_seed.py`, or `docs/reproducibility-seed.md` when no clear package exists |
 | RRD053 | `results/README.md` (only when `results/` exists) |
 | RRD091 | `.gitignore` (creates or appends research artifacts) |
 | RRD100 | `CHANGELOG.md` |
@@ -40,10 +41,15 @@ committing. Because fixers are idempotent, running them again is safe.
 Generated files are starting points. They contain placeholders (for example, the
 DOI in `CITATION.cff`) that you should complete before a release.
 
+The `RRD052` scaffold creates a documented `set_global_seed(seed: int)` helper
+for Python's `random`, NumPy, PyTorch, and TensorFlow. It does not rewrite your
+experiment entrypoint. Review the TODO in the generated file and call the helper
+before data splitting, random sampling, or model initialization.
+
 ## What is intentionally not auto-fixed
 
-Anything that requires judgement — the actual content of a README reproducibility
-section, removing a committed secret, pinning a specific dependency version — is
+Anything that requires judgement - the actual content of a README reproducibility
+section, removing a committed secret, pinning a specific dependency version - is
 left to a human or a coding agent. Use `rrdoctor plan` to get a tool-agnostic work
 order for those tasks. See [agent workflows](agent-workflows.md).
 
