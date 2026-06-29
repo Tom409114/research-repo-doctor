@@ -19,6 +19,25 @@ python -m rrdoctor plan tests/fixtures/missing-basics-repo
 python -m rrdoctor fix tests/fixtures/missing-basics-repo   # dry-run; add --write to apply
 ```
 
+## Agent verify loop
+
+Use rrdoctor as the deterministic, key-free grader for agent work. It runs
+offline, needs no API key, and verifies changes made by any coding agent or
+human contributor.
+
+Copy-paste loop for a research repository:
+
+```bash
+rrdoctor scan . --format json --output baseline.json
+rrdoctor plan . --output plan.md
+# Work through plan.md without weakening the checks.
+rrdoctor scan . --baseline baseline.json --fail-on-new error
+```
+
+Definition of done: the final command exits successfully. If it reports a new
+error, keep working from `plan.md` or the new finding until the baseline gate
+passes.
+
 ## Lint commands
 
 ```bash
