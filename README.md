@@ -143,6 +143,26 @@ Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss` (al
 general `minimal`/`standard`/`strict`/`ml` tiers). Dependency and runtime checks also understand
 R (`DESCRIPTION`, `renv.lock`) and Julia (`Project.toml`), not just Python and JavaScript.
 
+## Use with your coding agent
+
+Paste this into Claude Code, Cursor, GitHub Copilot, or any other coding agent:
+
+```text
+Use rrdoctor as the deterministic, offline, no-API-key grader for this research repo.
+
+Run:
+rrdoctor scan . --format json --output baseline.json
+rrdoctor plan . --output plan.md
+
+Work through plan.md without weakening rrdoctor checks.
+
+Definition of done:
+rrdoctor scan . --baseline baseline.json --fail-on-new error
+```
+
+The final command is the objective gate: it verifies the agent's work against
+the starting baseline and fails only on newly introduced errors.
+
 ## The audit → fix → verify loop
 
 A deterministic checker is reproducible and trustworthy but cannot write prose or judge
