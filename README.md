@@ -1,100 +1,44 @@
 # Research Repo Doctor
 
+Find the reproducibility traps in your research repo in seconds, then auto-fix the boring gaps before reviewers hit them.
+
+![demo](docs/demo.gif)
+
 [![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
 [![rrdoctor score](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tom409114/research-repo-doctor/main/.rrdoctor-badge.json)](https://github.com/Tom409114/research-repo-doctor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 
-**Get your research artifact reviewer-ready before you submit.**
+`rrdoctor` is a local CLI and GitHub Action for research code. It audits whether a repo is
+reproducible, reviewable, citable, and release-ready; scaffolds safe mechanical fixes; and
+turns the rest into a checklist any coding agent or human can finish.
 
-Research Repo Doctor (`rrdoctor`) is reproducibility infrastructure for research code: a
-local-first CLI and GitHub Action that **audits** whether a repository is reproducible,
-reviewable, citable, and release-ready, **fixes** the mechanical gaps, hands the rest to any
-coding agent as a verifiable plan, and maps the result to the artifact checklists that have a
-deadline attached — ACM Artifact Evaluation (Available / Functional / Reproduced) and the
-NeurIPS reproducibility checklist.
+## What it catches
 
-The audit is deterministic and runs without an AI API key, network access, or hosted
-service. That same determinism makes it an honest grader: it can verify fixes made by a
-person *or* a coding agent.
-
-```text
-audit ──▶ fix ──▶ plan ──▶ (your coding agent / you) ──▶ verify ──▶ PR
-  │         │        │                                      │
-  └ rrdoctor scan    └ rrdoctor fix --write                 └ rrdoctor scan --baseline
-            └ rrdoctor plan (tool-agnostic work order)        --fail-on-new error
-```
-
-```bash
-# Run without installing:
-uvx rrdoctor scan .
-# Before a deadline: draft the Artifact Appendix + ACM/NeurIPS checklist mapping
-uvx rrdoctor appendix . --profile acm
-```
-
-Keywords: research software, reproducibility, artifact evaluation, repository audit, auto-fix,
-coding agents, AGENTS.md, GitHub Action, notebooks, data availability, citation metadata.
-
-## Why this matters
-
-Research code often lands on GitHub under deadline pressure. A reviewer or future lab
-member finds a promising repository and then loses hours because the environment is
-underspecified, data paths are local, notebooks contain stale outputs, dependencies are
-unpinned, or the citation is unclear.
-
-Research Repo Doctor turns those recurring release blockers into deterministic checks with
-concrete remediation — and, where it is safe to do so, fixes them for you. It is built to
-sit in the ordinary maintenance path: run locally while preparing a release, then run
-automatically on pull requests through GitHub Actions.
-
-## What's new in 0.3.0
-
-- **`rrdoctor appendix`** — generates an ACM-style Artifact Appendix skeleton and maps findings
-  to ACM badge tiers and the NeurIPS reproducibility checklist, so you can fill the artifact
-  paperwork before a deadline.
-- **`rrdoctor verify`** — an L1 (static) / L2 (environment build) / L3 (entrypoint run)
-  reproducibility ladder. With `--run` it actually resolves dependencies (`uv`/`pip`/`conda`/`Rscript`)
-  and executes a declared entrypoint under a timeout. Only use `--run` on repositories you trust.
-- **Submission profiles** — `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss`, with
-  tag-based inheritance from the base tiers.
-- **Deeper static checks** — `RRD034` cross-checks imports against the dependency manifest
-  (deptry-style); `RRD054` flags hardcoded GPU/CUDA assumptions without a documented requirement.
-- **More ecosystems** — dependency/runtime checks now understand R (`DESCRIPTION`, `renv.lock`)
-  and Julia (`Project.toml`) in addition to Python and JavaScript.
-- **`rrdoctor mcp`** — an MCP server exposing `scan`/`verify`/`appendix` as tools for coding
-  agents (`pip install 'rrdoctor[mcp]'`).
-
-## What's new in 0.2.0
-
-- **`rrdoctor fix`** — deterministic, idempotent auto-fix for common gaps (governance docs,
-  citation metadata, data/results provenance, changelog, ignore entries). Never overwrites.
-- **`rrdoctor plan`** — a tool-agnostic fix plan you can hand to any coding agent; every task
-  names the deterministic check that verifies it.
-- **Baseline gating** — `rrdoctor scan --baseline report.json --fail-on-new error` fails only
-  on *newly introduced* findings, so large repos can adopt the audit incrementally.
-- **`rrdoctor badge`** — a Shields.io endpoint or SVG reproducibility-score badge.
-- **First-class PR automation** — the Action posts a sticky PR comment, writes a job summary,
-  and can attach the fix plan, using only the built-in `GITHUB_TOKEN`.
-- **New rules** — unpinned dependencies, committed notebook checkpoints, pre-commit config,
-  and an AGENTS.md task guide for agent and human contributors.
+- **"Your `--seed` flag does nothing."** `RRD052` spots code that declares a seed option but
+  never calls `random.seed`, `np.random.seed`, `torch.manual_seed`, `tf.random.set_seed`, or
+  `random_state=seed`.
+- **"This worked on my laptop."** Local-only data paths, missing data provenance, and
+  undocumented retrieval steps.
+- **"The environment silently changed."** Unpinned dependencies, missing runtime versions,
+  undeclared imports, and absent dependency manifests.
+- **"The notebook lies."** Stale outputs, out-of-order execution, checkpoint artifacts, and
+  secret-like notebook output.
+- **"Reviewers cannot tell how to cite or rerun this."** Missing license, citation, CI,
+  tests, changelog, results provenance, or experiment entrypoint.
 
 ## Install
 
-Run without installing:
+Run once, without installing:
 
 ```bash
 uvx rrdoctor scan .
 ```
 
-Alternative with `pipx`:
+Alternatives:
 
 ```bash
 pipx run rrdoctor scan .
-```
-
-Traditional install:
-
-```bash
 pip install rrdoctor
 rrdoctor scan .
 ```
@@ -108,11 +52,106 @@ python -m pip install -e ".[dev]"
 rrdoctor scan .
 ```
 
+## Fix the easy gaps
+
+Let `rrdoctor` create the safe scaffolding for you. It is deterministic, idempotent, and
+never overwrites existing files.
+
+```bash
+rrdoctor fix . --write
+```
+
+It can scaffold missing governance docs, citation metadata, data/results provenance notes,
+changelog entries, and common research `.gitignore` entries. The hard parts become a
+reviewable plan:
+
+```bash
+rrdoctor plan . --output plan.md
+```
+
+## Use with your coding agent
+
+Paste this into Claude Code, Cursor, GitHub Copilot, or any other coding agent:
+
+```text
+Use rrdoctor as the deterministic, offline, no-API-key grader for this research repo.
+
+Run:
+rrdoctor scan . --format json --output baseline.json
+rrdoctor plan . --output plan.md
+
+Work through plan.md without weakening rrdoctor checks.
+
+Definition of done:
+rrdoctor scan . --baseline baseline.json --fail-on-new error
+```
+
+The final command is the objective gate: it verifies the agent's work against the starting
+baseline and fails only on newly introduced errors.
+
+Keywords: research software, reproducibility, artifact evaluation, repository audit, auto-fix,
+coding agents, AGENTS.md, GitHub Action, notebooks, data availability, citation metadata.
+
+## Why this matters
+
+Research code often lands on GitHub under deadline pressure. A reviewer or future lab
+member finds a promising repository and then loses hours because the environment is
+underspecified, data paths are local, notebooks contain stale outputs, dependencies are
+unpinned, or the citation is unclear.
+
+Research Repo Doctor turns those recurring release blockers into deterministic checks with
+concrete remediation - and, where it is safe to do so, fixes them for you. It is built to
+sit in the ordinary maintenance path: run locally while preparing a release, then run
+automatically on pull requests through GitHub Actions.
+
+The audit runs without an AI API key, network access, or hosted service. That same
+determinism makes it an honest grader: it can verify fixes made by a person or a coding
+agent.
+
+```text
+audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
+  |       |       |                                  |
+  |       |       rrdoctor plan                      rrdoctor scan --baseline
+  |       rrdoctor fix --write                       --fail-on-new error
+  rrdoctor scan
+```
+
+## What's new in 0.3.0
+
+- **`rrdoctor appendix`** generates an ACM-style Artifact Appendix skeleton and maps findings
+  to ACM badge tiers and the NeurIPS reproducibility checklist, so you can fill the artifact
+  paperwork before a deadline.
+- **`rrdoctor verify`** adds an L1 (static) / L2 (environment build) / L3 (entrypoint run)
+  reproducibility ladder. With `--run` it actually resolves dependencies (`uv`/`pip`/`conda`/`Rscript`)
+  and executes a declared entrypoint under a timeout. Only use `--run` on repositories you trust.
+- **Submission profiles** include `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, and `joss`,
+  with tag-based inheritance from the base tiers.
+- **Deeper static checks** include `RRD034` import/manifest cross-checks (deptry-style) and
+  `RRD054` hardcoded GPU/CUDA assumptions without a documented requirement.
+- **More ecosystems**: dependency/runtime checks now understand R (`DESCRIPTION`, `renv.lock`)
+  and Julia (`Project.toml`) in addition to Python and JavaScript.
+- **`rrdoctor mcp`** exposes `scan`/`verify`/`appendix` as tools for coding agents
+  (`pip install 'rrdoctor[mcp]'`).
+
+## What's new in 0.2.0
+
+- **`rrdoctor fix`** provides deterministic, idempotent auto-fix for common gaps (governance
+  docs, citation metadata, data/results provenance, changelog, ignore entries). Never overwrites.
+- **`rrdoctor plan`** emits a tool-agnostic fix plan you can hand to any coding agent; every
+  task names the deterministic check that verifies it.
+- **Baseline gating**: `rrdoctor scan --baseline report.json --fail-on-new error` fails only
+  on newly introduced findings, so large repos can adopt the audit incrementally.
+- **`rrdoctor badge`** emits a Shields.io endpoint or SVG reproducibility-score badge.
+- **First-class PR automation**: the Action posts a sticky PR comment, writes a job summary,
+  and can attach the fix plan, using only the built-in `GITHUB_TOKEN`.
+- **New rules** include unpinned dependencies, committed notebook checkpoints, pre-commit
+  config, and an AGENTS.md task guide for agent and human contributors.
+
 ## Quickstart
 
 ```bash
-rrdoctor scan .                 # deterministic audit (Markdown report)
-rrdoctor fix . --write          # apply safe scaffolding for the easy gaps
+rrdoctor scan .                   # deterministic audit (Markdown report)
+rrdoctor fix . --write            # apply safe scaffolding for easy gaps
 rrdoctor plan . --output plan.md  # tool-agnostic work order for the rest
 rrdoctor scan . --format json --output baseline.json --fail-on none
 rrdoctor scan . --baseline baseline.json --fail-on-new error  # gate regressions
@@ -143,39 +182,18 @@ Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss` (al
 general `minimal`/`standard`/`strict`/`ml` tiers). Dependency and runtime checks also understand
 R (`DESCRIPTION`, `renv.lock`) and Julia (`Project.toml`), not just Python and JavaScript.
 
-## Use with your coding agent
-
-Paste this into Claude Code, Cursor, GitHub Copilot, or any other coding agent:
-
-```text
-Use rrdoctor as the deterministic, offline, no-API-key grader for this research repo.
-
-Run:
-rrdoctor scan . --format json --output baseline.json
-rrdoctor plan . --output plan.md
-
-Work through plan.md without weakening rrdoctor checks.
-
-Definition of done:
-rrdoctor scan . --baseline baseline.json --fail-on-new error
-```
-
-The final command is the objective gate: it verifies the agent's work against
-the starting baseline and fails only on newly introduced errors.
-
-## The audit → fix → verify loop
+## The audit -> fix -> verify loop
 
 A deterministic checker is reproducible and trustworthy but cannot write prose or judge
 intent. A coding agent edits well but needs a precise specification and an objective
 definition of done. Research Repo Doctor gives you both:
 
-1. **Audit** — `rrdoctor scan` produces deterministic findings.
-2. **Fix the easy ones** — `rrdoctor fix --write` scaffolds governance docs, citation
-   metadata, provenance notes, a changelog, and ignore entries (idempotent, never
-   overwriting).
-3. **Plan the rest** — `rrdoctor plan` emits a tool-agnostic work order. Paste it into the
+1. **Audit**: `rrdoctor scan` produces deterministic findings.
+2. **Fix the easy ones**: `rrdoctor fix --write` scaffolds governance docs, citation metadata,
+   provenance notes, a changelog, and ignore entries (idempotent, never overwriting).
+3. **Plan the rest**: `rrdoctor plan` emits a tool-agnostic work order. Paste it into the
    coding agent of your choice, attach it to an issue, or work it by hand.
-4. **Verify** — re-run the audit against a baseline. Because verification is deterministic
+4. **Verify**: re-run the audit against a baseline. Because verification is deterministic
    and key-free, it works as an honest grader for changes from any source.
 
 See [docs/agent-workflows.md](docs/agent-workflows.md) and [docs/autofix.md](docs/autofix.md).
@@ -263,7 +281,7 @@ complete before release.
 
 Deterministic first. The scanner is understandable, testable, and useful with no network
 access. The core scanner will not add network calls, require a hosted-service API key, or
-fabricate adoption metrics. AI is something you bring to *act on* the output — never a
+fabricate adoption metrics. AI is something you bring to act on the output - never a
 dependency of the audit itself, and never tied to a single tool.
 
 ## Configuration
