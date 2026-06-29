@@ -2,6 +2,8 @@
 
 Find the reproducibility traps in your research repo in seconds, then auto-fix the boring gaps before reviewers hit them.
 
+▶ Try it on any public repo (no install): <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
+
 ![demo](docs/demo.gif)
 
 [![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
