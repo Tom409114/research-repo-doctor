@@ -20,6 +20,27 @@ from rrdoctor.models import FixResult
 from rrdoctor.rules.base import read_text
 from rrdoctor.rules.security import COMMON_GITIGNORE_TERMS
 
+DATA_HINT_DIR_NAMES = {
+    "data",
+    "datasets",
+    "dataset",
+    "inputs",
+    "input",
+    "raw",
+    "processed",
+}
+DATA_SCRIPT_TERMS = (
+    "download",
+    "fetch",
+    "prepare",
+    "preprocess",
+    "dataset",
+    "data",
+)
+DATA_HINT_TEXT_RE = re.compile(
+    r"(?i)\b(data availability|dataset|datasets|download|preprocess|zenodo|doi|kaggle)\b"
+)
+
 
 @dataclass(frozen=True)
 class FixContext:
@@ -224,27 +245,131 @@ def _citation(ctx: FixContext) -> str:
     return "".join(lines)
 
 
+def _detected_data_hints(ctx: FixContext) -> list[str]:
+    hints: list[str] = []
+    for path in _top_level_data_dirs(ctx.root):
+        hints.append(f"- Local data-related directory: `{path}`")
+    for path in _data_related_scripts(ctx.root):
+        hints.append(f"- Possible data retrieval/preprocessing script: `{path}`")
+    readme = ctx.root / "README.md"
+    if readme.exists() and DATA_HINT_TEXT_RE.search(read_text(readme)):
+        hints.append("- README mentions data, datasets, downloads, DOI, or preprocessing.")
+    return hints
+
+
+def _top_level_data_dirs(root: Path) -> list[str]:
+    paths: list[str] = []
+    for path in sorted(root.iterdir()):
+        if path.is_dir() and path.name.lower() in DATA_HINT_DIR_NAMES:
+            paths.append(_rel_posix(path, root) + "/")
+    return paths[:12]
+
+
+def _data_related_scripts(root: Path) -> list[str]:
+    scripts: list[str] = []
+    for path in sorted(root.rglob("*")):
+        if len(scripts) >= 12:
+            break
+        if not path.is_file() or _is_ignored_hint_path(path, root):
+            continue
+        lowered = path.name.lower()
+        if path.suffix.lower() not in {".py", ".r", ".jl", ".sh", ".R"}:
+            continue
+        if any(term in lowered for term in DATA_SCRIPT_TERMS):
+            scripts.append(_rel_posix(path, root))
+    return scripts
+
+
+def _is_ignored_hint_path(path: Path, root: Path) -> bool:
+    ignored = {".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".ruff_cache"}
+    try:
+        rel_parts = path.relative_to(root).parts
+    except ValueError:
+        return True
+    return any(part in ignored for part in rel_parts)
+
+
+def _rel_posix(path: Path, root: Path) -> str:
+    return path.relative_to(root).as_posix()
+
+
+def _data_dir_children(ctx: FixContext) -> list[str]:
+    data_dir = ctx.root / "data"
+    if not data_dir.exists() or not data_dir.is_dir():
+        return []
+    children: list[str] = []
+    for child in sorted(data_dir.iterdir()):
+        suffix = "/" if child.is_dir() else ""
+        children.append(_rel_posix(child, ctx.root) + suffix)
+    return children[:20]
+
+
 def _data_md(ctx: FixContext) -> str:
-    return (
-        "# Data Availability\n\n"
-        "## Sources\n\n"
-        "Describe each dataset used: where it comes from, license or access terms, and\n"
-        "how to obtain it.\n\n"
-        "## Retrieval\n\n"
-        "Document the exact steps or scripts used to download or generate the data.\n\n"
-        "## Preprocessing\n\n"
-        "Describe preprocessing steps and where intermediate artifacts are stored.\n"
+    lines = [
+        "# Data Availability\n\n",
+        f"Project: {ctx.project_name}\n",
+    ]
+    if ctx.repository_url:
+        lines.append(f"Repository: {ctx.repository_url}\n")
+    lines.extend(
+        [
+            "\n",
+            "This file was scaffolded from local repository evidence. Replace the prompts\n",
+            "below with confirmed dataset names, access terms, versions, and retrieval\n",
+            "steps before a release or Artifact Evaluation submission.\n\n",
+            "## Detected local hints\n\n",
+        ]
     )
+    hints = _detected_data_hints(ctx)
+    if hints:
+        lines.extend(f"{hint}\n" for hint in hints)
+    else:
+        lines.append("- No obvious local data directories or retrieval scripts were detected.\n")
+    lines.extend(
+        [
+            "\n",
+            "## Sources\n\n",
+            "- Dataset name and version:\n",
+            "- Original source or archive URL/DOI:\n",
+            "- License, terms of use, or access restrictions:\n\n",
+            "## Retrieval\n\n",
+            "- Command or script to obtain the data:\n",
+            "- Expected download size and runtime:\n",
+            "- Required credentials or manual approval, if any:\n\n",
+            "## Preprocessing\n\n",
+            "- Command or script to preprocess raw data:\n",
+            "- Inputs and outputs:\n",
+            "- Random seed or deterministic ordering assumptions:\n\n",
+            "## Storage\n\n",
+            "- Files committed to this repository:\n",
+            "- Files intentionally excluded from git:\n",
+            "- Checksum or archive snapshot, if available:\n",
+        ]
+    )
+    return "".join(lines)
 
 
 def _data_dir_readme(ctx: FixContext) -> str:
-    return (
-        "# Data directory\n\n"
-        "This directory holds project data. Document the following:\n\n"
-        "- Expected contents and file formats.\n"
-        "- How to obtain raw data (large or restricted data should not be committed).\n"
-        "- Any preprocessing required before use.\n"
+    lines = [
+        "# Data directory\n\n",
+        "This directory holds project data or data pointers. Large, restricted, or\n",
+        "regenerable artifacts should usually stay outside git and be documented here.\n\n",
+    ]
+    children = _data_dir_children(ctx)
+    if children:
+        lines.extend(["## Current contents\n\n"])
+        lines.extend(f"- `{child}`\n" for child in children)
+        lines.append("\n")
+    lines.extend(
+        [
+            "## Document before release\n\n",
+            "- Expected files and formats.\n",
+            "- Source archive, DOI, or access procedure for raw data.\n",
+            "- Preprocessing commands and generated outputs.\n",
+            "- Checksums or version identifiers for externally stored artifacts.\n",
+        ]
     )
+    return "".join(lines)
 
 
 def _results_readme(ctx: FixContext) -> str:
