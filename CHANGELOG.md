@@ -10,6 +10,9 @@
   evidence-driven false-positive and false-negative review.
 - Added corpus review-stub generation so maintainers can scale manual
   false-positive and false-negative review without inflating reviewed counts.
+- Added a corpus regression gate for `expected_absent` rules, so reviewed
+  first-run trust cases such as nanoGPT can fail before release if known
+  false-positive or false-negative regressions return.
 - Updated PyPI publishing documentation to match the active Trusted Publishing
   workflow and current `rrdoctor` package release.
 - Polished public documentation, release notes, and project hygiene evidence.
