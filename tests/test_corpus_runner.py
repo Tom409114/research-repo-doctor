@@ -64,13 +64,19 @@ def test_markdown_summary_mentions_manual_review() -> None:
                 "findings_by_rule": {"RRD030": 1, "RRD050": 2},
                 "findings_by_severity": {"warning": 3},
                 "expected_absent_violations": [],
+                "manual_review": {
+                    "false_positives": [{"rule_id": "RRD030", "evidence": "fixture"}],
+                    "false_negatives": [],
+                },
             }
         ]
     )
 
     assert "Aggregate Overview" in rendered
+    assert "Manually reviewed: 1" in rendered
     assert "Functional" in rendered
     assert "RRD050" in rendered
+    assert "False positive" in rendered
     assert "Review this table manually" in rendered
 
 
@@ -89,6 +95,10 @@ def test_aggregate_summaries_counts_rules_and_violations() -> None:
                 "findings_by_rule": {"RRD030": 1, "RRD050": 2},
                 "findings_by_severity": {"error": 1, "warning": 2},
                 "expected_absent_violations": ["RRD050"],
+                "manual_review": {
+                    "false_positives": [{"rule_id": "RRD030", "evidence": "fixture"}],
+                    "false_negatives": [{"rule_id": "RRD052", "evidence": "fixture"}],
+                },
             },
             {
                 "name": "two",
@@ -105,13 +115,49 @@ def test_aggregate_summaries_counts_rules_and_violations() -> None:
     assert aggregate["scanned_repositories"] == 1
     assert aggregate["error_repositories"] == 1
     assert aggregate["average_score"] == 64.0
+    assert aggregate["reviewed_repositories"] == 1
     assert aggregate["readiness"] == {"Functional": 1}
     assert aggregate["rules"]["RRD050"] == 2
     assert aggregate["severities"] == {"error": 1, "warning": 2}
+    assert aggregate["false_positive_rules"] == {"RRD030": 1}
+    assert aggregate["false_negative_rules"] == {"RRD052": 1}
     assert aggregate["expected_absent_violations"] == [
         {
             "name": "one",
             "url": "https://example.invalid/one",
             "violations": ["RRD050"],
         }
+    ]
+
+
+def test_review_notes_are_loaded_and_attached(tmp_path) -> None:
+    runner = _load_runner()
+    review_dir = tmp_path / "reviews"
+    review_dir.mkdir()
+    (review_dir / "demo.yml").write_text(
+        "version: 1\n"
+        "repository: demo\n"
+        "status: reviewed\n"
+        "false_positives:\n"
+        "  - rule_id: RRD030\n"
+        "    evidence: dependency manifest is documented elsewhere\n"
+        "confirmed_absent:\n"
+        "  - RRD050\n",
+        encoding="utf-8",
+    )
+
+    reviews = runner.load_review_notes(review_dir)
+    summaries = runner.attach_review_notes(
+        [{"name": "demo", "status": "scanned"}],
+        reviews,
+    )
+
+    assert summaries[0]["manual_review"]["false_positives"] == [
+        {
+            "rule_id": "RRD030",
+            "evidence": "dependency manifest is documented elsewhere",
+        }
+    ]
+    assert summaries[0]["manual_review"]["confirmed_absent"] == [
+        {"rule_id": "RRD050", "evidence": ""}
     ]
