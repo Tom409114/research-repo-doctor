@@ -39,6 +39,8 @@
   version evidence without requiring network access.
 - Made `RRD101` informational in standard/ML scans while keeping it a warning in
   strict and submission profiles.
+- Improved `RRD020` citation detection so README Citing sections, "please cite"
+  text, BibTeX entries, DOI fields, and DOI links count as citation guidance.
 
 ## v0.2.3 - 2026-06-30
 
