@@ -41,8 +41,7 @@ For each repository:
 
 ## Expansion Target
 
-The seed corpus is intentionally small. Before using it for a data post, expand
-it to 50-100 recent or high-impact repositories across:
+The seed corpus now starts at 50+ recent or high-impact repositories across:
 
 - ML paper code releases.
 - Computational biology workflows.
@@ -52,4 +51,6 @@ it to 50-100 recent or high-impact repositories across:
 
 The goal is not to prove rrdoctor is perfect. The goal is to make false
 positives and false negatives visible enough that rule changes become
-evidence-driven.
+evidence-driven. Keep expanding toward 100 repositories before publishing an
+aggregate data post, and record manual review notes separately from the manifest
+so the public corpus remains a compact list of URLs and review focus areas.
