@@ -9,6 +9,7 @@ Start with the quickstart, then read the checks and configuration reference.
 - [Auto-fix](autofix.md)
 - [Agent workflows](agent-workflows.md)
 - [Configuration](configuration.md)
+- [Pre-commit hook](pre-commit.md)
 - [GitHub Action](github-action.md)
 - [Pull request automation](pull-request-automation.md)
 - [Report formats](report-format.md)
