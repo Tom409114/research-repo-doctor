@@ -334,6 +334,17 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
 [10.5281/zenodo.21045373](https://doi.org/10.5281/zenodo.21045373).
 
+```bibtex
+@software{research_repo_doctor_2026,
+  title = {Research Repo Doctor},
+  author = {{Research Repo Doctor Maintainers}},
+  version = {0.2.3},
+  year = {2026},
+  doi = {10.5281/zenodo.21045373},
+  url = {https://github.com/Tom409114/research-repo-doctor}
+}
+```
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
