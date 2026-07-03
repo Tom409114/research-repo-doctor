@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 
 from rrdoctor.cli import app
 from rrdoctor.config import DEFAULT_CONFIG
-from rrdoctor.fixers import FixContext, apply_fix, fixable_rule_ids
+from rrdoctor.fixers import FixContext, apply_fix, fixable_rule_ids, infer_fix_context
 from rrdoctor.scanner import Scanner
 
 runner = CliRunner()
@@ -33,6 +33,28 @@ def test_license_uses_author_and_year(tmp_path) -> None:
     text = (tmp_path / "LICENSE").read_text(encoding="utf-8")
     assert "Demo Author" in text
     assert "2026" in text
+
+
+def test_citation_fix_uses_pyproject_metadata(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        'name = "paper-demo"\n'
+        'version = "1.2.3"\n'
+        'authors = [{ name = "Example Lab" }]\n'
+        "\n"
+        "[project.urls]\n"
+        'Repository = "https://github.com/example/paper-demo"\n',
+        encoding="utf-8",
+    )
+
+    apply_fix("RRD020", infer_fix_context(tmp_path, year=2026))
+
+    text = (tmp_path / "CITATION.cff").read_text(encoding="utf-8")
+    assert 'title: "paper-demo"' in text
+    assert 'name: "Example Lab"' in text
+    assert 'version: "1.2.3"' in text
+    assert 'repository-code: "https://github.com/example/paper-demo"' in text
+    assert "The Authors" not in text
 
 
 def test_gitignore_created_then_appended(tmp_path) -> None:

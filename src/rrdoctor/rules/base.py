@@ -7,12 +7,51 @@ from pathlib import Path
 
 from rrdoctor.models import Category, Evidence, Finding, RuleDefinition, ScanContext, Severity
 
-SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
-    re.compile(r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"]?([A-Za-z0-9_\-]{16,})"),
+GENERIC_SECRET_ASSIGNMENT_RE = re.compile(
+    r"(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*['\"]?([A-Za-z0-9_\-+/=]{16,})"
+)
+PROVIDER_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"sk-[A-Za-z0-9]{20,}"),
     re.compile(r"ghp_[A-Za-z0-9]{20,}"),
     re.compile(r"AKIA[0-9A-Z]{16}"),
 )
+SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
+    GENERIC_SECRET_ASSIGNMENT_RE,
+    *PROVIDER_SECRET_PATTERNS,
+)
+
+
+def _looks_like_random_secret(value: str) -> bool:
+    stripped = value.strip("'\"` ,;)]}")
+    if len(stripped) < 20:
+        return False
+    classes = sum(
+        (
+            any(char.islower() for char in stripped),
+            any(char.isupper() for char in stripped),
+            any(char.isdigit() for char in stripped),
+            any(char in "_-+/=" for char in stripped),
+        )
+    )
+    return classes >= 2 and len(set(stripped)) >= 8
+
+
+def iter_secret_matches(value: str) -> list[re.Match[str]]:
+    """Return high-confidence secret-like matches in a text fragment."""
+
+    matches: list[re.Match[str]] = []
+    for pattern in PROVIDER_SECRET_PATTERNS:
+        matches.extend(pattern.finditer(value))
+    for match in GENERIC_SECRET_ASSIGNMENT_RE.finditer(value):
+        if _looks_like_random_secret(match.group(2)):
+            matches.append(match)
+    return matches
+
+
+def has_secret_like_value(value: str) -> bool:
+    """Return true when text contains a high-confidence secret-like value."""
+
+    return bool(iter_secret_matches(value))
 
 
 def mask_secret(value: str) -> str:
@@ -84,6 +123,7 @@ class Rule:
         recommendation: str | None = None,
         file: str | None = None,
         line: int | None = None,
+        severity: Severity | None = None,
     ) -> Finding:
         """Create a finding using rule metadata."""
 
@@ -92,7 +132,7 @@ class Rule:
             rule_id=self.definition.id,
             title=self.definition.name,
             category=self.definition.category,
-            severity=self.severity(context),
+            severity=severity or self.severity(context),
             message=message,
             evidence=evidence or [],
             recommendation=recommendation or self.definition.remediation,

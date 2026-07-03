@@ -16,6 +16,20 @@ def test_environment_detection_missing() -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD030"}).scan("tests/fixtures/missing-basics-repo")
 
     assert report.findings[0].rule_id == "RRD030"
+    assert report.findings[0].severity.value == "error"
+
+
+def test_readme_install_command_downgrades_missing_manifest(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nInstall dependencies with `pip install torch numpy tqdm`.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+    assert report.findings[0].rule_id == "RRD030"
+    assert report.findings[0].severity.value == "warning"
 
 
 def test_r_description_satisfies_manifest_and_version_hint(tmp_path) -> None:
@@ -47,6 +61,22 @@ def test_undeclared_import_alias_resolves(tmp_path) -> None:
     # cv2 is provided by the opencv-python distribution.
     (tmp_path / "requirements.txt").write_text("opencv-python\n", encoding="utf-8")
     (tmp_path / "main.py").write_text("import cv2\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_undeclared_import_reads_optional_dependencies(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        'dependencies = ["rich"]\n'
+        "\n"
+        "[project.optional-dependencies]\n"
+        'dev = ["pytest>=8"]\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "test_demo.py").write_text("import pytest\n", encoding="utf-8")
 
     report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
 

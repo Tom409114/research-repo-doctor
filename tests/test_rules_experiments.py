@@ -6,6 +6,35 @@ from rrdoctor.config import DEFAULT_CONFIG
 from rrdoctor.scanner import Scanner
 
 
+def test_root_train_py_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "train.py").write_text("print('train')\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_readme_train_command_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nRun `python train.py config/default.py` to reproduce the main run.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_workflow_files_count_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "Snakefile").write_text(
+        "rule all:\n    input: 'results/out.txt'\n", encoding="utf-8"
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_unseeded_numpy_randomness_flagged(tmp_path) -> None:
     (tmp_path / "train.py").write_text(
         "import numpy as np\n\ndef train():\n    return np.random.randn(10)\n",

@@ -9,7 +9,7 @@ from typing import Any
 import nbformat
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
-from rrdoctor.rules.base import Rule, definition, mask_secret
+from rrdoctor.rules.base import Rule, definition, has_secret_like_value, mask_secret
 from rrdoctor.rules.paths import ABSOLUTE_PATH_RE, find_files
 
 
@@ -162,8 +162,8 @@ class NotebookSecretOutputRule(Rule):
             for cell_index, cell in enumerate(nb.cells, start=1):
                 for output in cell.get("outputs", []):
                     text = json.dumps(output, default=str)
-                    masked = mask_secret(text)
-                    if masked != text:
+                    if has_secret_like_value(text):
+                        masked = mask_secret(text)
                         rel = context.rel(path)
                         return [
                             self.finding(

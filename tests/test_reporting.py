@@ -14,6 +14,8 @@ def test_markdown_report_generation() -> None:
     rendered = render_markdown(report)
 
     assert "# Research Repo Doctor Report" in rendered
+    assert "- Repository: `missing-basics-repo`" in rendered
+    assert "tests/fixtures/missing-basics-repo" not in rendered
     assert "How to fix first" in rendered
     assert "Suggested GitHub issues" in rendered
 
