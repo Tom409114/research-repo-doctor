@@ -4,6 +4,22 @@
 
 - Nothing yet.
 
+## v0.2.6 - 2026-07-04
+
+- Reduced `RRD090` security false positives on R/pkgdown repositories by
+  ignoring Rcpp `Generator token` provenance markers and public pkgdown
+  `docsearch.api_key` search configuration while keeping generic API key
+  detection active.
+- Added a GitHub archive fallback to the evaluation corpus runner so static
+  corpus scans can continue when `git clone` transport is unavailable or flaky.
+- Expanded focused corpus review notes from 4 to 17 repositories, covering
+  Snakemake/Nextflow entrypoint regression cases and R/Rcpp secret-heuristic
+  false positives.
+- Refreshed the public corpus snapshot: 60 listed repositories, 60 successful
+  static scans, 0 expected-absent regressions, and 17 focused manual reviews.
+- Added tests for package version consistency across `pyproject.toml`,
+  `rrdoctor.__version__`, `CITATION.cff`, and demo dependencies.
+
 ## v0.2.5 - 2026-07-04
 
 - Improved `RRD050` first-run trust on real ML/research repositories by

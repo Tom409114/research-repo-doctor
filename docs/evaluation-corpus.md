@@ -15,8 +15,9 @@ repository.
 python scripts/scan_corpus.py --limit 1
 ```
 
-This shallow-clones the first corpus repository into a temporary directory, runs
-the static rrdoctor scanner, and writes:
+This shallow-clones the first corpus repository into a temporary directory, falls
+back to a GitHub archive download if clone transport fails, runs the static
+rrdoctor scanner, and writes:
 
 - `evaluation/reports/corpus-scan.json`
 - `evaluation/reports/corpus-aggregate.json`
@@ -64,11 +65,11 @@ python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --fail-on-ex
 ```
 
 - Repositories listed: 60
-- Scanned successfully: 51
-- Clone or scan errors: 9
+- Scanned successfully: 60
+- Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Manually reviewed repositories: 4 focused reviews
-- Average score across scanned repositories: 56.9
+- Manually reviewed repositories: 17 focused reviews
+- Average score across scanned repositories: 57.9
 
 Readiness distribution:
 
@@ -82,22 +83,28 @@ Top actionable rule frequencies:
 
 | Rule | Error/warning findings |
 | --- | ---: |
+| RRD040 | 41 |
+| RRD002 | 39 |
 | RRD071 | 38 |
-| RRD040 | 34 |
-| RRD002 | 33 |
-| RRD004 | 30 |
-| RRD003 | 25 |
+| RRD004 | 37 |
+| RRD003 | 34 |
+| RRD043 | 28 |
+| RRD091 | 28 |
 | RRD070 | 25 |
-| RRD091 | 25 |
+| RRD034 | 24 |
 | RRD030 | 23 |
-| RRD081 | 22 |
-| RRD043 | 21 |
 
 This snapshot is calibration evidence, not a benchmark or ranking of the scanned
-projects. The clone/scan errors came from local checkout constraints such as
-Windows path length limits or transient GitHub connectivity. The scanner still
-does not install dependencies, import target modules, build target projects, or
-execute target repository code.
+projects. The scanner does not install dependencies, import target modules,
+build target projects, or execute target repository code. It uses a GitHub
+archive fallback only as a static transport mechanism when `git clone` is
+unavailable or flaky.
+
+Manual review flags captured in this snapshot:
+
+| Type | Rule | Count |
+| --- | --- | ---: |
+| False positive | RRD090 | 4 |
 
 ## Manual Review
 

@@ -41,7 +41,10 @@ class PotentialSecretRule(Rule):
             if path.suffix.lower() in {".cff"}:
                 continue
             text = read_text(path)
-            for line_number, line in enumerate(text.splitlines(), start=1):
+            lines = text.splitlines()
+            for line_number, line in enumerate(lines, start=1):
+                if _is_public_docsearch_key(lines, line_number - 1):
+                    continue
                 if has_secret_like_value(line):
                     rel = context.rel(path)
                     return [
@@ -61,6 +64,16 @@ class PotentialSecretRule(Rule):
                         )
                     ]
         return []
+
+
+def _is_public_docsearch_key(lines: list[str], index: int) -> bool:
+    line = lines[index].lower()
+    if "api_key" not in line:
+        return False
+    context_start = max(0, index - 5)
+    context_end = min(len(lines), index + 4)
+    context = "\n".join(lines[context_start:context_end]).lower()
+    return "docsearch:" in context and "index_name" in context
 
 
 class GitignoreResearchArtifactsRule(Rule):

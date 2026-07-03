@@ -1,0 +1,14 @@
+version: 1
+repository: nf-core-chipseq
+status: reviewed
+reviewed_at: 2026-07-04
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Focused review confirmed main.nf is recognized as a Nextflow workflow entrypoint.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused regression review for Nextflow entrypoint detection in nf-core
+  workflow repositories.
+

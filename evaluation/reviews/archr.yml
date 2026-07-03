@@ -1,0 +1,14 @@
+version: 1
+repository: archr
+status: reviewed
+reviewed_at: 2026-07-04
+reviewer: Research Repo Doctor maintainers
+confirmed_absent: []
+false_positives:
+  - rule_id: RRD090
+    evidence: R/RcppExports.R contains an Rcpp-generated '# Generator token:' provenance marker, not a committed credential.
+false_negatives: []
+notes: >
+  Focused secret-heuristic review for Rcpp-generated R packages. Generator
+  tokens are build provenance markers and should not be reported as secrets.
+

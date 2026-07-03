@@ -1,0 +1,14 @@
+version: 1
+repository: snakemake-dna-seq-gatk
+status: reviewed
+reviewed_at: 2026-07-04
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Focused review confirmed workflow/Snakefile is recognized as a Snakemake reproduction entrypoint.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused regression review for workflow repositories. The repository exposes a
+  Snakemake entrypoint under workflow/Snakefile, so RRD050 should stay absent.
+

@@ -17,33 +17,39 @@ Latest local maintainer smoke run:
 - Date: 2026-07-04
 - Command: `python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --fail-on-expected-absent`
 - Corpus slice: all 60 public repositories currently listed in `evaluation/corpus.yml`
-- Scanned successfully: 51 of 60
-- Clone or scan errors: 9
-- Average score across scanned repositories: 56.9
+- Scanned successfully: 60 of 60
+- Clone or scan errors: 0
+- Average score across scanned repositories: 57.9
 - Expected-absent regressions: 0
-- Manually reviewed repositories: 4 focused reviews
+- Manually reviewed repositories: 17 focused reviews
 
 Top actionable rule frequencies in that snapshot:
 
 | Rule | Error/warning findings |
 | --- | ---: |
+| RRD040 | 41 |
+| RRD002 | 39 |
 | RRD071 | 38 |
-| RRD040 | 34 |
-| RRD002 | 33 |
-| RRD004 | 30 |
-| RRD003 | 25 |
+| RRD004 | 37 |
+| RRD003 | 34 |
+| RRD043 | 28 |
+| RRD091 | 28 |
 | RRD070 | 25 |
-| RRD091 | 25 |
+| RRD034 | 24 |
 | RRD030 | 23 |
-| RRD081 | 22 |
-| RRD043 | 21 |
 
 This is not a benchmark and should not be read as a ranking of projects. The
 snapshot is a maintainer calibration tool: high-frequency rules are candidates
 for manual review, better evidence collection, or more conservative heuristics.
-The clone/scan errors in this snapshot came from local checkout constraints
-such as Windows path length limits or transient GitHub connectivity, not from
-executing target repositories.
+The runner shallow-clones each repository and falls back to a GitHub archive
+download when clone transport fails; both paths are static and never execute
+target repository code.
+
+Manual review flags captured in this snapshot:
+
+| Type | Rule | Count |
+| --- | --- | ---: |
+| False positive | RRD090 | 4 |
 
 ## Reproduce The Smoke Scan
 
@@ -60,5 +66,7 @@ python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --fail-on-ex
 ```
 
 The generated reports are written under `evaluation/reports/`, which is ignored
-by git. Before publishing aggregate results, manually review the findings for
-false positives and false negatives. Do not rank or shame individual maintainers.
+by git. The runner shallow-clones each repository and falls back to GitHub
+archives when clone transport fails. Before publishing aggregate results,
+manually review the findings for false positives and false negatives. Do not
+rank or shame individual maintainers.

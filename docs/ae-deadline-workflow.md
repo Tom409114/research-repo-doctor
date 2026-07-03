@@ -132,7 +132,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.5
+      - uses: Tom409114/research-repo-doctor@v0.2.6
         with:
           profile: acm
           fail-on: none

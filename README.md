@@ -130,6 +130,18 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.6
+
+- **Lower-noise secret checks**: Rcpp `Generator token` markers and public
+  pkgdown `docsearch.api_key` search configuration no longer trigger `RRD090`,
+  while generic credential-like API keys still do.
+- **More reliable corpus scans**: the evaluation runner now falls back to
+  GitHub archive downloads when `git clone` transport is flaky, without
+  installing or executing target repositories.
+- **More manual calibration evidence**: the public corpus snapshot now covers
+  60/60 successful static scans, 17 focused manual reviews, and 0
+  expected-absent regressions.
+
 ## What's new in 0.2.5
 
 - **Model-release entrypoints**: README-documented `python scripts/*.py` /
@@ -249,7 +261,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.5
+      - uses: Tom409114/research-repo-doctor@v0.2.6
         with:
           profile: standard
           fail-on: none
@@ -356,7 +368,7 @@ Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.5},
+  version = {0.2.6},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

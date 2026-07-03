@@ -43,9 +43,19 @@ def iter_secret_matches(value: str) -> list[re.Match[str]]:
     for pattern in PROVIDER_SECRET_PATTERNS:
         matches.extend(pattern.finditer(value))
     for match in GENERIC_SECRET_ASSIGNMENT_RE.finditer(value):
+        if _is_generated_token_marker(value, match):
+            continue
         if _looks_like_random_secret(match.group(2)):
             matches.append(match)
     return matches
+
+
+def _is_generated_token_marker(value: str, match: re.Match[str]) -> bool:
+    """Avoid treating generator provenance markers as credentials."""
+
+    prefix = value[: match.start()].strip().lower()
+    key = match.group(1).lower()
+    return key == "token" and prefix.endswith("generator")
 
 
 def has_secret_like_value(value: str) -> bool:

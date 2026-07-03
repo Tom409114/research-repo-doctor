@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.5
+      - uses: Tom409114/research-repo-doctor@v0.2.6
         with:
           profile: standard
           fail-on: warning
@@ -84,7 +84,7 @@ Set `appendix: "true"` to generate `ARTIFACT_APPENDIX.md` with an ACM-style
 artifact appendix and ACM/NeurIPS checklist mapping:
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.5
+      - uses: Tom409114/research-repo-doctor@v0.2.6
         with:
           profile: acm
           fail-on: none
@@ -101,7 +101,7 @@ hardware, runtime, data access, and expected-results details before submission.
 Set `verify: "true"` to emit a static L1/L2/L3 verification report:
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.5
+      - uses: Tom409114/research-repo-doctor@v0.2.6
         with:
           profile: acm
           fail-on: none
@@ -113,7 +113,7 @@ trust, add `verify-run: "true"` to resolve dependencies and execute the detected
 entrypoint under `verify-timeout`:
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.5
+      - uses: Tom409114/research-repo-doctor@v0.2.6
         with:
           profile: acm
           fail-on: none

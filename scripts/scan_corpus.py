@@ -1,13 +1,15 @@
 """Scan a public research-repository corpus with rrdoctor.
 
-The runner shallow-clones public repositories, runs rrdoctor's static scanner,
-and writes aggregate JSON/Markdown summaries for maintainer review. It never
-installs dependencies or executes code from target repositories.
+The runner shallow-clones public repositories, falls back to GitHub archives
+when clone transport fails, runs rrdoctor's static scanner, and writes aggregate
+JSON/Markdown summaries for maintainer review. It never installs dependencies
+or executes code from target repositories.
 """
 
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import os
 import re
@@ -15,8 +17,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.parse
+import urllib.request
+import zipfile
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import yaml
@@ -149,7 +155,7 @@ def _directory_size_bytes(root: Path) -> int:
 
 
 def clone_repo(entry: CorpusEntry, root: Path, timeout: int, max_bytes: int) -> Path:
-    """Shallow-clone a public repository for static scanning."""
+    """Shallow-clone a public repository, with a GitHub archive fallback."""
 
     destination = root / entry.name
     if destination.exists():
@@ -177,7 +183,14 @@ def clone_repo(entry: CorpusEntry, root: Path, timeout: int, max_bytes: int) -> 
         raise RuntimeError(f"git clone timed out after {timeout} seconds") from exc
     if completed.returncode != 0:
         detail = (completed.stderr or completed.stdout).strip()
-        raise RuntimeError(_sanitize_error_message(detail[:500] or "git clone failed"))
+        return _download_github_archive(
+            entry,
+            root,
+            destination,
+            timeout,
+            max_bytes,
+            detail[:500] or "git clone failed",
+        )
 
     size = _directory_size_bytes(destination)
     if size > max_bytes:
@@ -185,6 +198,89 @@ def clone_repo(entry: CorpusEntry, root: Path, timeout: int, max_bytes: int) -> 
         limit_mb = max_bytes // (1024 * 1024)
         raise RuntimeError(f"clone exceeds {limit_mb} MB size limit")
     return destination
+
+
+def _github_archive_url(repo_url: str) -> str | None:
+    parsed = urllib.parse.urlparse(repo_url)
+    if parsed.scheme not in {"http", "https"} or parsed.netloc.lower() != "github.com":
+        return None
+    parts = [part for part in parsed.path.strip("/").split("/") if part]
+    if len(parts) < 2:
+        return None
+    owner = parts[0]
+    repo = parts[1].removesuffix(".git")
+    if not owner or not repo:
+        return None
+    return f"https://api.github.com/repos/{owner}/{repo}/zipball"
+
+
+def _download_github_archive(
+    entry: CorpusEntry,
+    root: Path,
+    destination: Path,
+    timeout: int,
+    max_bytes: int,
+    clone_error: str,
+) -> Path:
+    archive_url = _github_archive_url(entry.url)
+    if archive_url is None:
+        raise RuntimeError(_sanitize_error_message(clone_error))
+
+    archive_dir = root / f"{entry.name}-archive"
+    shutil.rmtree(destination, ignore_errors=True)
+    shutil.rmtree(archive_dir, ignore_errors=True)
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    request = urllib.request.Request(
+        archive_url,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "rrdoctor-corpus-runner",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            payload = response.read(max_bytes + 1)
+    except (OSError, urllib.error.URLError) as exc:
+        detail = f"{clone_error}; GitHub archive fallback failed: {exc}"
+        raise RuntimeError(_sanitize_error_message(detail[:700])) from exc
+
+    if len(payload) > max_bytes:
+        limit_mb = max_bytes // (1024 * 1024)
+        raise RuntimeError(f"GitHub archive exceeds {limit_mb} MB size limit")
+
+    try:
+        _extract_github_archive(payload, destination)
+    finally:
+        shutil.rmtree(archive_dir, ignore_errors=True)
+
+    size = _directory_size_bytes(destination)
+    if size > max_bytes:
+        shutil.rmtree(destination, ignore_errors=True)
+        limit_mb = max_bytes // (1024 * 1024)
+        raise RuntimeError(f"GitHub archive extraction exceeds {limit_mb} MB size limit")
+    return destination
+
+
+def _extract_github_archive(payload: bytes, destination: Path) -> None:
+    destination.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+        for member in archive.infolist():
+            if member.is_dir():
+                continue
+            if "\\" in member.filename:
+                raise RuntimeError("GitHub archive contains an unsafe path")
+            parts = PurePosixPath(member.filename).parts
+            if (
+                len(parts) < 2
+                or parts[0].startswith("/")
+                or any(part in {"", ".", ".."} for part in parts)
+            ):
+                raise RuntimeError("GitHub archive contains an unsafe path")
+            rel = Path(*parts[1:])
+            target = destination / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with archive.open(member) as source, target.open("wb") as output:
+                shutil.copyfileobj(source, output)
 
 
 def _sanitize_error_message(message: str) -> str:

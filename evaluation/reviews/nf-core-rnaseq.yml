@@ -1,0 +1,14 @@
+version: 1
+repository: nf-core-rnaseq
+status: reviewed
+reviewed_at: 2026-07-04
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Focused review confirmed main.nf and nextflow.config are recognized as Nextflow workflow entrypoints.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused regression review for Nextflow workflow repositories. nf-core/rnaseq
+  should not be treated as missing an experiment or reproduction entrypoint.
+

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from rrdoctor.config import DEFAULT_CONFIG
+from rrdoctor.rules.base import has_secret_like_value
 from rrdoctor.scanner import Scanner
 
 
@@ -11,6 +12,36 @@ def test_secret_masking() -> None:
     evidence = report.findings[0].evidence[0].value or ""
     assert "..." in evidence
     assert "abcdefghijklmnopqrstuvwxyz" not in evidence
+
+
+def test_generator_token_marker_is_not_a_secret() -> None:
+    assert not has_secret_like_value("# Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393")
+    fake_secret = "abcdefghijklmnopqrstuvwxyz" + "123456"
+    assert has_secret_like_value("token = " + fake_secret)
+
+
+def test_pkgdown_docsearch_key_is_not_a_secret(tmp_path) -> None:
+    public_search_key = "ead918d7fe8467a2" + "fd38e97f5bbe3ecb"
+    (tmp_path / "_pkgdown.yaml").write_text(
+        f"template:\n  docsearch:\n    api_key: {public_search_key}\n    index_name: seurat\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD090"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_generic_api_key_still_flags(tmp_path) -> None:
+    fake_secret = "ead918d7fe8467a2" + "fd38e97f5bbe3ecb"
+    (tmp_path / "config.yml").write_text(
+        f"api_key: {fake_secret}\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD090"}).scan(tmp_path)
+
+    assert report.findings
 
 
 def test_gitignore_rule() -> None:

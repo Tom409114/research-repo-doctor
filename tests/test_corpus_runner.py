@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import sys
+import zipfile
 from pathlib import Path
 
 from rrdoctor.config import DEFAULT_CONFIG
@@ -65,6 +67,44 @@ def test_error_summary_sanitizes_local_paths() -> None:
     summary = runner.error_summary(entry, f"Command cloned into {windows_path}")
 
     assert summary["error"] == "Command cloned into <local-path>"
+
+
+def test_github_archive_url_accepts_github_repos() -> None:
+    runner = _load_runner()
+
+    assert (
+        runner._github_archive_url("https://github.com/example/project.git")
+        == "https://api.github.com/repos/example/project/zipball"
+    )
+    assert runner._github_archive_url("https://example.invalid/project.git") is None
+
+
+def test_extract_github_archive_strips_top_level_directory(tmp_path) -> None:
+    runner = _load_runner()
+    payload = io.BytesIO()
+    with zipfile.ZipFile(payload, "w") as archive:
+        archive.writestr("owner-repo-sha/README.md", "hello")
+        archive.writestr("owner-repo-sha/src/module.py", "print('static only')\n")
+
+    destination = tmp_path / "repo"
+    runner._extract_github_archive(payload.getvalue(), destination)
+
+    assert (destination / "README.md").read_text(encoding="utf-8") == "hello"
+    assert (destination / "src" / "module.py").exists()
+
+
+def test_extract_github_archive_rejects_unsafe_paths(tmp_path) -> None:
+    runner = _load_runner()
+    payload = io.BytesIO()
+    with zipfile.ZipFile(payload, "w") as archive:
+        archive.writestr("owner-repo-sha/../evil.txt", "nope")
+
+    try:
+        runner._extract_github_archive(payload.getvalue(), tmp_path / "repo")
+    except RuntimeError as exc:
+        assert "unsafe path" in str(exc)
+    else:  # pragma: no cover - defensive clarity for the assertion above
+        raise AssertionError("unsafe archive path was accepted")
 
 
 def test_markdown_summary_mentions_manual_review() -> None:
