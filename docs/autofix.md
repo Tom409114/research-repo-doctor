@@ -28,8 +28,14 @@ top-level data directories, likely data download or preprocessing scripts, and
 README data/access mentions. rrdoctor does not infer the actual dataset license
 or access terms; it gives maintainers a better starting point to verify.
 
-Re-run the scan to confirm the score improved, then review the diff before
-committing. Because fixers are idempotent, running them again is safe.
+When unseeded randomness is detected, rrdoctor can scaffold a small
+`set_global_seed(seed: int)` helper. It does not edit your training script; the
+generated file includes a TODO showing where to import and call the helper.
+
+Review the diff before committing, then re-run the scan after wiring any starter
+code into the project. Some scaffolds, such as the seed helper, are intentionally
+only starting points and clear the finding only after you import and call them.
+Because fixers are idempotent, running them again is safe.
 
 ## What can be auto-fixed
 
@@ -43,6 +49,7 @@ committing. Because fixers are idempotent, running them again is safe.
 | RRD020 | `CITATION.cff` |
 | RRD040 | `DATA.md` |
 | RRD041 | `data/README.md` (only when `data/` exists) |
+| RRD052 | `src/<package>/_repro_seed.py` or `repro_seed.py` |
 | RRD053 | `results/README.md` (only when `results/` exists) |
 | RRD091 | `.gitignore` (creates or appends research artifacts) |
 | RRD100 | `CHANGELOG.md` |

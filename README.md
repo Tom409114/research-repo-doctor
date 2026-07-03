@@ -76,8 +76,8 @@ rrdoctor fix . --write
 ```
 
 It can scaffold missing governance docs, citation metadata, data/results provenance notes,
-changelog entries, and common research `.gitignore` entries. The hard parts become a
-reviewable plan:
+a reproducible-seed helper, changelog entries, and common research `.gitignore` entries.
+The hard parts become a reviewable plan:
 
 ```bash
 rrdoctor plan . --output plan.md
@@ -148,7 +148,8 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
 ## What's new in 0.2.0
 
 - **`rrdoctor fix`** provides deterministic, idempotent auto-fix for common gaps (governance
-  docs, citation metadata, data/results provenance, changelog, ignore entries). Never overwrites.
+  docs, citation metadata, data/results provenance, seed helper scaffolding, changelog, ignore
+  entries). Never overwrites.
 - **`rrdoctor plan`** emits a tool-agnostic fix plan you can hand to any coding agent; every
   task names the deterministic check that verifies it.
 - **Baseline gating**: `rrdoctor scan --baseline report.json --fail-on-new error` fails only
@@ -205,7 +206,8 @@ definition of done. Research Repo Doctor gives you both:
 
 1. **Audit**: `rrdoctor scan` produces deterministic findings.
 2. **Fix the easy ones**: `rrdoctor fix --write` scaffolds governance docs, citation metadata,
-   provenance notes, a changelog, and ignore entries (idempotent, never overwriting).
+   provenance notes, a seed helper, a changelog, and ignore entries (idempotent, never
+   overwriting).
 3. **Plan the rest**: `rrdoctor plan` emits a tool-agnostic work order. Paste it into the
    coding agent of your choice, attach it to an issue, or work it by hand.
 4. **Verify**: re-run the audit against a baseline. Because verification is deterministic

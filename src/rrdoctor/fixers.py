@@ -94,16 +94,16 @@ def _read_pyproject_metadata(root: Path) -> dict[str, str]:
     text = read_text(pyproject)
     metadata: dict[str, str] = {}
     for key in ("name", "version"):
-        match = re.search(rf"(?m)^{key}\s*=\s*\"([^\"]+)\"", text)
+        match = re.search(rf"(?m)^{key}\s*=\s*['\"]([^'\"]+)['\"]", text)
         if match:
             metadata[key] = match.group(1)
-    author = re.search(r"(?s)authors\s*=\s*\[\s*\{\s*name\s*=\s*\"([^\"]+)\"", text)
+    author = re.search(r"(?s)authors\s*=\s*\[\s*\{\s*name\s*=\s*['\"]([^'\"]+)['\"]", text)
     if author:
         metadata["author"] = author.group(1)
     urls = re.search(r"(?ms)^\[project\.urls\](.*?)(?:^\[|\Z)", text)
     if urls:
         for key in ("Repository", "Homepage"):
-            match = re.search(rf"(?m)^{key}\s*=\s*\"([^\"]+)\"", urls.group(1))
+            match = re.search(rf"(?m)^{key}\s*=\s*['\"]([^'\"]+)['\"]", urls.group(1))
             if match:
                 metadata["repository_url"] = match.group(1)
                 break
@@ -383,6 +383,55 @@ def _results_readme(ctx: FixContext) -> str:
     )
 
 
+def _seed_helper(ctx: FixContext) -> str:
+    return (
+        '"""Deterministic seed helper scaffolded by rrdoctor.\n'
+        "\n"
+        "TODO: Import and call set_global_seed(seed) at the start of your CLI,\n"
+        "training, evaluation, or notebook entrypoint before creating datasets,\n"
+        "models, data loaders, train/test splits, or any random samples.\n"
+        '"""\n'
+        "\n"
+        "from __future__ import annotations\n"
+        "\n"
+        "import os\n"
+        "import random\n"
+        "\n"
+        "\n"
+        "def set_global_seed(seed: int) -> None:\n"
+        '    """Seed common Python and ML randomness sources."""\n'
+        "\n"
+        '    os.environ["PYTHONHASHSEED"] = str(seed)\n'
+        "    random.seed(seed)\n"
+        "\n"
+        "    try:\n"
+        "        import numpy as np\n"
+        "    except ImportError:\n"
+        "        np = None\n"
+        "    if np is not None:\n"
+        "        np.random.seed(seed)\n"
+        "\n"
+        "    try:\n"
+        "        import torch\n"
+        "    except ImportError:\n"
+        "        torch = None\n"
+        "    if torch is not None:\n"
+        "        torch.manual_seed(seed)\n"
+        '        if hasattr(torch, "cuda"):\n'
+        "            torch.cuda.manual_seed_all(seed)\n"
+        '        if hasattr(torch, "backends") and hasattr(torch.backends, "cudnn"):\n'
+        "            torch.backends.cudnn.deterministic = True\n"
+        "            torch.backends.cudnn.benchmark = False\n"
+        "\n"
+        "    try:\n"
+        "        import tensorflow as tf\n"
+        "    except ImportError:\n"
+        "        tf = None\n"
+        "    if tf is not None:\n"
+        "        tf.random.set_seed(seed)\n"
+    )
+
+
 def _changelog(ctx: FixContext) -> str:
     today = datetime.now(timezone.utc).date().isoformat()
     return (
@@ -441,6 +490,53 @@ def _fix_results_readme(ctx: FixContext) -> FixResult:
     )
 
 
+def _fix_seed_helper(ctx: FixContext) -> FixResult:
+    rule_id = "RRD052"
+    path = _seed_helper_path(ctx)
+    rel = _rel_posix(path, ctx.root)
+    return _write_if_missing(path, _seed_helper(ctx), rule_id, rel)
+
+
+def _seed_helper_path(ctx: FixContext) -> Path:
+    package_dir = _preferred_python_package_dir(ctx)
+    if package_dir is not None:
+        return package_dir / "_repro_seed.py"
+    return ctx.root / "repro_seed.py"
+
+
+def _preferred_python_package_dir(ctx: FixContext) -> Path | None:
+    normalized = _normalize_package_name(ctx.project_name)
+    candidates: list[Path] = []
+    src = ctx.root / "src"
+    if src.exists() and src.is_dir():
+        exact = src / normalized
+        if _is_python_package_dir(exact):
+            return exact
+        candidates.extend(_package_dirs(src))
+    exact_root = ctx.root / normalized
+    if _is_python_package_dir(exact_root):
+        return exact_root
+    candidates.extend(_package_dirs(ctx.root))
+    return candidates[0] if len(candidates) == 1 else None
+
+
+def _normalize_package_name(name: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_]", "_", name).strip("_").lower()
+
+
+def _package_dirs(root: Path) -> list[Path]:
+    ignored = {".git", ".venv", "venv", "__pycache__", "tests", "docs", "examples"}
+    return sorted(
+        path
+        for path in root.iterdir()
+        if path.is_dir() and path.name not in ignored and _is_python_package_dir(path)
+    )
+
+
+def _is_python_package_dir(path: Path) -> bool:
+    return path.exists() and path.is_dir() and (path / "__init__.py").exists()
+
+
 def _simple_file(
     name: str, render: Callable[[FixContext], str], rule_id: str
 ) -> Callable[[FixContext], FixResult]:
@@ -461,6 +557,7 @@ FIXERS: dict[str, Callable[[FixContext], FixResult]] = {
     "RRD020": _simple_file("CITATION.cff", _citation, "RRD020"),
     "RRD040": _simple_file("DATA.md", _data_md, "RRD040"),
     "RRD041": _fix_data_dir_readme,
+    "RRD052": _fix_seed_helper,
     "RRD053": _fix_results_readme,
     "RRD091": _fix_gitignore,
     "RRD100": _simple_file("CHANGELOG.md", _changelog, "RRD100"),

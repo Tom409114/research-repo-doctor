@@ -40,9 +40,9 @@ rrdoctor fix . --write
 ```
 
 Fixes are deterministic and idempotent. They create starter files such as
-governance docs, citation metadata, data/results notes, changelog entries, and
-research-oriented ignore rules. They never overwrite existing files. Review any
-generated starter text before submission.
+governance docs, citation metadata, data/results notes, seed helpers, changelog
+entries, and research-oriented ignore rules. They never overwrite existing
+files. Review any generated starter text before submission.
 
 ## 3. Turn the Remaining Work into a Plan
 

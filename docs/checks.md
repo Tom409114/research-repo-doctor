@@ -28,7 +28,7 @@ covered by the agent fix plan (`rrdoctor plan`).
 | RRD043 | Potential local absolute data path detected | data | warning | standard, strict, ml |  |
 | RRD050 | No experiment entrypoint found | experiments | error | minimal, standard, strict, ml |  |
 | RRD051 | No configuration files found | experiments | warning | ml |  |
-| RRD052 | Unseeded randomness in Python code | reproducibility | warning | standard, strict, ml |  |
+| RRD052 | Unseeded randomness in Python code | reproducibility | warning | standard, strict, ml | yes |
 | RRD053 | Results provenance documentation missing | experiments | warning | standard, strict, ml | yes |
 | RRD054 | Hardcoded GPU/CUDA assumption without a documented requirement | reproducibility | warning | ml |  |
 | RRD060 | Notebook files detected with large outputs | notebooks | warning | standard, strict, ml |  |
