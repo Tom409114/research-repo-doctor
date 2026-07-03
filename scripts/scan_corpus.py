@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -309,6 +310,7 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
     rule_counts: dict[str, int] = {}
     expected_absent_violations: list[dict[str, Any]] = []
     reviewed_repositories = 0
+    pending_review_repositories = 0
     false_positive_counts: dict[str, int] = {}
     false_negative_counts: dict[str, int] = {}
     scores: list[int] = []
@@ -318,7 +320,10 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
         ecosystem_counts[ecosystem] = ecosystem_counts.get(ecosystem, 0) + 1
         review = item.get("manual_review", {})
         if isinstance(review, dict) and review:
-            reviewed_repositories += 1
+            if _review_is_complete(review):
+                reviewed_repositories += 1
+            else:
+                pending_review_repositories += 1
             for false_positive in review.get("false_positives", []):
                 rule_id = str(false_positive.get("rule_id", ""))
                 if rule_id:
@@ -365,6 +370,7 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
         "error_repositories": len(errors),
         "average_score": average_score,
         "reviewed_repositories": reviewed_repositories,
+        "pending_review_repositories": pending_review_repositories,
         "ecosystems": _sorted_counts(ecosystem_counts),
         "readiness": _sorted_counts(readiness_counts),
         "severities": _sorted_counts(severity_counts),
@@ -374,6 +380,11 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
         "false_negative_rules": _sorted_counts(false_negative_counts),
         "expected_absent_violations": expected_absent_violations,
     }
+
+
+def _review_is_complete(review: dict[str, Any]) -> bool:
+    status = str(review.get("status", "reviewed")).strip().lower()
+    return status in {"reviewed", "complete", "completed"}
 
 
 def _sorted_counts(counts: dict[str, int]) -> dict[str, int]:
@@ -399,6 +410,7 @@ def render_markdown(summaries: list[dict[str, Any]]) -> str:
         f"- Scanned successfully: {aggregate['scanned_repositories']}",
         f"- Clone or scan errors: {aggregate['error_repositories']}",
         f"- Manually reviewed: {aggregate['reviewed_repositories']}",
+        f"- Pending manual review: {aggregate['pending_review_repositories']}",
         f"- Average score: {average_score}",
         "",
         "### Readiness distribution",
@@ -500,12 +512,83 @@ def render_markdown(summaries: list[dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def write_review_stubs(summaries: list[dict[str, Any]], output_dir: Path) -> list[Path]:
+    """Write one YAML review stub per unreviewed scanned repository.
+
+    Stubs are intentionally marked ``needs-review`` so loading them does not
+    inflate the reviewed repository count. Existing files are never overwritten.
+    """
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    for item in summaries:
+        if item.get("status") != "scanned" or item.get("manual_review"):
+            continue
+        path = output_dir / f"{_slug(str(item.get('name', 'repository')))}.yml"
+        if path.exists():
+            continue
+        path.write_text(render_review_stub(item), encoding="utf-8")
+        written.append(path)
+    return written
+
+
+def render_review_stub(summary: dict[str, Any]) -> str:
+    """Render a YAML review-note starter from a scan summary."""
+
+    scan_summary = summary.get("summary", {})
+    readiness = summary.get("readiness", {})
+    payload = {
+        "version": 1,
+        "repository": str(summary.get("name", "")),
+        "status": "needs-review",
+        "reviewed_at": "",
+        "reviewer": "",
+        "scan": {
+            "readiness": readiness.get("level", "") if isinstance(readiness, dict) else "",
+            "score": summary.get("score"),
+            "errors": scan_summary.get("error", 0) if isinstance(scan_summary, dict) else 0,
+            "warnings": scan_summary.get("warning", 0) if isinstance(scan_summary, dict) else 0,
+        },
+        "review_focus": summary.get("review_focus", []),
+        "expected_absent": summary.get("expected_absent", []),
+        "candidate_findings": [
+            {
+                "rule_id": finding.get("rule_id", ""),
+                "severity": finding.get("severity", ""),
+                "title": finding.get("title", ""),
+                "file": finding.get("file", ""),
+                "message": finding.get("message", ""),
+            }
+            for finding in summary.get("top_findings", [])
+        ],
+        "confirmed_absent": [],
+        "false_positives": [],
+        "false_negatives": [],
+        "notes": (
+            "TODO: replace this stub with maintainer-reviewed evidence before using in "
+            "public aggregate claims."
+        ),
+    }
+    return yaml.safe_dump(payload, sort_keys=False, allow_unicode=True)
+
+
+def _slug(value: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", value.strip()).strip("-").lower()
+    return slug or "repository"
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--aggregate-output", type=Path, default=DEFAULT_AGGREGATE_OUTPUT)
     parser.add_argument("--markdown-output", type=Path, default=DEFAULT_MARKDOWN)
+    parser.add_argument(
+        "--review-stub-dir",
+        type=Path,
+        default=None,
+        help="Optional directory for generated needs-review YAML stubs.",
+    )
     parser.add_argument(
         "--review-notes",
         type=Path,
@@ -549,7 +632,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
     args.markdown_output.write_text(render_markdown(summaries), encoding="utf-8")
-    print(f"Wrote {args.output}, {args.aggregate_output}, and {args.markdown_output}")
+    message = f"Wrote {args.output}, {args.aggregate_output}, and {args.markdown_output}"
+    if args.review_stub_dir is not None:
+        stubs = write_review_stubs(summaries, args.review_stub_dir)
+        message += f"; wrote {len(stubs)} review stub(s) to {args.review_stub_dir}"
+    print(message)
     return 0
 
 
