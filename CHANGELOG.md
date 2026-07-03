@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Nothing yet.
+
+## v0.2.4 - 2026-07-04
+
 - Added Artifact Evaluation-style readiness levels (`Available`, `Functional`,
   `Reproduced-ready`) to scan reports, JSON output, CLI summaries, fix plans, and badges.
 - Changed `rrdoctor badge` to publish the readiness label instead of a bare numeric score.
