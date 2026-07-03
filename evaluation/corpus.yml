@@ -75,3 +75,245 @@ repositories:
     ecosystem: julia-science
     reason: Julia scientific computing package with project metadata.
     review_focus: [julia-environment, package-metadata, docs]
+  - name: detectron2
+    url: https://github.com/facebookresearch/detectron2
+    ecosystem: python-ml
+    reason: Computer vision research platform with configs, training scripts, and model zoo docs.
+    review_focus: [large-repo-scan, config-detection, model-artifacts]
+  - name: detr
+    url: https://github.com/facebookresearch/detr
+    ecosystem: python-ml-legacy
+    reason: Archived high-impact object detection artifact with root scripts and pretrained model docs.
+    review_focus: [legacy-artifact, entrypoints, checkpoint-docs]
+  - name: mae
+    url: https://github.com/facebookresearch/mae
+    ecosystem: python-ml-legacy
+    reason: Archived representation-learning artifact with training commands and checkpoints.
+    review_focus: [legacy-artifact, entrypoints, checkpoint-docs]
+  - name: dino
+    url: https://github.com/facebookresearch/dino
+    ecosystem: python-ml-legacy
+    reason: Archived self-supervised learning release with scripts and model download instructions.
+    review_focus: [legacy-artifact, entrypoints, data-docs]
+  - name: dinov2
+    url: https://github.com/facebookresearch/dinov2
+    ecosystem: python-ml
+    reason: Modern foundation-model research release with configs, pretrained weights, and docs.
+    review_focus: [model-artifacts, configs, docs-noise]
+  - name: clip
+    url: https://github.com/openai/CLIP
+    ecosystem: python-ml
+    reason: Widely cited model release with install docs, pretrained weights, and examples.
+    review_focus: [package-metadata, model-artifacts, citation]
+  - name: guided-diffusion
+    url: https://github.com/openai/guided-diffusion
+    ecosystem: python-ml
+    reason: Diffusion research artifact with scripts, checkpoints, and sampling commands.
+    review_focus: [entrypoints, checkpoint-docs, dependency-docs]
+  - name: improved-diffusion
+    url: https://github.com/openai/improved-diffusion
+    ecosystem: python-ml
+    reason: Diffusion model artifact with training and sampling commands.
+    review_focus: [entrypoints, dependency-docs, randomness]
+  - name: vision-transformer
+    url: https://github.com/google-research/vision_transformer
+    ecosystem: python-ml
+    reason: Vision Transformer artifact with configs, checkpoints, and dataset instructions.
+    review_focus: [configs, checkpoint-docs, data-docs]
+  - name: t5x
+    url: https://github.com/google-research/t5x
+    ecosystem: python-ml
+    reason: Large ML research framework with training configs and complex dependency metadata.
+    review_focus: [large-repo-scan, dependency-docs, configs]
+  - name: long-range-arena
+    url: https://github.com/google-research/long-range-arena
+    ecosystem: python-ml-legacy
+    reason: Archived benchmark artifact with multiple model and task entrypoints.
+    review_focus: [legacy-artifact, benchmark-docs, entrypoints]
+  - name: big-vision
+    url: https://github.com/google-research/big_vision
+    ecosystem: python-ml
+    reason: Research training codebase with many configs and data pipeline assumptions.
+    review_focus: [configs, data-docs, hardware-requirements]
+  - name: graphcast
+    url: https://github.com/google-deepmind/graphcast
+    ecosystem: python-geoscience-ml
+    reason: Weather-model artifact with data access, model checkpoints, and notebook examples.
+    review_focus: [data-provenance, model-artifacts, notebooks]
+  - name: open-spiel
+    url: https://github.com/google-deepmind/open_spiel
+    ecosystem: python-cpp-rl
+    reason: Multi-language research framework for game-theoretic reinforcement learning.
+    review_focus: [multi-language, build-docs, tests]
+  - name: stylegan2-ada-pytorch
+    url: https://github.com/NVlabs/stylegan2-ada-pytorch
+    ecosystem: python-ml
+    reason: GAN research artifact with training scripts, datasets, and hardware assumptions.
+    review_focus: [entrypoints, data-docs, hardware-requirements]
+  - name: instant-ngp
+    url: https://github.com/NVlabs/instant-ngp
+    ecosystem: cpp-python-ml
+    reason: Graphics/ML artifact with native build requirements, data examples, and scripts.
+    review_focus: [native-build, hardware-requirements, data-docs]
+  - name: latent-diffusion
+    url: https://github.com/CompVis/latent-diffusion
+    ecosystem: python-ml
+    reason: Diffusion artifact with configs, weights, and train/sample scripts.
+    review_focus: [configs, checkpoint-docs, entrypoints]
+  - name: taming-transformers
+    url: https://github.com/CompVis/taming-transformers
+    ecosystem: python-ml
+    reason: Generative-model artifact with configs, pretrained weights, and scripts.
+    review_focus: [configs, checkpoint-docs, dependency-docs]
+  - name: generative-models
+    url: https://github.com/Stability-AI/generative-models
+    ecosystem: python-ml
+    reason: Generative-model research release with configs, checkpoints, and example scripts.
+    review_focus: [configs, checkpoint-docs, large-repo-scan]
+  - name: pytorch-image-models
+    url: https://github.com/huggingface/pytorch-image-models
+    ecosystem: python-ml
+    reason: Model zoo and training code used across many vision research repos.
+    review_focus: [package-metadata, entrypoints, model-artifacts]
+  - name: scvi-tools
+    url: https://github.com/scverse/scvi-tools
+    ecosystem: python-bioinformatics
+    reason: Probabilistic single-cell analysis toolkit with docs, tests, and model examples.
+    review_focus: [package-metadata, notebooks, testing]
+  - name: scikit-learn
+    url: https://github.com/scikit-learn/scikit-learn
+    ecosystem: python-science
+    reason: Mature scientific Python project useful as a low-noise quality baseline.
+    review_focus: [package-metadata, testing, ci-docs]
+  - name: scipy
+    url: https://github.com/scipy/scipy
+    ecosystem: python-science
+    reason: Mature scientific computing project with native build and extensive governance.
+    review_focus: [native-build, package-metadata, governance]
+  - name: astropy
+    url: https://github.com/astropy/astropy
+    ecosystem: python-astronomy
+    reason: Research software project with strong citation, governance, and docs practices.
+    review_focus: [citation, governance, testing]
+  - name: yt
+    url: https://github.com/yt-project/yt
+    ecosystem: python-astronomy
+    reason: Scientific analysis toolkit with datasets, docs, and testing practices.
+    review_focus: [data-docs, package-metadata, testing]
+  - name: sunpy
+    url: https://github.com/sunpy/sunpy
+    ecosystem: python-astronomy
+    reason: Scientific Python project with domain data access and citation expectations.
+    review_focus: [data-docs, citation, package-metadata]
+  - name: nilearn
+    url: https://github.com/nilearn/nilearn
+    ecosystem: python-neuroimaging
+    reason: Neuroimaging research software with examples, datasets, and docs.
+    review_focus: [data-docs, notebooks, testing]
+  - name: mne-python
+    url: https://github.com/mne-tools/mne-python
+    ecosystem: python-neuroimaging
+    reason: Neuroscience research software with datasets, examples, and citation metadata.
+    review_focus: [data-docs, citation, examples]
+  - name: nipype
+    url: https://github.com/nipy/nipype
+    ecosystem: python-neuroimaging-workflow
+    reason: Neuroimaging workflow project with multi-tool execution assumptions.
+    review_focus: [workflow-docs, dependency-docs, entrypoints]
+  - name: monocle3
+    url: https://github.com/cole-trapnell-lab/monocle3
+    ecosystem: r-bioinformatics
+    reason: R single-cell analysis artifact with package metadata and tutorials.
+    review_focus: [r-environment, notebooks, citation]
+  - name: dada2
+    url: https://github.com/benjjneb/dada2
+    ecosystem: r-bioinformatics
+    reason: R/Bioconductor microbiome workflow package with citation and examples.
+    review_focus: [r-environment, citation, examples]
+  - name: clusterprofiler
+    url: https://github.com/YuLab-SMU/clusterProfiler
+    ecosystem: r-bioinformatics
+    reason: R enrichment-analysis package with docs, citation, and release metadata.
+    review_focus: [r-environment, citation, docs]
+  - name: archr
+    url: https://github.com/GreenleafLab/ArchR
+    ecosystem: r-bioinformatics
+    reason: R single-cell ATAC-seq analysis toolkit with data and installation complexity.
+    review_focus: [r-environment, data-docs, dependency-docs]
+  - name: nf-core-atacseq
+    url: https://github.com/nf-core/atacseq
+    ecosystem: nextflow
+    reason: Mature Nextflow workflow for ATAC-seq analysis.
+    expected_absent: [RRD050]
+    review_focus: [nextflow-entrypoint, workflow-docs, configs]
+  - name: nf-core-chipseq
+    url: https://github.com/nf-core/chipseq
+    ecosystem: nextflow
+    reason: Mature Nextflow workflow for ChIP-seq analysis.
+    expected_absent: [RRD050]
+    review_focus: [nextflow-entrypoint, workflow-docs, configs]
+  - name: nf-core-sarek
+    url: https://github.com/nf-core/sarek
+    ecosystem: nextflow
+    reason: Genomics Nextflow workflow with extensive configuration and data requirements.
+    expected_absent: [RRD050]
+    review_focus: [nextflow-entrypoint, data-docs, configs]
+  - name: nf-core-scrnaseq
+    url: https://github.com/nf-core/scrnaseq
+    ecosystem: nextflow
+    reason: Single-cell RNA-seq Nextflow workflow with complex input metadata.
+    expected_absent: [RRD050]
+    review_focus: [nextflow-entrypoint, data-docs, configs]
+  - name: nf-core-methylseq
+    url: https://github.com/nf-core/methylseq
+    ecosystem: nextflow
+    reason: Methylation Nextflow workflow with domain-specific data requirements.
+    expected_absent: [RRD050]
+    review_focus: [nextflow-entrypoint, workflow-docs, configs]
+  - name: snakemake-dna-seq-gatk
+    url: https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling
+    ecosystem: snakemake
+    reason: Snakemake workflow for DNA-seq variant calling.
+    expected_absent: [RRD050]
+    review_focus: [snakemake-entrypoint, workflow-docs, configs]
+  - name: snakemake-rna-seq-star-deseq2
+    url: https://github.com/snakemake-workflows/rna-seq-star-deseq2
+    ecosystem: snakemake-r
+    reason: Snakemake/R workflow for RNA-seq differential expression.
+    expected_absent: [RRD050]
+    review_focus: [snakemake-entrypoint, r-environment, workflow-docs]
+  - name: differentialequations-jl
+    url: https://github.com/SciML/DifferentialEquations.jl
+    ecosystem: julia-science
+    reason: Julia scientific computing package with reproducible examples and docs.
+    review_focus: [julia-environment, package-metadata, docs]
+  - name: turing-jl
+    url: https://github.com/TuringLang/Turing.jl
+    ecosystem: julia-statistics
+    reason: Julia probabilistic programming project with examples and package metadata.
+    review_focus: [julia-environment, examples, testing]
+  - name: flux-jl
+    url: https://github.com/FluxML/Flux.jl
+    ecosystem: julia-ml
+    reason: Julia machine learning package with docs, examples, and model code.
+    review_focus: [julia-environment, examples, testing]
+  - name: distributions-jl
+    url: https://github.com/JuliaStats/Distributions.jl
+    ecosystem: julia-statistics
+    reason: Julia statistics package useful as a mature package baseline.
+    review_focus: [julia-environment, package-metadata, testing]
+  - name: images-jl
+    url: https://github.com/JuliaImages/Images.jl
+    ecosystem: julia-science
+    reason: Julia scientific image-processing package with docs and examples.
+    review_focus: [julia-environment, docs, package-metadata]
+  - name: arviz
+    url: https://github.com/arviz-devs/arviz
+    ecosystem: python-statistics
+    reason: Bayesian analysis and visualization package with examples and docs.
+    review_focus: [package-metadata, notebooks, citation]
+  - name: pymc
+    url: https://github.com/pymc-devs/pymc
+    ecosystem: python-statistics
+    reason: Probabilistic programming project with examples, docs, and tests.
+    review_focus: [package-metadata, examples, testing]
