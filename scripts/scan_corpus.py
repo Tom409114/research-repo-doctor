@@ -28,6 +28,7 @@ DEFAULT_MANIFEST = Path("evaluation/corpus.yml")
 DEFAULT_OUTPUT = Path("evaluation/reports/corpus-scan.json")
 DEFAULT_AGGREGATE_OUTPUT = Path("evaluation/reports/corpus-aggregate.json")
 DEFAULT_MARKDOWN = Path("evaluation/reports/corpus-summary.md")
+DEFAULT_REVIEW_NOTES = Path("evaluation/reviews")
 DEFAULT_TIMEOUT_SECONDS = 90
 DEFAULT_MAX_BYTES = 300 * 1024 * 1024
 
@@ -71,6 +72,63 @@ def load_corpus(path: Path) -> list[CorpusEntry]:
             )
         )
     return entries
+
+
+def load_review_notes(path: Path | None) -> dict[str, dict[str, Any]]:
+    """Load optional manual review notes keyed by corpus entry name."""
+
+    if path is None or not path.exists():
+        return {}
+
+    files = sorted(path.glob("*.yml")) + sorted(path.glob("*.yaml")) if path.is_dir() else [path]
+    reviews: dict[str, dict[str, Any]] = {}
+    for file in files:
+        payload = yaml.safe_load(file.read_text(encoding="utf-8"))
+        if payload is None:
+            continue
+        if not isinstance(payload, dict):
+            raise ValueError(f"{file} must contain a mapping.")
+        repository = str(payload.get("repository", "")).strip()
+        if not repository:
+            raise ValueError(f"{file} must set `repository`.")
+        false_positives = _review_rule_list(payload, "false_positives", file)
+        false_negatives = _review_rule_list(payload, "false_negatives", file)
+        confirmed_absent = _review_rule_list(payload, "confirmed_absent", file)
+        reviews[repository] = {
+            "status": str(payload.get("status", "reviewed")),
+            "reviewed_at": str(payload.get("reviewed_at", "")),
+            "reviewer": str(payload.get("reviewer", "")),
+            "false_positives": false_positives,
+            "false_negatives": false_negatives,
+            "confirmed_absent": confirmed_absent,
+            "notes": str(payload.get("notes", "")),
+        }
+    return reviews
+
+
+def _review_rule_list(payload: dict[str, Any], key: str, file: Path) -> list[dict[str, str]]:
+    raw_items = payload.get(key, [])
+    if raw_items is None:
+        return []
+    if not isinstance(raw_items, list):
+        raise ValueError(f"{file}: `{key}` must be a list.")
+    items: list[dict[str, str]] = []
+    for item in raw_items:
+        if isinstance(item, str):
+            items.append({"rule_id": item.upper(), "evidence": ""})
+        elif isinstance(item, dict):
+            rule_id = str(item.get("rule_id", "")).upper()
+            if not rule_id:
+                raise ValueError(f"{file}: `{key}` item is missing rule_id.")
+            items.append(
+                {
+                    "rule_id": rule_id,
+                    "evidence": str(item.get("evidence", "")),
+                }
+            )
+        else:
+            raise ValueError(f"{file}: `{key}` items must be strings or mappings.")
+    return items
 
 
 def _directory_size_bytes(root: Path) -> int:
@@ -223,6 +281,23 @@ def scan_entries(
     return summaries
 
 
+def attach_review_notes(
+    summaries: list[dict[str, Any]], reviews: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Attach manual review notes to matching scan summaries."""
+
+    if not reviews:
+        return summaries
+    enriched: list[dict[str, Any]] = []
+    for item in summaries:
+        copy = dict(item)
+        review = reviews.get(str(item.get("name", "")))
+        if review:
+            copy["manual_review"] = review
+        enriched.append(copy)
+    return enriched
+
+
 def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
     """Aggregate corpus summaries into data-post-ready counts."""
 
@@ -233,11 +308,25 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
     severity_counts: dict[str, int] = {}
     rule_counts: dict[str, int] = {}
     expected_absent_violations: list[dict[str, Any]] = []
+    reviewed_repositories = 0
+    false_positive_counts: dict[str, int] = {}
+    false_negative_counts: dict[str, int] = {}
     scores: list[int] = []
 
     for item in summaries:
         ecosystem = str(item.get("ecosystem", "unknown"))
         ecosystem_counts[ecosystem] = ecosystem_counts.get(ecosystem, 0) + 1
+        review = item.get("manual_review", {})
+        if isinstance(review, dict) and review:
+            reviewed_repositories += 1
+            for false_positive in review.get("false_positives", []):
+                rule_id = str(false_positive.get("rule_id", ""))
+                if rule_id:
+                    false_positive_counts[rule_id] = false_positive_counts.get(rule_id, 0) + 1
+            for false_negative in review.get("false_negatives", []):
+                rule_id = str(false_negative.get("rule_id", ""))
+                if rule_id:
+                    false_negative_counts[rule_id] = false_negative_counts.get(rule_id, 0) + 1
         if item.get("status") != "scanned":
             continue
 
@@ -275,11 +364,14 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
         "scanned_repositories": len(scanned),
         "error_repositories": len(errors),
         "average_score": average_score,
+        "reviewed_repositories": reviewed_repositories,
         "ecosystems": _sorted_counts(ecosystem_counts),
         "readiness": _sorted_counts(readiness_counts),
         "severities": _sorted_counts(severity_counts),
         "rules": _sorted_counts(rule_counts),
         "top_rules": _top_counts(rule_counts, 10),
+        "false_positive_rules": _sorted_counts(false_positive_counts),
+        "false_negative_rules": _sorted_counts(false_negative_counts),
         "expected_absent_violations": expected_absent_violations,
     }
 
@@ -306,6 +398,7 @@ def render_markdown(summaries: list[dict[str, Any]]) -> str:
         f"- Repositories listed: {aggregate['total_repositories']}",
         f"- Scanned successfully: {aggregate['scanned_repositories']}",
         f"- Clone or scan errors: {aggregate['error_repositories']}",
+        f"- Manually reviewed: {aggregate['reviewed_repositories']}",
         f"- Average score: {average_score}",
         "",
         "### Readiness distribution",
@@ -357,6 +450,24 @@ def render_markdown(summaries: list[dict[str, Any]]) -> str:
     lines.extend(
         [
             "",
+            "### Manual review flags",
+            "",
+            "| Type | Rule | Count |",
+            "| --- | --- | ---: |",
+        ]
+    )
+    review_rows = 0
+    for rule_id, count in aggregate.get("false_positive_rules", {}).items():
+        lines.append(f"| False positive | {rule_id} | {count} |")
+        review_rows += 1
+    for rule_id, count in aggregate.get("false_negative_rules", {}).items():
+        lines.append(f"| False negative | {rule_id} | {count} |")
+        review_rows += 1
+    if not review_rows:
+        lines.append("| - | - | 0 |")
+    lines.extend(
+        [
+            "",
             "## Repository Details",
             "",
             "| Repository | Status | Readiness | Score | Errors | Warnings | "
@@ -395,6 +506,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--aggregate-output", type=Path, default=DEFAULT_AGGREGATE_OUTPUT)
     parser.add_argument("--markdown-output", type=Path, default=DEFAULT_MARKDOWN)
+    parser.add_argument(
+        "--review-notes",
+        type=Path,
+        default=DEFAULT_REVIEW_NOTES,
+        help="Directory or YAML file containing manual corpus review notes.",
+    )
     parser.add_argument("--profile", default="standard")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--only", action="append", default=[], help="Entry name to scan.")
@@ -421,6 +538,7 @@ def main(argv: list[str] | None = None) -> int:
         max_bytes=max_bytes,
         cache_dir=args.cache_dir,
     )
+    summaries = attach_review_notes(summaries, load_review_notes(args.review_notes))
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(summaries, indent=2, sort_keys=True) + "\n", encoding="utf-8")

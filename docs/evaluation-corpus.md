@@ -25,6 +25,8 @@ the static rrdoctor scanner, and writes:
 The scan JSON stays one object per repository. The aggregate JSON and Markdown
 summary include data-post-ready counts for readiness levels, ecosystems,
 severity totals, top rule IDs, and expected-absent violations.
+Manual review notes from `evaluation/reviews/` are loaded automatically and add
+reviewed-repository, false-positive, and false-negative counts to the aggregate.
 
 The runner never installs target dependencies, imports target modules, builds
 the target project, or executes target repository scripts.
@@ -46,6 +48,8 @@ For each repository:
 
 Use `corpus-aggregate.json` for public charts only after this manual review. The
 raw counts are triage evidence, not final claims about individual projects.
+Record those reviews in `evaluation/reviews/` so corpus studies can distinguish
+raw scanner output from maintainer-confirmed false positives and false negatives.
 
 ## Expansion Target
 
