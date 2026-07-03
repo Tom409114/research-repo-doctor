@@ -31,6 +31,16 @@ reviewed-repository, false-positive, and false-negative counts to the aggregate.
 The runner never installs target dependencies, imports target modules, builds
 the target project, or executes target repository scripts.
 
+To create YAML starters for manual review, add a stub directory:
+
+```bash
+python scripts/scan_corpus.py --limit 10 --review-stub-dir evaluation/reviews/todo
+```
+
+Review stubs are marked `needs-review`, so they do not count as manually
+reviewed repositories until a maintainer edits them and changes `status` to
+`reviewed`.
+
 ## Manual Review
 
 Every corpus scan needs human review before its results are used in a public
@@ -43,6 +53,8 @@ For each repository:
 - Mark false negatives with the missing reproducibility risk and the file or
   README section that should have been recognized.
 - Add or update a small fixture before changing rule logic.
+- Start from generated stubs when available, but remove irrelevant
+  `candidate_findings` before committing a final review note.
 - Keep aggregate posts about ecosystem patterns; do not shame individual
   maintainers.
 

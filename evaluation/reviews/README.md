@@ -25,3 +25,15 @@ When `scripts/scan_corpus.py` runs, it loads this directory by default and
 includes review counts in `evaluation/reports/corpus-aggregate.json` and the
 Markdown summary. Public posts should use aggregate patterns after manual review,
 not rankings of individual maintainers.
+
+To generate starter files for a batch review, run:
+
+```bash
+python scripts/scan_corpus.py --limit 10 --review-stub-dir evaluation/reviews/todo
+```
+
+Generated stubs use `status: needs-review`. They are working notes, not evidence
+of completed review. After checking the repository and the rrdoctor findings,
+move the file into `evaluation/reviews/`, set `status: reviewed`, and keep only
+the confirmed `false_positives`, `false_negatives`, and `confirmed_absent`
+entries you are willing to cite in aggregate.
