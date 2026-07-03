@@ -35,6 +35,10 @@
   reproducibility.
 - Updated corpus summaries to rank top actionable error/warning rules while
   still preserving all rule frequencies in JSON.
+- Improved `RRD101` version metadata detection so local git tags count as
+  version evidence without requiring network access.
+- Made `RRD101` informational in standard/ML scans while keeping it a warning in
+  strict and submission profiles.
 
 ## v0.2.3 - 2026-06-30
 
