@@ -1,5 +1,5 @@
 name: Research Repo Doctor
-description: Audit a research code repository for reproducibility, with PR comments and a fix plan.
+description: Prepare research artifacts for AE review with reproducibility scans, PR comments, fix plans, and appendices.
 author: Research Repo Doctor Maintainers
 branding:
   icon: check-circle
@@ -41,6 +41,14 @@ inputs:
     description: Also generate an agent-ready fix plan (rrdoctor-plan.md).
     required: false
     default: "false"
+  appendix:
+    description: Also generate an Artifact Evaluation appendix/checklist.
+    required: false
+    default: "false"
+  appendix-output:
+    description: Artifact appendix output path.
+    required: false
+    default: ARTIFACT_APPENDIX.md
   comment-pr:
     description: Post or update a sticky comment on the pull request with the report.
     required: false
@@ -57,6 +65,19 @@ inputs:
     description: Extra arguments passed to rrdoctor scan.
     required: false
     default: ""
+outputs:
+  exit-code:
+    description: rrdoctor scan exit code before the final enforcement step.
+    value: ${{ steps.audit.outputs.code }}
+  report-path:
+    description: Path to the generated report.
+    value: ${{ steps.paths.outputs.report-path }}
+  plan-path:
+    description: Path to the generated fix plan when plan is true.
+    value: ${{ steps.paths.outputs.plan-path }}
+  appendix-path:
+    description: Path to the generated Artifact Evaluation appendix when appendix is true.
+    value: ${{ steps.paths.outputs.appendix-path }}
 runs:
   using: composite
   steps:
@@ -94,6 +115,16 @@ runs:
         rrdoctor "${args[@]}" $RRD_EXTRA_ARGS
         echo "code=$?" >> "$GITHUB_OUTPUT"
         exit 0
+    - name: Record output paths
+      id: paths
+      shell: bash
+      env:
+        RRD_OUTPUT: ${{ inputs.output }}
+        RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
+      run: |
+        echo "report-path=$RRD_OUTPUT" >> "$GITHUB_OUTPUT"
+        echo "plan-path=rrdoctor-plan.md" >> "$GITHUB_OUTPUT"
+        echo "appendix-path=$RRD_APPENDIX_OUTPUT" >> "$GITHUB_OUTPUT"
     - name: Generate fix plan
       if: ${{ inputs.plan == 'true' }}
       shell: bash
@@ -101,16 +132,28 @@ runs:
         RRD_PATH: ${{ inputs.path }}
         RRD_PROFILE: ${{ inputs.profile }}
       run: rrdoctor plan "$RRD_PATH" --profile "$RRD_PROFILE" --output rrdoctor-plan.md
+    - name: Generate artifact appendix
+      if: ${{ inputs.appendix == 'true' }}
+      shell: bash
+      env:
+        RRD_PATH: ${{ inputs.path }}
+        RRD_PROFILE: ${{ inputs.profile }}
+        RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
+      run: rrdoctor appendix "$RRD_PATH" --profile "$RRD_PROFILE" --output "$RRD_APPENDIX_OUTPUT"
     - name: Write job summary
       if: ${{ inputs.step-summary == 'true' }}
       shell: bash
       env:
         RRD_OUTPUT: ${{ inputs.output }}
+        RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
       run: |
         set -uo pipefail
         if [ -f "$RRD_OUTPUT" ]; then cat "$RRD_OUTPUT" >> "$GITHUB_STEP_SUMMARY"; fi
         if [ -f rrdoctor-plan.md ]; then
           { echo ""; echo "---"; echo ""; cat rrdoctor-plan.md; } >> "$GITHUB_STEP_SUMMARY"
+        fi
+        if [ -f "$RRD_APPENDIX_OUTPUT" ]; then
+          { echo ""; echo "---"; echo ""; cat "$RRD_APPENDIX_OUTPUT"; } >> "$GITHUB_STEP_SUMMARY"
         fi
     - name: Comment on pull request
       if: ${{ inputs.comment-pr == 'true' && github.event_name == 'pull_request' }}
@@ -139,6 +182,7 @@ runs:
         path: |
           ${{ inputs.output }}
           rrdoctor-plan.md
+          ${{ inputs.appendix-output }}
         if-no-files-found: ignore
     - name: Enforce result
       shell: bash

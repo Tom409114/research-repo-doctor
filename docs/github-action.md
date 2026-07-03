@@ -1,6 +1,8 @@
 # GitHub Action
 
-The action lets another repository run Research Repo Doctor in pull requests and pushes.
+The action lets another repository run Research Repo Doctor in pull requests and
+pushes. It can publish the reproducibility report, an agent-ready fix plan, and
+an Artifact Evaluation appendix from the same run.
 
 ```yaml
 name: Research Repo Doctor
@@ -20,6 +22,8 @@ jobs:
           profile: standard
           fail-on: warning
           output: rrdoctor-report.md
+          plan: "true"
+          appendix: "true"
 ```
 
 ## Inputs
@@ -28,13 +32,15 @@ jobs:
 | --- | --- | --- |
 | `path` | `.` | Repository path to scan. |
 | `config` | empty | Optional config path. |
-| `profile` | `standard` | `minimal`, `standard`, `strict`, or `ml`. |
+| `profile` | `standard` | `minimal`, `standard`, `strict`, `ml`, `ml-paper`, `neurips`, `icml`, `acm`, `fair4rs`, or `joss`. |
 | `format` | `markdown` | `markdown`, `json`, `sarif`, or `agent`. |
 | `output` | `rrdoctor-report.md` | Report output path. |
 | `fail-on` | `error` | `none`, `error`, or `warning`. |
 | `baseline` | empty | Baseline JSON report to compare against. |
 | `fail-on-new` | empty | With `baseline`, fail only on new findings. |
 | `plan` | `false` | Also generate an agent-ready `rrdoctor-plan.md`. |
+| `appendix` | `false` | Also generate an Artifact Evaluation appendix/checklist. |
+| `appendix-output` | `ARTIFACT_APPENDIX.md` | Artifact appendix output path. |
 | `comment-pr` | `false` | Post or update a sticky PR comment with the report. |
 | `step-summary` | `true` | Write the report to the job summary. |
 | `upload-artifacts` | `true` | Upload the report (and plan) as artifacts. |
@@ -42,6 +48,15 @@ jobs:
 
 The action does not require API keys and does not make network calls as part of
 scanning. PR comments use the built-in `GITHUB_TOKEN`.
+
+## Outputs
+
+| Output | Description |
+| --- | --- |
+| `exit-code` | rrdoctor scan exit code before the final enforcement step. |
+| `report-path` | Path to the generated report. |
+| `plan-path` | Path to `rrdoctor-plan.md` when `plan` is `true`. |
+| `appendix-path` | Path to the appendix file when `appendix` is `true`. |
 
 ## Pull request comments and gating
 
@@ -56,3 +71,21 @@ permissions:
 
 The action edits a single marker-tagged comment on each run rather than posting a
 new one, so the PR thread stays clean.
+
+## Artifact Appendix
+
+Set `appendix: "true"` to generate `ARTIFACT_APPENDIX.md` with an ACM-style
+artifact appendix and ACM/NeurIPS checklist mapping:
+
+```yaml
+      - uses: Tom409114/research-repo-doctor@v0.2.3
+        with:
+          profile: acm
+          fail-on: none
+          appendix: "true"
+          appendix-output: ARTIFACT_APPENDIX.md
+```
+
+The appendix is uploaded as an artifact and included in the job summary when
+`step-summary` is enabled. Treat it as a scaffold: fill in venue-specific
+hardware, runtime, data access, and expected-results details before submission.

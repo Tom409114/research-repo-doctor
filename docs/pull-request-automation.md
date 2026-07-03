@@ -62,6 +62,22 @@ Set `plan: "true"` to also produce `rrdoctor-plan.md`, which the action uploads 
 a build artifact and includes in the job summary. Contributors (or a coding agent)
 can use it to resolve the findings. See [agent workflows](agent-workflows.md).
 
+## Emit the Artifact Appendix
+
+Set `appendix: "true"` before a submission deadline to produce
+`ARTIFACT_APPENDIX.md` from the same scan:
+
+```yaml
+      - uses: Tom409114/research-repo-doctor@v0.2.3
+        with:
+          profile: acm
+          fail-on: none
+          appendix: "true"
+```
+
+The appendix is uploaded with the other action artifacts and included in the job
+summary when `step-summary` is enabled.
+
 ## Readiness badge
 
 Publish a live artifact-readiness badge by committing an endpoint file and pointing

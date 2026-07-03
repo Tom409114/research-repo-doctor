@@ -15,3 +15,5 @@ jobs:
           profile: standard
           fail-on: warning
           output: rrdoctor-report.md
+          plan: "true"
+          appendix: "true"
