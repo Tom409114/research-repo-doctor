@@ -1,0 +1,15 @@
+version: 1
+repository: nanoGPT
+status: reviewed
+reviewed_at: 2026-07-03
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Root-level train.py and README training commands are recognized.
+  - rule_id: RRD063
+    evidence: Public notebook output is not flagged as a credential leak in the current scan.
+false_positives: []
+false_negatives: []
+notes: >
+  Regression seed case for the first-run trust issues found during nanoGPT
+  scanning. Keep RRD050 and RRD063 absent unless new evidence justifies a finding.
