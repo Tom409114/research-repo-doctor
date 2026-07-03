@@ -2,16 +2,18 @@
 
 ## Install
 
-Zero-clone (needs `uv` or `pipx`):
+Run from PyPI without adding it to the project:
 
 ```bash
-uvx --from git+https://github.com/Tom409114/research-repo-doctor rrdoctor scan .
+uvx rrdoctor scan .
 ```
 
-After PyPI publishing:
+Alternatives:
 
 ```bash
-uvx rrdoctor scan .        # or: pipx run rrdoctor scan .  /  pip install rrdoctor
+pipx run rrdoctor scan .
+python -m pip install rrdoctor
+rrdoctor scan .
 ```
 
 For development:
