@@ -26,6 +26,14 @@
 - Root-level ML entrypoint detection plus Snakemake and Nextflow workflow detection.
 - Reproducible randomness checks for unseeded Python/ML code.
 
+## v0.2.4
+
+- First-run trust fixes driven by the public repository evaluation corpus.
+- More conservative notebook and repository secret heuristics.
+- Lower-noise README reproducibility and citation guidance detection.
+- Git-tag-based release metadata detection without network access.
+- Public corpus calibration snapshot and refreshed 100/100 self-scan evidence.
+
 ## v0.3.0
 
 - More robust SARIF output and code-scanning docs.

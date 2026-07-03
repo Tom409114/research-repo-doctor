@@ -130,22 +130,20 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
-## What's new in 0.2.3
+## What's new in 0.2.4
 
-- **`rrdoctor appendix`** generates an ACM-style Artifact Appendix skeleton and maps findings
-  to ACM badge tiers and the NeurIPS reproducibility checklist, so you can fill the artifact
-  paperwork before a deadline.
-- **`rrdoctor verify`** adds an L1 (static) / L2 (environment build) / L3 (entrypoint run)
-  reproducibility ladder. With `--run` it actually resolves dependencies (`uv`/`pip`/`conda`/`Rscript`)
-  and executes a declared entrypoint under a timeout. Only use `--run` on repositories you trust.
-- **Submission profiles** include `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, and `joss`,
-  with tag-based inheritance from the base tiers.
-- **Deeper static checks** include `RRD034` import/manifest cross-checks (deptry-style) and
-  `RRD054` hardcoded GPU/CUDA assumptions without a documented requirement.
-- **More ecosystems**: dependency/runtime checks now understand R (`DESCRIPTION`, `renv.lock`)
-  and Julia (`Project.toml`) in addition to Python and JavaScript.
-- **`rrdoctor mcp`** exposes `scan`/`verify`/`appendix` as tools for coding agents
-  (`pip install 'rrdoctor[mcp]'`; see [MCP integration](docs/mcp.md)).
+- **First-run trust improvements**: root-level `train.py`/`main.py`/`run.py`,
+  Snakemake/Nextflow workflows, and README run commands count as experiment entrypoints.
+- **Lower-noise security checks**: notebook and repository secret detection now requires
+  high-confidence credential-like values before raising blocking errors.
+- **More realistic README checks**: concrete training, evaluation, benchmark, workflow, or
+  reproduction commands count as evidence for reproducing results.
+- **Corpus-backed rule calibration**: the public evaluation corpus tracks false-positive and
+  false-negative review notes, expected-absent regression gates, and aggregate rule frequencies.
+- **Release hygiene**: citation guidance detection recognizes README Citing sections, BibTeX,
+  DOI links, and "please cite" text; local git tags count as deterministic version evidence.
+- **Clean public posture**: internal launch notes were removed from the public docs, the demo
+  GIF is generated, issue access is open, and the committed self-scan report is 100/100.
 
 ## What's new in 0.2.0
 
@@ -235,7 +233,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.3
+      - uses: Tom409114/research-repo-doctor@v0.2.4
         with:
           profile: standard
           fail-on: none
@@ -342,7 +340,7 @@ Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.3},
+  version = {0.2.4},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}
