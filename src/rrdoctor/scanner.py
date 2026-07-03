@@ -11,6 +11,7 @@ from typing import Any
 from rrdoctor.config import profile_tags
 from rrdoctor.fixers import fixable_rule_ids
 from rrdoctor.models import Finding, RuleResult, ScanContext, ScanReport, Severity
+from rrdoctor.readiness import compute_readiness
 from rrdoctor.rules.registry import all_rules
 from rrdoctor.scoring import score_findings
 
@@ -129,4 +130,5 @@ class Scanner:
             findings=findings,
             rules_evaluated=len(results),
             summary=summary,
+            readiness=compute_readiness(findings),
         )

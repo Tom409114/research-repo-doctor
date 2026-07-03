@@ -16,7 +16,7 @@ output and gate it in CI.
 - **Baseline gating** — `rrdoctor scan --baseline report.json --fail-on-new error` reports new
   and resolved findings and fails only on newly introduced ones. Large repositories can adopt
   the audit without fixing everything first.
-- **`rrdoctor badge`** — a Shields.io endpoint document or self-contained SVG score badge.
+- **`rrdoctor badge`** — a Shields.io endpoint document or self-contained SVG badge.
 - **Pull request automation** — the GitHub Action posts a sticky PR comment, writes the report
   to the job summary, can attach an agent-ready fix plan, supports baseline gating, and uploads
   artifacts. It uses only the built-in `GITHUB_TOKEN`.

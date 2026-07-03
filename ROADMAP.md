@@ -13,7 +13,7 @@
 - Deterministic auto-fix (`rrdoctor fix`) for common reproducibility gaps.
 - Tool-agnostic agent fix plan (`rrdoctor plan` / `agent` format).
 - Baseline comparison and new-finding gating for incremental adoption.
-- Score badge (`rrdoctor badge`).
+- Badge endpoint (`rrdoctor badge`).
 - Pull request automation: sticky comments, job summaries, fix-plan artifacts.
 - New rules: AGENTS.md, unpinned dependencies, notebook checkpoints, pre-commit.
 

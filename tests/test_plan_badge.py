@@ -45,11 +45,11 @@ def test_badge_endpoint_and_svg() -> None:
 
     assert endpoint["schemaVersion"] == 1
     assert endpoint["label"] == "rrdoctor"
-    assert "/100" in endpoint["message"]
+    assert endpoint["message"] == "Reproduced-ready"
 
     svg = render_badge_svg(report)
     assert svg.startswith("<svg")
-    assert "/100" in svg
+    assert "Reproduced-ready" in svg
 
 
 def test_cli_plan_and_badge() -> None:

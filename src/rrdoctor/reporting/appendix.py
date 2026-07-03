@@ -9,6 +9,7 @@ checklist. This is the "bind to the painful moment" layer.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import PurePosixPath
 
 from rrdoctor.models import ScanReport
 
@@ -66,12 +67,14 @@ def render_checklist(report: ScanReport) -> str:
     """Render the ACM/NeurIPS mapping table as Markdown."""
 
     failed = _failed_rule_ids(report)
+    repo_name = PurePosixPath(report.repository_path.replace("\\", "/").rstrip("/")).name
     lines = [
         "# Submission readiness - checklist mapping",
         "",
-        f"- Repository: `{report.repository_path}`",
+        f"- Repository: `{repo_name or report.repository_path}`",
         f"- Profile: `{report.profile}`",
-        f"- Score: **{report.score}/100**",
+        f"- Artifact readiness: **{report.readiness.level}**",
+        f"- Heuristic score: **{report.score}/100**",
         "",
         "## ACM Artifact Evaluation badges",
         "",
