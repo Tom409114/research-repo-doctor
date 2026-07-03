@@ -19,9 +19,9 @@ Latest local maintainer smoke run:
 - Corpus slice: first 10 public repositories in `evaluation/corpus.yml`
 - Scanned successfully: 10 of 10
 - Clone or scan errors: 0
-- Average score across scanned repositories: 64.4
+- Average score across scanned repositories: 68.0
 - Expected-absent regressions: 0
-- Manually reviewed repositories: 2 focused reviews
+- Manually reviewed repositories: 4 focused reviews
 
 Top actionable rule frequencies in that snapshot:
 

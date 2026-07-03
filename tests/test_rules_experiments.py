@@ -59,6 +59,65 @@ def test_readme_tools_train_command_counts_as_experiment_entrypoint(tmp_path) ->
     assert not report.findings
 
 
+def test_documented_scripts_python_command_counts_as_experiment_entrypoint(tmp_path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "amg.py").write_text("print('generate masks')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n```bash\npython scripts/amg.py --input image.jpg --output masks/\n```\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_documented_pyproject_console_script_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname = 'demo'\n\n[project.scripts]\ndemo-transcribe = 'demo.cli:main'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n```bash\ndemo-transcribe audio.wav --model tiny\n```\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_pyproject_console_script_prose_only_does_not_count(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname = 'demo'\n\n[project.scripts]\ndemo-transcribe = 'demo.cli:main'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nThe demo-transcribe command exists after installation.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+
+
+def test_pyproject_console_script_name_only_inline_code_does_not_count(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname = 'demo'\n\n[project.scripts]\ndemo-transcribe = 'demo.cli:main'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nIf you use `demo-transcribe` in your work, please cite us.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+
+
 def test_unseeded_numpy_randomness_flagged(tmp_path) -> None:
     (tmp_path / "train.py").write_text(
         "import numpy as np\n\ndef train():\n    return np.random.randn(10)\n",

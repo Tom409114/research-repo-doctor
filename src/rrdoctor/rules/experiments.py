@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import ClassVar
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
@@ -22,7 +23,8 @@ class ExperimentEntrypointMissingRule(Rule):
         ("minimal", "standard", "strict", "ml"),
         "Checks for scripts or commands that reproduce experiments.",
         "Reviewers need an obvious entrypoint for rerunning experiments.",
-        "Add scripts/reproduce.sh, scripts/run*.sh, a Makefile, or documented train/eval scripts.",
+        "Add scripts/reproduce.sh, scripts/run*.sh, a Makefile, or documented "
+        "CLI/train/eval scripts.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
@@ -74,8 +76,8 @@ _DOCUMENTED_ENTRYPOINT_RE = re.compile(
     r"(?ix)"
     r"\b("
     r"python(?:\s+-m)?\s+(?:\./)?(?:train|main|run|eval|evaluate|reproduce)(?:\.py)?\b|"
-    r"python\s+(?:\./)?(?:scripts|src|tools)/[^\s`]*(?:train|test|eval|evaluate|run|reproduce)"
-    r"[^\s`]*\.py\b|"
+    r"python\s+(?:\./)?(?:scripts|tools)/[^\s`]+\.py\b|"
+    r"python\s+(?:\./)?src/[^\s`]*(?:train|test|eval|evaluate|run|reproduce)[^\s`]*\.py\b|"
     r"bash\s+(?:\./)?(?:scripts/)?(?:run|reproduce|train|eval)[^\s`]*\.sh\b|"
     r"make\s+(?:all|run|train|eval|evaluate|reproduce|results)\b|"
     r"snakemake\b|"
@@ -90,7 +92,45 @@ def _has_documented_entrypoint(context: ScanContext) -> bool:
     readme = context.root / "README.md"
     if not readme.exists():
         return False
-    return bool(_DOCUMENTED_ENTRYPOINT_RE.search(read_text(readme)))
+    text = read_text(readme)
+    return bool(
+        _DOCUMENTED_ENTRYPOINT_RE.search(text)
+        or _has_documented_console_script(text, _project_console_scripts(context.root))
+    )
+
+
+def _project_console_scripts(root: Path) -> set[str]:
+    pyproject = root / "pyproject.toml"
+    if not pyproject.exists():
+        return set()
+    text = read_text(pyproject)
+    scripts: set[str] = set()
+    current_table = ""
+    for line in text.splitlines():
+        stripped = line.strip()
+        table_match = re.match(r"\[([^\]]+)\]", stripped)
+        if table_match:
+            current_table = table_match.group(1).strip()
+            continue
+        if current_table in {"project.scripts", "tool.poetry.scripts"}:
+            script_match = re.match(r"""["']?([A-Za-z0-9_.-]+)["']?\s*=""", stripped)
+            if script_match:
+                scripts.add(script_match.group(1))
+        dotted_match = re.match(r"""scripts\.["']?([A-Za-z0-9_.-]+)["']?\s*=""", stripped)
+        if current_table == "project" and dotted_match:
+            scripts.add(dotted_match.group(1))
+    return scripts
+
+
+def _has_documented_console_script(readme_text: str, scripts: set[str]) -> bool:
+    for script in scripts:
+        pattern = (
+            rf"(?m)(?:^|\n)\s*(?:\$|>)?\s*{re.escape(script)}(?:\s|$)|"
+            rf"`{re.escape(script)}\s+[^`]+`"
+        )
+        if re.search(pattern, readme_text):
+            return True
+    return False
 
 
 class ConfigFilesMissingRule(Rule):

@@ -129,3 +129,51 @@ def test_verification_detects_tools_python_entrypoint(tmp_path) -> None:
     assert runnable is not None
     assert runnable[-1] == "tools/train.py"
     assert display == "python tools/train.py"
+
+
+def test_verification_accepts_documented_scripts_python_command(tmp_path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "amg.py").write_text("print('generate masks')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n```bash\npython scripts/amg.py --input image.jpg --output masks/\n```\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[1:] == ["scripts/amg.py", "--input", "image.jpg", "--output", "masks/"]
+    assert display == "python scripts/amg.py --input image.jpg --output masks/"
+
+
+def test_verification_accepts_documented_pyproject_console_script(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname = 'demo'\n\n[project.scripts]\ndemo-transcribe = 'demo.cli:main'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n```bash\ndemo-transcribe audio.wav --model tiny\n```\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable == ["demo-transcribe", "audio.wav", "--model", "tiny"]
+    assert display == "demo-transcribe audio.wav --model tiny"
+
+
+def test_verification_ignores_console_script_name_only_inline_code(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname = 'demo'\n\n[project.scripts]\ndemo-transcribe = 'demo.cli:main'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nIf you use `demo-transcribe` in your work, please cite us.\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is None
+    assert display == ""

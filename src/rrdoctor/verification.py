@@ -203,8 +203,9 @@ def _readme_entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
     readme = root / "README.md"
     if not readme.exists():
         return None, ""
+    console_scripts = _project_console_scripts(root)
     for line in _readme_command_lines(read_text(readme)):
-        parsed = _parse_documented_entrypoint(line, root)
+        parsed = _parse_documented_entrypoint(line, root, console_scripts)
         if parsed[1]:
             return parsed
     return None, ""
@@ -227,7 +228,9 @@ def _strip_command_prompt(line: str) -> str:
     return stripped.strip()
 
 
-def _parse_documented_entrypoint(line: str, root: Path) -> tuple[list[str] | None, str]:
+def _parse_documented_entrypoint(
+    line: str, root: Path, console_scripts: set[str] | None = None
+) -> tuple[list[str] | None, str]:
     if not line or line.startswith("#"):
         return None, ""
     try:
@@ -252,6 +255,8 @@ def _parse_documented_entrypoint(line: str, root: Path) -> tuple[list[str] | Non
         return _parse_documented_script_runner(parts, root, {"run", "reproduce", "train", "eval"})
     if command == "julia":
         return _parse_documented_script_runner(parts, root, {"run", "reproduce", "train", "eval"})
+    if console_scripts and command in console_scripts and len(parts) > 1:
+        return parts, shlex.join(parts)
     return None, ""
 
 
@@ -340,10 +345,33 @@ def _is_python_entrypoint(path: str) -> bool:
         "evaluate.py",
     } or bool(
         re.match(
-            r"(?i)(?:scripts|src|tools)/.*(?:train|test|run|eval|evaluate|reproduce).*\.py$",
+            r"(?i)(?:scripts|tools)/.*\.py$|src/.*(?:train|test|run|eval|evaluate|reproduce).*\.py$",
             rel,
         )
     )
+
+
+def _project_console_scripts(root: Path) -> set[str]:
+    pyproject = root / "pyproject.toml"
+    if not pyproject.exists():
+        return set()
+    text = read_text(pyproject)
+    scripts: set[str] = set()
+    current_table = ""
+    for line in text.splitlines():
+        stripped = line.strip()
+        table_match = re.match(r"\[([^\]]+)\]", stripped)
+        if table_match:
+            current_table = table_match.group(1).strip()
+            continue
+        if current_table in {"project.scripts", "tool.poetry.scripts"}:
+            script_match = re.match(r"""["']?([A-Za-z0-9_.-]+)["']?\s*=""", stripped)
+            if script_match:
+                scripts.add(script_match.group(1).lower())
+        dotted_match = re.match(r"""scripts\.["']?([A-Za-z0-9_.-]+)["']?\s*=""", stripped)
+        if current_table == "project" and dotted_match:
+            scripts.add(dotted_match.group(1).lower())
+    return scripts
 
 
 def _is_shell_entrypoint(path: str) -> bool:

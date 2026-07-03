@@ -17,11 +17,13 @@ repositories:
     url: https://github.com/facebookresearch/segment-anything
     ecosystem: python-ml
     reason: Model artifact repo with notebooks, checkpoint links, and inference examples.
+    expected_absent: [RRD050]
     review_focus: [notebooks, model-checkpoints, install-docs]
   - name: whisper
     url: https://github.com/openai/whisper
     ecosystem: python-ml
     reason: Widely used research model release with package metadata and examples.
+    expected_absent: [RRD050]
     review_focus: [package-metadata, citation, model-artifacts]
   - name: bert
     url: https://github.com/google-research/bert

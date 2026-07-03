@@ -63,9 +63,10 @@ as `python train.py`, `python eval.py`, `make reproduce`, `snakemake`, or
 
 `RRD050` recognizes common research entrypoints including root-level `train.py`,
 `main.py`, `run.py`, `scripts/` and ML-style `tools/train.py` or
-`tools/test.py` entrypoints, eval/reproduce scripts, Make targets,
-Snakemake/Nextflow workflow files, and README commands such as
-`python train.py ...`.
+`tools/test.py` entrypoints, README-documented `python scripts/*.py` or
+`python tools/*.py` commands, pyproject-declared console scripts shown in the
+README, eval/reproduce scripts, Make targets, Snakemake/Nextflow workflow files,
+and README commands such as `python train.py ...`.
 
 `RRD030` treats a lockable dependency manifest as the strongest evidence. If no
 manifest exists but the README contains concrete install commands, the finding is
