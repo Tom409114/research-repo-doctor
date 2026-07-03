@@ -38,6 +38,36 @@ def test_unpinned_dependencies_rule_all_pinned(tmp_path) -> None:
     assert not report.findings
 
 
+def test_readme_dataset_section_satisfies_data_docs_rule(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n"
+        "## Datasets\n\n"
+        "Download the Shakespeare data with "
+        "`python data/shakespeare/prepare.py` before training.\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD040")
+
+    assert not report.findings
+
+
+def test_readme_data_prepare_command_satisfies_data_docs_rule(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n"
+        "## Quick start\n\n"
+        "First download and tokenize the data:\n\n"
+        "```sh\n"
+        "python data/openwebtext/prepare.py\n"
+        "```\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD040")
+
+    assert not report.findings
+
+
 def test_notebook_checkpoints_rule(tmp_path) -> None:
     checkpoint_dir = tmp_path / "notebooks" / ".ipynb_checkpoints"
     checkpoint_dir.mkdir(parents=True)

@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.0
+      - uses: Tom409114/research-repo-doctor@v0.2.3
         with:
           profile: standard
           fail-on: none
@@ -46,7 +46,7 @@ git add .rrdoctor-baseline.json && git commit -m "Add rrdoctor baseline"
 ```
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.0
+      - uses: Tom409114/research-repo-doctor@v0.2.3
         with:
           profile: standard
           baseline: .rrdoctor-baseline.json

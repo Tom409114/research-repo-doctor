@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+import re
+
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
-from rrdoctor.rules.base import Rule, definition, mask_secret, read_text
+from rrdoctor.rules.base import Rule, definition, has_any_heading, mask_secret, read_text
 from rrdoctor.rules.paths import first_absolute_path, text_files
+
+DATA_README_TERMS = ("data availability", "data", "dataset", "datasets")
+DATA_ACCESS_RE = re.compile(
+    r"(?i)\b(download|prepare|preprocess|dataset|datasets|data/|wget|curl|kaggle|zenodo|doi)\b"
+)
+DATA_PREP_COMMAND_RE = re.compile(r"(?i)\b(python|Rscript|julia|bash)\s+[^\n`]*data/[^\n`]*prepare")
 
 
 class DataDocsMissingRule(Rule):
@@ -26,10 +34,19 @@ class DataDocsMissingRule(Rule):
             context.root / "data" / "README.md",
         ]
         readme = context.root / "README.md"
-        has_readme_data = readme.exists() and "data availability" in read_text(readme).lower()
+        has_readme_data = readme.exists() and _readme_documents_data(read_text(readme))
         if not any(path.exists() for path in candidates) and not has_readme_data:
             return [self.finding(context, message="No data availability documentation was found.")]
         return []
+
+
+def _readme_documents_data(text: str) -> bool:
+    lowered = text.lower()
+    if "data availability" in lowered:
+        return True
+    if has_any_heading(text, DATA_README_TERMS) and DATA_ACCESS_RE.search(text):
+        return True
+    return bool(DATA_PREP_COMMAND_RE.search(text)) and bool(DATA_ACCESS_RE.search(text))
 
 
 class DataDirReadmeMissingRule(Rule):

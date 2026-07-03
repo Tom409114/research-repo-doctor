@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from pathlib import PurePosixPath
 
 from rrdoctor.models import Finding, ScanReport, Severity
 
@@ -12,13 +13,18 @@ def _finding_key(finding: Finding) -> tuple[int, str, str]:
     return (order[finding.severity], finding.category.value, finding.rule_id)
 
 
+def _display_repository_path(path: str) -> str:
+    normalized = path.replace("\\", "/").rstrip("/")
+    return PurePosixPath(normalized).name or normalized or "."
+
+
 def render_markdown(report: ScanReport) -> str:
     """Render a scan report as Markdown."""
 
     lines: list[str] = [
         "# Research Repo Doctor Report",
         "",
-        f"- Repository path: `{report.repository_path}`",
+        f"- Repository: `{_display_repository_path(report.repository_path)}`",
         f"- Generated: `{report.generated_at}`",
         f"- Profile: `{report.profile}`",
         f"- Overall score: **{report.score}/100**",
@@ -54,6 +60,7 @@ def render_markdown(report: ScanReport) -> str:
     lines.extend(["", "## Findings", ""])
     if not grouped:
         lines.append("No findings were detected.")
+        lines.append("")
     for group, findings in grouped.items():
         lines.extend([f"### {group}", ""])
         for finding in findings:

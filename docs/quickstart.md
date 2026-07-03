@@ -82,7 +82,7 @@ rrdoctor mcp        # exposes scan/verify/appendix as MCP tools over stdio
 ## Add the GitHub Action
 
 ```yaml
-- uses: Tom409114/research-repo-doctor@v0.2.0
+- uses: Tom409114/research-repo-doctor@v0.2.3
   with:
     profile: standard
     fail-on: warning

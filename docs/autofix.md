@@ -18,6 +18,11 @@ Apply the changes with `--write`:
 rrdoctor fix . --write --author "Your Lab" --project-name "my-project"
 ```
 
+If `--author` or `--project-name` is omitted, `rrdoctor` tries to infer sensible
+values from `pyproject.toml` and the local git remote. Generated citation
+metadata can include the project name, version, release date, author, and
+repository URL when those are already available locally.
+
 Re-run the scan to confirm the score improved, then review the diff before
 committing. Because fixers are idempotent, running them again is safe.
 
@@ -42,8 +47,8 @@ DOI in `CITATION.cff`) that you should complete before a release.
 
 ## What is intentionally not auto-fixed
 
-Anything that requires judgement — the actual content of a README reproducibility
-section, removing a committed secret, pinning a specific dependency version — is
+Anything that requires judgement - the actual content of a README reproducibility
+section, removing a committed secret, pinning a specific dependency version - is
 left to a human or a coding agent. Use `rrdoctor plan` to get a tool-agnostic work
 order for those tasks. See [agent workflows](agent-workflows.md).
 

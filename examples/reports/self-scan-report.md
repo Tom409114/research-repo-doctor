@@ -1,10 +1,10 @@
 # Research Repo Doctor Report
 
-- Repository path: `/path/to/research-repo-doctor`
-- Generated: `2026-06-08T00:00:00+00:00`
+- Repository: `research-repo-doctor`
+- Generated: `2026-07-03T11:29:18.582408+00:00`
 - Profile: `standard`
 - Overall score: **100/100**
-- Rules evaluated: `32`
+- Rules evaluated: `33`
 
 > Heuristic note: Research Repo Doctor uses deterministic heuristics. The score is a guide, not a substitute for peer review or maintainer judgment.
 
@@ -21,6 +21,7 @@
 ## Findings
 
 No findings were detected.
+
 ## Suggested GitHub issues
 
 - No issue suggestions from this scan.

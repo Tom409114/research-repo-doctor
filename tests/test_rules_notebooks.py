@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import nbformat
+
 from rrdoctor.config import DEFAULT_CONFIG, deep_merge
 from rrdoctor.scanner import Scanner
 
@@ -21,3 +23,51 @@ def test_notebook_out_of_order_detection() -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD061"}).scan("tests/fixtures/notebook-issues-repo")
 
     assert any(finding.rule_id == "RRD061" for finding in report.findings)
+
+
+def test_notebook_secret_output_ignores_non_secret_token_text(tmp_path) -> None:
+    notebook_path = tmp_path / "scaling_laws.ipynb"
+    notebook = nbformat.v4.new_notebook(
+        cells=[
+            nbformat.v4.new_code_cell(
+                "print('tokenizer')",
+                outputs=[
+                    nbformat.v4.new_output(
+                        "stream",
+                        name="stdout",
+                        text="token: GPT2BPETokenizer\nnum_tokens: 50331648\n",
+                    )
+                ],
+            )
+        ]
+    )
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD063"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_notebook_secret_output_flags_high_confidence_secret(tmp_path) -> None:
+    notebook_path = tmp_path / "analysis.ipynb"
+    secret_value = "abc123XYZ789" + "def456GHI"
+    notebook = nbformat.v4.new_notebook(
+        cells=[
+            nbformat.v4.new_code_cell(
+                "print('secret')",
+                outputs=[
+                    nbformat.v4.new_output(
+                        "stream",
+                        name="stdout",
+                        text=f"api_key: {secret_value}\n",
+                    )
+                ],
+            )
+        ]
+    )
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD063"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+    assert report.findings[0].rule_id == "RRD063"

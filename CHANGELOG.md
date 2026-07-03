@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased (0.3.0)
+## Unreleased
+
+- Polished public documentation, release notes, and project hygiene evidence.
+- Removed the broken README demo GIF reference and kept the live web demo link.
+- Fixed `RRD050` so common research entrypoints such as root-level `train.py`, `main.py`,
+  `run.py`, eval scripts, Snakemake, Nextflow, and documented README commands count as
+  experiment entrypoints.
+- Tightened `RRD063` and `RRD090` secret heuristics so notebook output needs a
+  high-confidence credential-like value before triggering a security error.
+- Improved `rrdoctor fix` metadata inference for generated citation scaffolds.
+
+## v0.2.3 - 2026-06-30
 
 - Repositioned around conference Artifact Evaluation: README leads with an
   "AE-ready before you submit" wedge and zero-clone `uvx`/`pipx` install commands.
@@ -18,7 +29,7 @@
 - Broadened environment checks to R (`DESCRIPTION`, `install.R`) and Julia (`Project.toml`)
   manifests and runtime-version hints.
 - The GitHub Action profile input now accepts the submission profiles.
-- Added `maintainer release checklist` with the maintainer's manual release/outreach steps.
+- Added release, publishing, and outreach documentation without requiring users to manage API keys.
 
 ## v0.2.0 - 2026-06-08
 
