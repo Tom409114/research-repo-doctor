@@ -71,3 +71,18 @@ def test_list_rules_and_explain() -> None:
     assert list_result.stdout.count("RRD") >= 24
     assert explain_result.exit_code == 0
     assert "README missing" in explain_result.stdout
+
+
+def test_mcp_help_preserves_extra_name() -> None:
+    result = runner.invoke(app, ["mcp", "--help"])
+
+    assert result.exit_code == 0
+    assert "rrdoctor[mcp]" in result.stdout
+
+
+def test_doctor_reports_mcp_optional_dependency() -> None:
+    result = runner.invoke(app, ["doctor"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert "mcp" in payload["optional_dependencies"]
