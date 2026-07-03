@@ -200,9 +200,16 @@ def summarize_report(entry: CorpusEntry, report: ScanReport) -> dict[str, Any]:
         "expected_absent": list(entry.expected_absent),
         "expected_absent_violations": expected_absent_violations,
         "findings_by_rule": _count_findings_by_rule(report.findings),
+        "actionable_findings_by_rule": _count_findings_by_rule(
+            _actionable_findings(report.findings)
+        ),
         "findings_by_severity": _count_findings_by_severity(report.findings),
         "top_findings": [_finding_summary(finding) for finding in report.findings[:12]],
     }
+
+
+def _actionable_findings(findings: list[Finding]) -> list[Finding]:
+    return [finding for finding in findings if finding.severity.value in {"error", "warning"}]
 
 
 def _count_findings_by_rule(findings: list[Finding]) -> dict[str, int]:
@@ -308,6 +315,7 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
     ecosystem_counts: dict[str, int] = {}
     severity_counts: dict[str, int] = {}
     rule_counts: dict[str, int] = {}
+    actionable_rule_counts: dict[str, int] = {}
     expected_absent_violations: list[dict[str, Any]] = []
     reviewed_repositories = 0
     pending_review_repositories = 0
@@ -353,6 +361,13 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
             for rule_id, count in findings_by_rule.items():
                 rule_counts[str(rule_id)] = rule_counts.get(str(rule_id), 0) + int(count)
 
+        actionable_findings_by_rule = item.get("actionable_findings_by_rule", {})
+        if isinstance(actionable_findings_by_rule, dict):
+            for rule_id, count in actionable_findings_by_rule.items():
+                actionable_rule_counts[str(rule_id)] = actionable_rule_counts.get(
+                    str(rule_id), 0
+                ) + int(count)
+
         violations = item.get("expected_absent_violations", [])
         if violations:
             expected_absent_violations.append(
@@ -375,7 +390,9 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
         "readiness": _sorted_counts(readiness_counts),
         "severities": _sorted_counts(severity_counts),
         "rules": _sorted_counts(rule_counts),
+        "actionable_rules": _sorted_counts(actionable_rule_counts),
         "top_rules": _top_counts(rule_counts, 10),
+        "top_actionable_rules": _top_counts(actionable_rule_counts, 10),
         "false_positive_rules": _sorted_counts(false_positive_counts),
         "false_negative_rules": _sorted_counts(false_negative_counts),
         "expected_absent_violations": expected_absent_violations,
@@ -446,13 +463,13 @@ def render_markdown(summaries: list[dict[str, Any]]) -> str:
     lines.extend(
         [
             "",
-            "### Top rule frequencies",
+            "### Top actionable rule frequencies",
             "",
-            "| Rule | Findings |",
+            "| Rule | Error/warning findings |",
             "| --- | ---: |",
         ]
     )
-    top_rules = aggregate.get("top_rules", [])
+    top_rules = aggregate.get("top_actionable_rules", [])
     if isinstance(top_rules, list) and top_rules:
         for item in top_rules:
             lines.append(f"| {item['key']} | {item['count']} |")
