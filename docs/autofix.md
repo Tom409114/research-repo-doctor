@@ -23,6 +23,11 @@ values from `pyproject.toml` and the local git remote. Generated citation
 metadata can include the project name, version, release date, author, and
 repository URL when those are already available locally.
 
+Generated data-provenance notes also include local evidence when it exists:
+top-level data directories, likely data download or preprocessing scripts, and
+README data/access mentions. rrdoctor does not infer the actual dataset license
+or access terms; it gives maintainers a better starting point to verify.
+
 Re-run the scan to confirm the score improved, then review the diff before
 committing. Because fixers are idempotent, running them again is safe.
 
