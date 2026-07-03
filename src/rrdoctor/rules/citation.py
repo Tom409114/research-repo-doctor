@@ -2,10 +2,17 @@
 
 from __future__ import annotations
 
+import re
+
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import has_file
 from rrdoctor.rules.readme import readme_path
+
+CITATION_GUIDANCE_RE = re.compile(
+    r"(?is)(\bcitation\b|\bciting\b|please\s+cite|cite\s+this\s+work|\bbibtex\b|"
+    r"@[a-z]+\s*\{|doi\s*[:=]|\bdoi\.org/)"
+)
 
 
 class CitationMissingRule(Rule):
@@ -22,8 +29,10 @@ class CitationMissingRule(Rule):
 
     def check(self, context: ScanContext) -> list[Finding]:
         path = readme_path(context)
-        readme = read_text(path).lower() if path else ""
-        if not has_file(context.root, ["CITATION.cff", "CITATION.md"]) and "citation" not in readme:
+        readme = read_text(path) if path else ""
+        if not has_file(context.root, ["CITATION.cff", "CITATION.md"]) and not (
+            readme and CITATION_GUIDANCE_RE.search(readme)
+        ):
             return [
                 self.finding(context, message="No CITATION.cff or citation guidance was found.")
             ]

@@ -53,6 +53,9 @@ covered by the agent fix plan (`rrdoctor plan`).
 This table is verified against the rule registry by the test suite, so it stays in
 sync with the code.
 
+`RRD020` accepts `CITATION.cff`, `CITATION.md`, or README citation evidence such
+as Citing sections, "please cite" text, BibTeX entries, DOI fields, or DOI links.
+
 `RRD050` recognizes common research entrypoints including root-level `train.py`,
 `main.py`, `run.py`, eval/reproduce scripts, Make targets, Snakemake/Nextflow
 workflow files, and README commands such as `python train.py ...`.
