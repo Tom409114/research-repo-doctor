@@ -29,6 +29,16 @@ def test_parse_github_url_accepts_common_repo_forms() -> None:
     assert target.clone_url == "https://github.com/Tom409114/research-repo-doctor.git"
 
 
+def test_demo_requirements_pin_current_rrdoctor_version() -> None:
+    pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
+    requirements = Path("demo/requirements.txt").read_text(encoding="utf-8")
+
+    version_line = next(line for line in pyproject.splitlines() if line.startswith("version = "))
+    version = version_line.split('"', 2)[1]
+
+    assert f"rrdoctor=={version}" in requirements
+
+
 def test_parse_github_url_rejects_non_github_url() -> None:
     app = _load_demo_app()
 
