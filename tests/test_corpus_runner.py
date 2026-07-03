@@ -131,6 +131,34 @@ def test_aggregate_summaries_counts_rules_and_violations() -> None:
     ]
 
 
+def test_expected_absent_failure_message_lists_regressions() -> None:
+    runner = _load_runner()
+
+    message = runner.expected_absent_failure_message(
+        {
+            "expected_absent_violations": [
+                {
+                    "name": "nanoGPT",
+                    "url": "https://github.com/karpathy/nanoGPT",
+                    "violations": ["RRD050", "RRD063"],
+                }
+            ]
+        }
+    )
+
+    assert message is not None
+    assert "Expected-absent rule regression" in message
+    assert "nanoGPT: RRD050, RRD063" in message
+
+
+def test_expected_absent_failure_message_is_empty_without_regressions() -> None:
+    runner = _load_runner()
+
+    message = runner.expected_absent_failure_message({"expected_absent_violations": []})
+
+    assert message is None
+
+
 def test_pending_review_stubs_do_not_count_as_reviewed() -> None:
     runner = _load_runner()
 
