@@ -203,9 +203,7 @@ def main() -> None:
 
     st.set_page_config(page_title="rrdoctor web demo", layout="centered")
     st.title("Research Repo Doctor")
-    st.caption(
-        "Paste a public GitHub repo URL. Get a static reproducibility score and top findings."
-    )
+    st.caption("Paste a public GitHub repo URL. Get an AE-style readiness level and top findings.")
     st.info(SAFE_SCAN_NOTE)
 
     with st.form("scan-form"):
@@ -228,8 +226,17 @@ def main() -> None:
         return
 
     score = int(report.get("score", 0) or 0)
+    readiness = report.get("readiness", {})
+    readiness_level = "Unknown"
+    readiness_note = ""
+    if isinstance(readiness, dict):
+        readiness_level = str(readiness.get("level") or readiness_level)
+        readiness_note = str(readiness.get("description") or "")
     st.subheader(f"Results for [{target.owner}/{target.repo}]({target.web_url})")
-    st.metric("Reproducibility score", f"{score}/100")
+    st.metric("Artifact readiness", readiness_level)
+    if readiness_note:
+        st.caption(readiness_note)
+    st.metric("Heuristic score", f"{score}/100")
     st.progress(max(0, min(score, 100)) / 100)
 
     col1, col2, col3 = st.columns(3)

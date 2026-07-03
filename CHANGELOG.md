@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added Artifact Evaluation-style readiness levels (`Available`, `Functional`,
+  `Reproduced-ready`) to scan reports, JSON output, CLI summaries, fix plans, and badges.
+- Changed `rrdoctor badge` to publish the readiness label instead of a bare numeric score.
 - Polished public documentation, release notes, and project hygiene evidence.
 - Removed the broken README demo GIF reference and kept the live web demo link.
 - Fixed `RRD050` so common research entrypoints such as root-level `train.py`, `main.py`,
@@ -41,7 +44,7 @@
   task names the deterministic check that verifies it.
 - Added baseline comparison to `rrdoctor scan` via `--baseline` and `--fail-on-new`, so CI
   can gate only on newly introduced findings.
-- Added `rrdoctor badge`: a Shields.io endpoint document or a self-contained SVG score badge.
+- Added `rrdoctor badge`: a Shields.io endpoint document or a self-contained SVG badge.
 - Enhanced the GitHub Action with sticky pull request comments, job summaries, an optional
   fix-plan artifact, baseline gating, and artifact upload, all using the built-in token.
 - Added rules: RRD014 (AGENTS.md task guide), RRD033 (unpinned dependencies), RRD065

@@ -15,6 +15,7 @@ def test_markdown_report_generation() -> None:
 
     assert "# Research Repo Doctor Report" in rendered
     assert "- Repository: `missing-basics-repo`" in rendered
+    assert "Artifact readiness" in rendered
     assert "tests/fixtures/missing-basics-repo" not in rendered
     assert "How to fix first" in rendered
     assert "Suggested GitHub issues" in rendered
@@ -25,6 +26,7 @@ def test_json_report_generation() -> None:
     payload = json.loads(render_json(report))
 
     assert payload["repository_path"]
+    assert payload["readiness"]["level"] == "Reproduced-ready"
     assert "findings" in payload
 
 
