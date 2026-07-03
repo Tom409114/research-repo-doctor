@@ -14,6 +14,7 @@ Start with the quickstart, then read the checks and configuration reference.
 - [Pre-commit hook](pre-commit.md)
 - [GitHub Action](github-action.md)
 - [Pull request automation](pull-request-automation.md)
+- [PyPI publishing](pypi-publishing.md)
 - [Report formats](report-format.md)
 - [Rule authoring](rule-authoring.md)
 - [Evaluation corpus](evaluation-corpus.md)
