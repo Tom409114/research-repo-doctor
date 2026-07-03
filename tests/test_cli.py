@@ -86,3 +86,14 @@ def test_doctor_reports_mcp_optional_dependency() -> None:
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
     assert "mcp" in payload["optional_dependencies"]
+
+
+def test_profile_help_lists_submission_profiles() -> None:
+    scan = runner.invoke(app, ["scan", "--help"])
+    init = runner.invoke(app, ["init", "--help"])
+
+    assert scan.exit_code == 0
+    assert init.exit_code == 0
+    for profile in ("ml-paper", "neurips", "icml", "acm", "fair4rs", "joss"):
+        assert profile in scan.stdout
+        assert profile in init.stdout
