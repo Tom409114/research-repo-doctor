@@ -168,8 +168,8 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   false-negative review notes, expected-absent regression gates, and aggregate rule frequencies.
 - **Release hygiene**: citation guidance detection recognizes README Citing sections, BibTeX,
   DOI links, and "please cite" text; local git tags count as deterministic version evidence.
-- **Release polish**: the demo
-  GIF is generated, issue access is open, and the committed self-scan report is 100/100.
+- **Release polish**: the demo GIF is generated, issue access is open, and the committed
+  self-scan report is 100/100.
 
 ## What's new in 0.2.0
 
