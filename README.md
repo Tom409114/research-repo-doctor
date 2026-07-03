@@ -145,7 +145,7 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
 - **More ecosystems**: dependency/runtime checks now understand R (`DESCRIPTION`, `renv.lock`)
   and Julia (`Project.toml`) in addition to Python and JavaScript.
 - **`rrdoctor mcp`** exposes `scan`/`verify`/`appendix` as tools for coding agents
-  (`pip install 'rrdoctor[mcp]'`).
+  (`pip install 'rrdoctor[mcp]'`; see [MCP integration](docs/mcp.md)).
 
 ## What's new in 0.2.0
 

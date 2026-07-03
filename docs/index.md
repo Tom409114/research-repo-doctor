@@ -9,6 +9,7 @@ Start with the quickstart, then read the checks and configuration reference.
 - [Checks](checks.md)
 - [Auto-fix](autofix.md)
 - [Agent workflows](agent-workflows.md)
+- [MCP integration](mcp.md)
 - [Configuration](configuration.md)
 - [Pre-commit hook](pre-commit.md)
 - [GitHub Action](github-action.md)
