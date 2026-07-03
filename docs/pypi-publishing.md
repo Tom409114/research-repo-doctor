@@ -1,30 +1,77 @@
-# PyPI Publishing Preparation
+# PyPI Publishing
 
-PyPI publication is intentionally deferred for v0.1.0 unless the maintainer explicitly requests it and Trusted Publishing is configured.
+Research Repo Doctor publishes the `rrdoctor` package to PyPI from GitHub
+Releases using PyPI Trusted Publishing. Maintainers do not need long-lived PyPI
+API tokens.
 
-## Recommended Trusted Publishing setup
+## Current Package
 
-1. Create or claim the `rrdoctor` project on PyPI.
-2. In PyPI project settings, add a trusted publisher for:
-   - Owner: `research-repo-doctor`
-   - Repository: `research-repo-doctor`
-   - Workflow: `.github/workflows/release.yml`
-   - Environment: leave empty unless the workflow later uses one.
-3. Verify the GitHub release workflow has `id-token: write`.
-4. Uncomment the `pypa/gh-action-pypi-publish` step in `.github/workflows/release.yml`.
-5. Publish only from a reviewed GitHub tag/release workflow.
+- PyPI project: `rrdoctor`
+- Current package version: `0.2.3`
+- Release workflow: [`.github/workflows/release.yml`](../.github/workflows/release.yml)
+- PyPI environment name: `pypi`
 
-## Local build check
+Install from PyPI:
 
 ```bash
-python -m pip install build
+uvx rrdoctor scan .
+pipx run rrdoctor scan .
+python -m pip install rrdoctor
+```
+
+## Trusted Publishing Setup
+
+The GitHub workflow is configured to publish on GitHub Release publication:
+
+- trigger: `release` / `published`
+- build frontend: `python -m build`
+- publisher: `pypa/gh-action-pypi-publish@release/v1`
+- OIDC permission: `id-token: write`
+- GitHub environment: `pypi`
+
+PyPI should have a matching trusted publisher entry:
+
+- PyPI project: `rrdoctor`
+- Owner: `Tom409114`
+- Repository: `research-repo-doctor`
+- Workflow: `release.yml`
+- Environment: `pypi`
+
+Do not add a PyPI password or API token secret to this repository unless Trusted
+Publishing becomes unavailable and the maintainer explicitly accepts that
+tradeoff.
+
+## Local Release Checks
+
+Before publishing a GitHub Release:
+
+```bash
+python -m pip install --upgrade build twine
 python -m build
+twine check dist/*
+python -m pytest
+ruff check .
+ruff format --check .
+python -m rrdoctor scan . --profile standard --fail-on none --quiet
 ```
 
-If `twine` is available:
+Confirm the version is consistent in:
+
+- [`pyproject.toml`](../pyproject.toml)
+- [`src/rrdoctor/__init__.py`](../src/rrdoctor/__init__.py)
+- [`CITATION.cff`](../CITATION.cff)
+- [`CHANGELOG.md`](../CHANGELOG.md)
+
+## Publishing Flow
+
+1. Merge the release-preparation pull request.
+2. Ensure the working tree is clean and tests are green.
+3. Create and push a signed or annotated version tag when possible.
+4. Publish a GitHub Release for that tag.
+5. Watch the `Publish to PyPI` workflow.
+6. Verify the package after the workflow succeeds:
 
 ```bash
-twine check dist/*
+python -m pip index versions rrdoctor
+uvx rrdoctor --help
 ```
-
-Do not use long-lived PyPI API tokens unless Trusted Publishing is not available and the maintainer explicitly accepts that tradeoff.
