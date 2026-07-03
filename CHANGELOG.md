@@ -41,6 +41,9 @@
   strict and submission profiles.
 - Improved `RRD020` citation detection so README Citing sections, "please cite"
   text, BibTeX entries, DOI fields, and DOI links count as citation guidance.
+- Improved `RRD004` reproducibility README detection so concrete training,
+  evaluation, benchmark, workflow, or reproduction commands count as a documented
+  path to reproduce results.
 
 ## v0.2.3 - 2026-06-30
 

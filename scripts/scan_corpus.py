@@ -32,6 +32,10 @@ DEFAULT_MARKDOWN = Path("evaluation/reports/corpus-summary.md")
 DEFAULT_REVIEW_NOTES = Path("evaluation/reviews")
 DEFAULT_TIMEOUT_SECONDS = 90
 DEFAULT_MAX_BYTES = 300 * 1024 * 1024
+LOCAL_PATH_RE = re.compile(
+    r"(?i)\b[A-Z]:\\(?:[^\\\s'\",\]]+\\)*[^\\\s'\",\]]+|"
+    r"(?:/tmp|/var/folders|/private/var/folders)/[^\s'\",\]]+"
+)
 
 
 @dataclass(frozen=True)
@@ -160,17 +164,20 @@ def clone_repo(entry: CorpusEntry, root: Path, timeout: int, max_bytes: int) -> 
         entry.url,
         str(destination),
     ]
-    completed = subprocess.run(
-        command,
-        capture_output=True,
-        env=env,
-        text=True,
-        timeout=timeout,
-        check=False,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            env=env,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"git clone timed out after {timeout} seconds") from exc
     if completed.returncode != 0:
         detail = (completed.stderr or completed.stdout).strip()
-        raise RuntimeError(detail[:500] or "git clone failed")
+        raise RuntimeError(_sanitize_error_message(detail[:500] or "git clone failed"))
 
     size = _directory_size_bytes(destination)
     if size > max_bytes:
@@ -178,6 +185,12 @@ def clone_repo(entry: CorpusEntry, root: Path, timeout: int, max_bytes: int) -> 
         limit_mb = max_bytes // (1024 * 1024)
         raise RuntimeError(f"clone exceeds {limit_mb} MB size limit")
     return destination
+
+
+def _sanitize_error_message(message: str) -> str:
+    """Remove host-specific paths from persisted corpus error summaries."""
+
+    return LOCAL_PATH_RE.sub("<local-path>", message)
 
 
 def summarize_report(entry: CorpusEntry, report: ScanReport) -> dict[str, Any]:
@@ -247,7 +260,7 @@ def error_summary(entry: CorpusEntry, message: str) -> dict[str, Any]:
         "reason": entry.reason,
         "review_focus": list(entry.review_focus),
         "status": "error",
-        "error": message,
+        "error": _sanitize_error_message(message),
         "expected_absent": list(entry.expected_absent),
     }
 
