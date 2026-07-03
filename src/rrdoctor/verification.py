@@ -12,6 +12,8 @@ Only use it on repositories you trust.
 
 from __future__ import annotations
 
+import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -19,6 +21,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from rrdoctor.models import ScanReport
+from rrdoctor.rules.base import read_text
 
 DEFAULT_TIMEOUT = 300
 
@@ -166,6 +169,9 @@ _PYTHON_ENTRYPOINTS = (
 def _entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
     """Return (runnable command, display) for the most likely entrypoint."""
 
+    documented = _readme_entrypoint_command(root)
+    if documented[1]:
+        return documented
     if (root / "scripts" / "reproduce.sh").exists():
         return ["bash", "scripts/reproduce.sh"], "bash scripts/reproduce.sh"
     if (root / "scripts" / "run.sh").exists():
@@ -183,6 +189,159 @@ def _entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
         rel = notebooks[0].relative_to(root).as_posix()
         return None, f"papermill {rel}  (papermill not installed)"
     return None, ""
+
+
+def _readme_entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
+    """Return a conservative README command that looks like a reproducibility entrypoint."""
+
+    readme = root / "README.md"
+    if not readme.exists():
+        return None, ""
+    for line in _readme_command_lines(read_text(readme)):
+        parsed = _parse_documented_entrypoint(line, root)
+        if parsed[1]:
+            return parsed
+    return None, ""
+
+
+def _readme_command_lines(text: str) -> list[str]:
+    """Extract likely command lines from fenced blocks, inline code, and standalone lines."""
+
+    lines: list[str] = []
+    for block in re.findall(r"```[^\n]*\n(.*?)```", text, flags=re.DOTALL):
+        lines.extend(block.splitlines())
+    lines.extend(re.findall(r"`([^`\n]+)`", text))
+    lines.extend(text.splitlines())
+    return [_strip_command_prompt(line) for line in lines]
+
+
+def _strip_command_prompt(line: str) -> str:
+    stripped = line.strip()
+    stripped = re.sub(r"^(?:\$|>|PS\s+[^>]+>|[A-Za-z]:\\[^>]+>)\s*", "", stripped)
+    return stripped.strip()
+
+
+def _parse_documented_entrypoint(line: str, root: Path) -> tuple[list[str] | None, str]:
+    if not line or line.startswith("#"):
+        return None, ""
+    try:
+        parts = shlex.split(line, comments=True)
+    except ValueError:
+        return None, ""
+    if not parts:
+        return None, ""
+
+    command = parts[0].lower()
+    if _is_python_command(command):
+        return _parse_documented_python(parts, root)
+    if command in {"bash", "sh"}:
+        return _parse_documented_shell(parts, root)
+    if command == "make":
+        return _parse_documented_make(parts, root)
+    if command == "snakemake":
+        return _parse_documented_snakemake(parts, root)
+    if command == "nextflow" and len(parts) > 1 and parts[1] == "run":
+        return _parse_documented_nextflow(parts, root)
+    if command == "rscript":
+        return _parse_documented_script_runner(parts, root, {"run", "reproduce", "train", "eval"})
+    if command == "julia":
+        return _parse_documented_script_runner(parts, root, {"run", "reproduce", "train", "eval"})
+    return None, ""
+
+
+def _parse_documented_python(parts: list[str], root: Path) -> tuple[list[str] | None, str]:
+    script_index = _python_script_index(parts)
+    if script_index is None:
+        return None, ""
+    script = _clean_relative(parts[script_index])
+    if not _is_python_entrypoint(script) or not (root / script).exists():
+        return None, ""
+    runnable = [sys.executable, *parts[1:]]
+    display = shlex.join(["python", *parts[1:]])
+    return runnable, display
+
+
+def _python_script_index(parts: list[str]) -> int | None:
+    index = 1
+    while index < len(parts) and parts[index] in {"-u", "-O", "-OO", "-B"}:
+        index += 1
+    if index >= len(parts) or parts[index] == "-m":
+        return None
+    return index
+
+
+def _parse_documented_shell(parts: list[str], root: Path) -> tuple[list[str] | None, str]:
+    if len(parts) < 2:
+        return None, ""
+    script = _clean_relative(parts[1])
+    if not _is_shell_entrypoint(script) or not (root / script).exists():
+        return None, ""
+    return parts, shlex.join(parts)
+
+
+def _parse_documented_make(parts: list[str], root: Path) -> tuple[list[str] | None, str]:
+    if not (root / "Makefile").exists():
+        return None, ""
+    if len(parts) == 1:
+        return parts, "make"
+    target = parts[1]
+    if target in {"all", "run", "train", "eval", "evaluate", "reproduce", "results"}:
+        return parts, shlex.join(parts)
+    return None, ""
+
+
+def _parse_documented_snakemake(parts: list[str], root: Path) -> tuple[list[str] | None, str]:
+    if (root / "Snakefile").exists():
+        return parts, shlex.join(parts)
+    return None, ""
+
+
+def _parse_documented_nextflow(parts: list[str], root: Path) -> tuple[list[str] | None, str]:
+    if len(parts) < 3:
+        return None, ""
+    workflow = _clean_relative(parts[2])
+    if (root / workflow).exists() or (root / "nextflow.config").exists():
+        return parts, shlex.join(parts)
+    return None, ""
+
+
+def _parse_documented_script_runner(
+    parts: list[str], root: Path, allowed_stems: set[str]
+) -> tuple[list[str] | None, str]:
+    if len(parts) < 2:
+        return None, ""
+    script = _clean_relative(parts[1])
+    if not (root / script).exists():
+        return None, ""
+    if Path(script).stem.lower() not in allowed_stems:
+        return None, ""
+    return parts, shlex.join(parts)
+
+
+def _is_python_command(command: str) -> bool:
+    return command in {"python", "python3", "python.exe", "py"}
+
+
+def _is_python_entrypoint(path: str) -> bool:
+    rel = path.replace("\\", "/")
+    name = Path(rel).name.lower()
+    return name in {
+        "train.py",
+        "main.py",
+        "run.py",
+        "reproduce.py",
+        "eval.py",
+        "evaluate.py",
+    } or bool(re.match(r"(?i)(?:scripts|src)/.*(?:train|run|eval|evaluate|reproduce).*\.py$", rel))
+
+
+def _is_shell_entrypoint(path: str) -> bool:
+    rel = path.replace("\\", "/")
+    return bool(re.match(r"(?i)(?:scripts/)?(?:run|reproduce|train|eval).*\.sh$", rel))
+
+
+def _clean_relative(path: str) -> str:
+    return path.replace("\\", "/").removeprefix("./")
 
 
 def _l3_step(root: Path, run: bool, timeout: int) -> LadderStep:
