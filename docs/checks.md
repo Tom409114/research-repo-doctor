@@ -45,7 +45,7 @@ covered by the agent fix plan (`rrdoctor plan`).
 | RRD090 | Potential committed secret detected | security | error | standard, strict, ml |  |
 | RRD091 | .gitignore missing common research artifacts | security | warning | standard, strict, ml | yes |
 | RRD100 | CHANGELOG missing | release | info | standard, strict, ml | yes |
-| RRD101 | No version metadata found | release | warning | standard, strict, ml |  |
+| RRD101 | No version metadata found | release | info/warning | standard, strict, ml |  |
 | RRD102 | No release or packaging workflow found | release | info | strict |  |
 | RRD110 | Python project metadata incomplete | metadata | warning | standard, strict, ml |  |
 | RRD111 | Repository lacks topic/keyword guidance in README | metadata | info | standard, strict, ml |  |
@@ -77,3 +77,8 @@ folders such as `wandb` or `mlruns`.
 `RRD100` is informational in the standard profiles. Changelogs help package
 users and release maintainers, but a missing changelog is not treated as a core
 research-artifact reproducibility blocker.
+
+`RRD101` accepts package version fields, a `VERSION` file, or local git tags as
+version evidence. The scan stays network-free and does not query GitHub
+releases. It is informational in standard/ML scans and a warning in strict or
+submission profiles.
