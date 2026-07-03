@@ -67,6 +67,19 @@ def test_undeclared_import_alias_resolves(tmp_path) -> None:
     assert not report.findings
 
 
+def test_undeclared_import_alias_resolves_case_insensitive_import(tmp_path) -> None:
+    # PIL is provided by the Pillow distribution.
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\ndependencies = ["Pillow>=10"]\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "main.py").write_text("from PIL import Image\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_undeclared_import_reads_optional_dependencies(tmp_path) -> None:
     (tmp_path / "pyproject.toml").write_text(
         "[project]\n"

@@ -3,6 +3,8 @@
 Get your research artifact ready for Artifact Evaluation before the deadline:
 scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
+![rrdoctor demo](docs/demo.gif)
+
 [![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
 [![rrdoctor readiness](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tom409114/research-repo-doctor/main/.rrdoctor-badge.json)](https://github.com/Tom409114/research-repo-doctor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)

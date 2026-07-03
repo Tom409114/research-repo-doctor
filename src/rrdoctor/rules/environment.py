@@ -213,7 +213,7 @@ IMPORT_TO_DISTRIBUTION = {
     "torch": "torch",
     "tensorflow": "tensorflow",
     "google": "protobuf",
-    "OpenSSL": "pyopenssl",
+    "openssl": "pyopenssl",
 }
 
 _IMPORT_RE = re.compile(r"^\s*(?:import|from)\s+([A-Za-z0-9_.]+)", re.MULTILINE)
@@ -325,7 +325,7 @@ class UndeclaredImportRule(Rule):
                 norm = _normalize(top)
                 if norm in local:
                     continue
-                distribution = IMPORT_TO_DISTRIBUTION.get(top, norm)
+                distribution = IMPORT_TO_DISTRIBUTION.get(norm, norm)
                 if _normalize(distribution) in declared:
                     continue
                 seen.setdefault(top, context.rel(path))
