@@ -2,7 +2,10 @@
 
 ## Markdown
 
-Markdown is the default human-readable format. It includes repository path, timestamp, profile, score, category summary, prioritized fixes, grouped findings, suggested GitHub issue titles, and a reproducibility checklist.
+Markdown is the default human-readable format. It includes repository name, timestamp,
+profile, Artifact Evaluation-style readiness level, heuristic score, category summary,
+prioritized fixes, grouped findings, suggested GitHub issue titles, and a reproducibility
+checklist.
 
 ```bash
 rrdoctor scan . --format markdown --output rrdoctor-report.md
@@ -21,6 +24,7 @@ Top-level fields include:
 - `repository_path`
 - `generated_at`
 - `profile`
+- `readiness`
 - `score`
 - `category_scores`
 - `findings`
@@ -48,9 +52,10 @@ rrdoctor plan . --format json --output fix-plan.json
 
 See [agent workflows](agent-workflows.md).
 
-## Score badge
+## Readiness badge
 
-`rrdoctor badge` emits a Shields.io endpoint document or a self-contained SVG.
+`rrdoctor badge` emits a Shields.io endpoint document or a self-contained SVG using
+the AE-style readiness label (`Available`, `Functional`, or `Reproduced-ready`).
 
 ```bash
 rrdoctor badge . --output .rrdoctor-badge.json

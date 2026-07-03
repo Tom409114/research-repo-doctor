@@ -64,6 +64,7 @@ def _print_summary(report: ScanReport) -> None:
     table.add_column("Metric")
     table.add_column("Value", justify="right")
     table.add_row("Profile", report.profile)
+    table.add_row("Readiness", report.readiness.level)
     table.add_row("Score", f"{report.score}/100")
     table.add_row("Errors", str(report.summary["error"]))
     table.add_row("Warnings", str(report.summary["warning"]))
@@ -346,7 +347,7 @@ def plan(
 
 @app.command()
 def badge(
-    path: Annotated[Path, typer.Argument(help="Repository path to score.")] = Path("."),
+    path: Annotated[Path, typer.Argument(help="Repository path to summarize.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
     profile: Annotated[
         str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
@@ -358,7 +359,7 @@ def badge(
         Path | None, typer.Option("--output", help="Write the badge to this path.")
     ] = None,
 ) -> None:
-    """Emit a reproducibility score badge (Shields.io endpoint JSON or SVG)."""
+    """Emit an artifact-readiness badge (Shields.io endpoint JSON or SVG)."""
 
     if profile not in PROFILES:
         raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")

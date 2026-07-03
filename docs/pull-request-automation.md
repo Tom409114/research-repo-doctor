@@ -62,10 +62,11 @@ Set `plan: "true"` to also produce `rrdoctor-plan.md`, which the action uploads 
 a build artifact and includes in the job summary. Contributors (or a coding agent)
 can use it to resolve the findings. See [agent workflows](agent-workflows.md).
 
-## Score badge
+## Readiness badge
 
-Publish a live reproducibility badge by committing an endpoint file and pointing
-Shields.io at it:
+Publish a live artifact-readiness badge by committing an endpoint file and pointing
+Shields.io at it. The badge shows the AE-style readiness level; the full report
+still includes the numeric score:
 
 ```bash
 rrdoctor badge . --output .rrdoctor-badge.json

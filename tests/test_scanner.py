@@ -26,6 +26,8 @@ def test_healthy_fixture_has_fewer_findings_than_missing_basics() -> None:
 
     assert len(healthy.findings) < len(missing.findings)
     assert healthy.score > missing.score
+    assert healthy.readiness.level == "Reproduced-ready"
+    assert missing.readiness.level == "Needs preparation"
 
 
 def test_include_runs_single_rule() -> None:

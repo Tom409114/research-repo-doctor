@@ -36,7 +36,9 @@ rrdoctor scan . --format json --quiet
 
 ## Interpret the result
 
-The score starts at 100 and subtracts deterministic penalties for errors and warnings. Treat it as a triage signal, not as proof that a repository is reproducible.
+The report leads with an Artifact Evaluation-style readiness level: `Available`,
+`Functional`, or `Reproduced-ready`. The numeric score remains as a secondary
+triage signal, not proof that a repository is reproducible.
 
 Fix errors first, then warnings that affect setup, data access, experiment entrypoints, notebooks, tests, and CI.
 

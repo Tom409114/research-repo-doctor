@@ -138,6 +138,15 @@ class CategoryScore:
 
 
 @dataclass(frozen=True)
+class ArtifactReadiness:
+    """Coarse artifact-evaluation readiness label."""
+
+    level: str
+    description: str
+    blocking_rule_ids: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class ScanReport:
     """Complete scan report."""
 
@@ -149,6 +158,13 @@ class ScanReport:
     findings: list[Finding]
     rules_evaluated: int
     summary: dict[str, int]
+    readiness: ArtifactReadiness = field(
+        default_factory=lambda: ArtifactReadiness(
+            level="Needs preparation",
+            description="Readiness has not been computed.",
+            blocking_rule_ids=[],
+        )
+    )
     heuristic_note: str = (
         "Research Repo Doctor uses deterministic heuristics. The score is a guide, "
         "not a substitute for peer review or maintainer judgment."
@@ -167,6 +183,11 @@ class ScanReport:
             findings=[],
             rules_evaluated=0,
             summary={"error": 0, "warning": 0, "info": 0},
+            readiness=ArtifactReadiness(
+                level="Reproduced-ready",
+                description="No findings were detected.",
+                blocking_rule_ids=[],
+            ),
         )
 
 
@@ -196,6 +217,7 @@ class FixPlan:
     repository_path: str
     generated_at: str
     profile: str
+    readiness_level: str
     score: int
     tasks: list[FixTask]
     autofixable: int = 0

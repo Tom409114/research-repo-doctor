@@ -48,6 +48,7 @@ def build_fix_plan(report: ScanReport) -> FixPlan:
         repository_path=report.repository_path,
         generated_at=report.generated_at,
         profile=report.profile,
+        readiness_level=report.readiness.level,
         score=report.score,
         tasks=tasks,
         autofixable=autofixable,
@@ -63,7 +64,8 @@ def render_agent_markdown(report: ScanReport) -> str:
         "",
         f"- Repository: `{plan.repository_path}`",
         f"- Profile: `{plan.profile}`",
-        f"- Current score: **{plan.score}/100**",
+        f"- Current readiness: **{plan.readiness_level}**",
+        f"- Heuristic score: **{plan.score}/100**",
         f"- Tasks: `{len(plan.tasks)}` ({plan.autofixable} auto-fixable)",
         "",
         "## How to use this plan",
@@ -74,7 +76,7 @@ def render_agent_markdown(report: ScanReport) -> str:
         "",
         "1. Apply the mechanical fixes first: `rrdoctor fix --write`.",
         "2. Work the remaining tasks below, smallest blast radius first.",
-        "3. Verify with `rrdoctor scan <path> --fail-on none` and aim to raise the score.",
+        "3. Verify with `rrdoctor scan <path> --fail-on none` and aim to improve readiness.",
         "",
     ]
 
@@ -111,8 +113,8 @@ def render_agent_markdown(report: ScanReport) -> str:
             "## Acceptance",
             "",
             "When the plan is complete, re-run the audit. The resolved tasks should no "
-            "longer appear and the overall score should increase. Use a baseline to gate "
-            "regressions in CI:",
+            "longer appear, readiness should improve, and the heuristic score should "
+            "increase. Use a baseline to gate regressions in CI:",
             "",
             "```bash",
             "rrdoctor scan . --format json --output rrdoctor-baseline.json --fail-on none",

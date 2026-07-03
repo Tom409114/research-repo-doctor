@@ -6,7 +6,7 @@ Try the live web demo on any public repo (no install):
 <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
 
 [![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
-[![rrdoctor score](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tom409114/research-repo-doctor/main/.rrdoctor-badge.json)](https://github.com/Tom409114/research-repo-doctor)
+[![rrdoctor readiness](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tom409114/research-repo-doctor/main/.rrdoctor-badge.json)](https://github.com/Tom409114/research-repo-doctor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 
@@ -142,7 +142,10 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   task names the deterministic check that verifies it.
 - **Baseline gating**: `rrdoctor scan --baseline report.json --fail-on-new error` fails only
   on newly introduced findings, so large repos can adopt the audit incrementally.
-- **`rrdoctor badge`** emits a Shields.io endpoint or SVG reproducibility-score badge.
+- **`rrdoctor badge`** emits a Shields.io endpoint or SVG artifact-readiness badge.
+- **Artifact readiness labels** map findings to an AE-style level: `Available`,
+  `Functional`, or `Reproduced-ready`. The numeric score remains as a secondary
+  triage signal.
 - **First-class PR automation**: the Action posts a sticky PR comment, writes a job summary,
   and can attach the fix plan, using only the built-in `GITHUB_TOKEN`.
 - **New rules** include unpinned dependencies, committed notebook checkpoints, pre-commit
@@ -236,8 +239,9 @@ For new-finding gating and a committed baseline, see
 ```text
 Research Repo Doctor Summary
 Profile: standard
-Score: 76/100
-Errors: 1
+Readiness: Functional
+Score: 64/100
+Errors: 0
 Warnings: 5
 Rules evaluated: 32
 
@@ -258,7 +262,7 @@ Worked examples live in [examples/reports/](examples/reports/), including a
 | `rrdoctor plan` | Emit a tool-agnostic fix plan (Markdown or JSON). |
 | `rrdoctor verify` | Reproducibility ladder L1/L2/L3; `--run` actually builds and executes. |
 | `rrdoctor appendix` | Generate an ACM Artifact Appendix + ACM/NeurIPS checklist mapping. |
-| `rrdoctor badge` | Emit a reproducibility-score badge (Shields.io endpoint or SVG). |
+| `rrdoctor badge` | Emit an artifact-readiness badge (Shields.io endpoint or SVG). |
 | `rrdoctor mcp` | Run the MCP server (`scan`/`verify`/`appendix` as agent tools). |
 | `rrdoctor init` | Write a documented `.rrdoctor.yml`. |
 | `rrdoctor list-rules` | List all registered rules. |
