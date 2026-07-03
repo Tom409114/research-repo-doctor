@@ -56,6 +56,11 @@ sync with the code.
 `RRD020` accepts `CITATION.cff`, `CITATION.md`, or README citation evidence such
 as Citing sections, "please cite" text, BibTeX entries, DOI fields, or DOI links.
 
+`RRD004` accepts explicit Reproducibility/Results/Replicate sections as well as
+concrete training, evaluation, benchmark, workflow, or reproduction commands such
+as `python train.py`, `python eval.py`, `make reproduce`, `snakemake`, or
+`nextflow run ...`.
+
 `RRD050` recognizes common research entrypoints including root-level `train.py`,
 `main.py`, `run.py`, eval/reproduce scripts, Make targets, Snakemake/Nextflow
 workflow files, and README commands such as `python train.py ...`.

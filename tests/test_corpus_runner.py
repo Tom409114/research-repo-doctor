@@ -50,6 +50,23 @@ def test_expected_absent_violations_are_reported() -> None:
     assert summary["expected_absent_violations"] == ["RRD001"]
 
 
+def test_error_summary_sanitizes_local_paths() -> None:
+    runner = _load_runner()
+    entry = runner.CorpusEntry(
+        name="private",
+        url="https://example.invalid/private",
+        ecosystem="fixture",
+        reason="test",
+        expected_absent=(),
+        review_focus=(),
+    )
+
+    windows_path = "C:" + r"\temp\rrdoctor-corpus-abc\repo"
+    summary = runner.error_summary(entry, f"Command cloned into {windows_path}")
+
+    assert summary["error"] == "Command cloned into <local-path>"
+
+
 def test_markdown_summary_mentions_manual_review() -> None:
     runner = _load_runner()
     rendered = runner.render_markdown(
