@@ -7,7 +7,7 @@ API tokens.
 ## Current Package
 
 - PyPI project: `rrdoctor`
-- Current package version: `0.2.4`
+- Current package version: `0.2.5`
 - Release workflow: [`.github/workflows/release.yml`](../.github/workflows/release.yml)
 - PyPI environment name: `pypi`
 

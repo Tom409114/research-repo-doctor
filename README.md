@@ -130,6 +130,20 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.5
+
+- **Model-release entrypoints**: README-documented `python scripts/*.py` /
+  `python tools/*.py` commands and pyproject-declared CLI commands now count as
+  experiment entrypoints, reducing first-run false positives on repositories
+  such as Segment Anything and Whisper.
+- **ML tools entrypoints**: common `tools/train.py`, `tools/test.py`, and
+  related ML framework commands now count for `RRD050`.
+- **Seed helper scaffolding**: `rrdoctor fix --write` can scaffold a
+  reproducible `set_global_seed(seed)` helper for `RRD052` without overwriting
+  project code.
+- **Corpus regression gates**: entrypoint fixes are backed by focused review
+  notes and `expected_absent` checks in the public evaluation corpus.
+
 ## What's new in 0.2.4
 
 - **First-run trust improvements**: root-level `train.py`/`main.py`/`run.py`,
@@ -235,7 +249,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.4
+      - uses: Tom409114/research-repo-doctor@v0.2.5
         with:
           profile: standard
           fail-on: none
@@ -342,7 +356,7 @@ Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.4},
+  version = {0.2.5},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

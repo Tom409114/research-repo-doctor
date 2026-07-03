@@ -4,6 +4,22 @@
 
 - Nothing yet.
 
+## v0.2.5 - 2026-07-04
+
+- Improved `RRD050` first-run trust on real ML/research repositories by
+  recognizing ML-style `tools/train.py`, `tools/test.py`, documented
+  `python scripts/*.py` or `python tools/*.py` commands, and pyproject-declared
+  console scripts shown in the README.
+- Added focused corpus review notes and `expected_absent` regression gates for
+  `segment-anything`, `whisper`, and `mmdetection` entrypoint detection.
+- Added `RRD052` auto-fix scaffolding: `rrdoctor fix --write` can create a
+  non-destructive `set_global_seed(seed)` helper for Python/NumPy/PyTorch/
+  TensorFlow projects while leaving integration with the training entrypoint as
+  an explicit TODO.
+- Updated auto-fix documentation to clarify that some scaffolds are starting
+  points and clear findings only after maintainers wire them into the project.
+- Refreshed the public evaluation-corpus snapshot and self-scan report.
+
 ## v0.2.4 - 2026-07-04
 
 - Added Artifact Evaluation-style readiness levels (`Available`, `Functional`,
