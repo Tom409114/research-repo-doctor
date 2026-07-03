@@ -116,6 +116,7 @@ def test_aggregate_summaries_counts_rules_and_violations() -> None:
     assert aggregate["error_repositories"] == 1
     assert aggregate["average_score"] == 64.0
     assert aggregate["reviewed_repositories"] == 1
+    assert aggregate["pending_review_repositories"] == 0
     assert aggregate["readiness"] == {"Functional": 1}
     assert aggregate["rules"]["RRD050"] == 2
     assert aggregate["severities"] == {"error": 1, "warning": 2}
@@ -128,6 +129,34 @@ def test_aggregate_summaries_counts_rules_and_violations() -> None:
             "violations": ["RRD050"],
         }
     ]
+
+
+def test_pending_review_stubs_do_not_count_as_reviewed() -> None:
+    runner = _load_runner()
+
+    aggregate = runner.aggregate_summaries(
+        [
+            {
+                "name": "demo",
+                "url": "https://example.invalid/demo",
+                "ecosystem": "python-ml",
+                "status": "scanned",
+                "readiness": {"level": "Functional"},
+                "score": 64,
+                "findings_by_rule": {},
+                "findings_by_severity": {},
+                "expected_absent_violations": [],
+                "manual_review": {
+                    "status": "needs-review",
+                    "false_positives": [],
+                    "false_negatives": [],
+                },
+            }
+        ]
+    )
+
+    assert aggregate["reviewed_repositories"] == 0
+    assert aggregate["pending_review_repositories"] == 1
 
 
 def test_review_notes_are_loaded_and_attached(tmp_path) -> None:
@@ -161,3 +190,40 @@ def test_review_notes_are_loaded_and_attached(tmp_path) -> None:
     assert summaries[0]["manual_review"]["confirmed_absent"] == [
         {"rule_id": "RRD050", "evidence": ""}
     ]
+
+
+def test_review_stubs_are_written_without_overwrite(tmp_path) -> None:
+    runner = _load_runner()
+    summaries = [
+        {
+            "name": "Demo Repo",
+            "url": "https://example.invalid/demo",
+            "status": "scanned",
+            "readiness": {"level": "Functional"},
+            "score": 64,
+            "summary": {"error": 1, "warning": 2},
+            "review_focus": ["entrypoint-detection"],
+            "expected_absent": ["RRD050"],
+            "top_findings": [
+                {
+                    "rule_id": "RRD030",
+                    "severity": "warning",
+                    "title": "No dependency manifest found",
+                    "file": "README.md",
+                    "message": "Dependency metadata is missing.",
+                }
+            ],
+        }
+    ]
+
+    written = runner.write_review_stubs(summaries, tmp_path)
+    again = runner.write_review_stubs(summaries, tmp_path)
+
+    assert len(written) == 1
+    assert again == []
+    payload = runner.yaml.safe_load(written[0].read_text(encoding="utf-8"))
+    assert payload["repository"] == "Demo Repo"
+    assert payload["status"] == "needs-review"
+    assert payload["scan"]["errors"] == 1
+    assert payload["candidate_findings"][0]["rule_id"] == "RRD030"
+    assert payload["false_positives"] == []

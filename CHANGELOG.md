@@ -8,6 +8,8 @@
 - Reframed the README first screen around Artifact Evaluation deadline preparation.
 - Added a public-repository evaluation corpus manifest and static scan runner for
   evidence-driven false-positive and false-negative review.
+- Added corpus review-stub generation so maintainers can scale manual
+  false-positive and false-negative review without inflating reviewed counts.
 - Updated PyPI publishing documentation to match the active Trusted Publishing
   workflow and current `rrdoctor` package release.
 - Removed internal launch notes and issue-draft documents from the public documentation tree.
