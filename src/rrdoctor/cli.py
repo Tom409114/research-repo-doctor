@@ -486,9 +486,9 @@ def appendix(
 
 @app.command()
 def mcp() -> None:
-    """Start the MCP server so coding agents can call scan/verify/appendix as tools.
+    r"""Start the MCP server so coding agents can call scan/verify/appendix as tools.
 
-    Requires the optional dependency: pip install 'rrdoctor[mcp]'.
+    Requires the optional dependency: pip install "rrdoctor\[mcp]".
     """
 
     from rrdoctor.mcp_server import run as run_server
@@ -556,6 +556,7 @@ def doctor() -> None:
             "nbformat": importlib.util.find_spec("nbformat") is not None,
             "yaml": importlib.util.find_spec("yaml") is not None,
             "rich": importlib.util.find_spec("rich") is not None,
+            "mcp": importlib.util.find_spec("mcp") is not None,
         },
     }
     console.print_json(json.dumps(payload))
