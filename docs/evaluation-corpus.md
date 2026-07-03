@@ -19,7 +19,12 @@ This shallow-clones the first corpus repository into a temporary directory, runs
 the static rrdoctor scanner, and writes:
 
 - `evaluation/reports/corpus-scan.json`
+- `evaluation/reports/corpus-aggregate.json`
 - `evaluation/reports/corpus-summary.md`
+
+The scan JSON stays one object per repository. The aggregate JSON and Markdown
+summary include data-post-ready counts for readiness levels, ecosystems,
+severity totals, top rule IDs, and expected-absent violations.
 
 The runner never installs target dependencies, imports target modules, builds
 the target project, or executes target repository scripts.
@@ -38,6 +43,9 @@ For each repository:
 - Add or update a small fixture before changing rule logic.
 - Keep aggregate posts about ecosystem patterns; do not shame individual
   maintainers.
+
+Use `corpus-aggregate.json` for public charts only after this manual review. The
+raw counts are triage evidence, not final claims about individual projects.
 
 ## Expansion Target
 
