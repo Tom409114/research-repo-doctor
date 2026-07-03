@@ -80,6 +80,48 @@ def test_data_readme_only_when_dir_exists(tmp_path) -> None:
     assert (tmp_path / "data" / "README.md").exists()
 
 
+def test_data_md_includes_local_repository_hints(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        'name = "paper-demo"\n'
+        "\n"
+        "[project.urls]\n"
+        'Repository = "https://github.com/example/paper-demo"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nDownload the dataset from Zenodo before preprocessing.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "data").mkdir()
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts" / "download_data.py").write_text("# static fixture\n", encoding="utf-8")
+
+    created = apply_fix("RRD040", infer_fix_context(tmp_path, year=2026))
+
+    assert created is not None and created.action == "created"
+    text = (tmp_path / "DATA.md").read_text(encoding="utf-8")
+    assert "Project: paper-demo" in text
+    assert "Repository: https://github.com/example/paper-demo" in text
+    assert "Local data-related directory: `data/`" in text
+    assert "Possible data retrieval/preprocessing script: `scripts/download_data.py`" in text
+    assert "README mentions data" in text
+
+
+def test_data_dir_readme_lists_existing_contents(tmp_path) -> None:
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    (data_dir / "raw").mkdir()
+    (data_dir / "sample.csv").write_text("x\n1\n", encoding="utf-8")
+
+    created = apply_fix("RRD041", _ctx(tmp_path))
+
+    assert created is not None and created.action == "created"
+    text = (tmp_path / "data" / "README.md").read_text(encoding="utf-8")
+    assert "`data/raw/`" in text
+    assert "`data/sample.csv`" in text
+
+
 def test_apply_fix_unknown_rule_returns_none(tmp_path) -> None:
     assert apply_fix("RRD001", _ctx(tmp_path)) is None
 
