@@ -42,6 +42,13 @@ RUNTIME_VERSION_RE = re.compile(
     r"|julia\s*[<>=~]|\[compat\]"  # Julia Project.toml compat
     r")"
 )
+README_INSTALL_RE = re.compile(
+    r"(?i)\b("
+    r"pip\s+install|uv\s+pip\s+install|pipx\s+run|uvx\s+|"
+    r"conda\s+env\s+create|mamba\s+env\s+create|poetry\s+install|"
+    r"renv::restore|Rscript\s+|julia\s+--project|npm\s+install"
+    r")"
+)
 
 
 class DependencyManifestMissingRule(Rule):
@@ -58,6 +65,26 @@ class DependencyManifestMissingRule(Rule):
 
     def check(self, context: ScanContext) -> list[Finding]:
         if not has_file(context.root, DEPENDENCY_FILES):
+            readme = context.root / "README.md"
+            if readme.exists() and README_INSTALL_RE.search(read_text(readme)):
+                rel = context.rel(readme)
+                return [
+                    self.finding(
+                        context,
+                        message=(
+                            "No supported dependency manifest was found, but README install "
+                            "instructions were detected."
+                        ),
+                        evidence=[Evidence("README contains an install command.", rel)],
+                        recommendation=(
+                            "Promote the documented install command into requirements.txt, "
+                            "pyproject.toml, environment.yml, renv.lock, or another lockable "
+                            "manifest."
+                        ),
+                        file=rel,
+                        severity=Severity.WARNING,
+                    )
+                ]
             return [self.finding(context, message="No supported dependency manifest was found.")]
         return []
 
@@ -224,6 +251,13 @@ def _declared_distributions(context: ScanContext) -> set[str]:
                 match = _REQ_NAME_RE.match(spec)
                 if match:
                     declared.add(_normalize(match.group(0)))
+        optional = re.search(r"(?ms)^\[project\.optional-dependencies\](.*?)(?:^\[|\Z)", text)
+        if optional:
+            for block in re.findall(r"(?m)^\w[\w-]*\s*=\s*\[(.*?)\]", optional.group(1), re.DOTALL):
+                for spec in re.findall(r"['\"]([^'\"]+)['\"]", block):
+                    match = _REQ_NAME_RE.match(spec)
+                    if match:
+                        declared.add(_normalize(match.group(0)))
 
     for env_name in ("environment.yml", "conda.yml"):
         env = context.root / env_name

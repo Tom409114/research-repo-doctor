@@ -27,21 +27,65 @@ class ExperimentEntrypointMissingRule(Rule):
 
     def check(self, context: ScanContext) -> list[Finding]:
         patterns = [
+            "train*.py",
+            "eval*.py",
+            "evaluate*.py",
+            "run*.py",
+            "main.py",
+            "reproduce*.py",
+            "run*.sh",
+            "reproduce*.sh",
             "scripts/run*.sh",
             "scripts/reproduce*.sh",
             "scripts/train*.py",
+            "scripts/eval*.py",
+            "scripts/evaluate*.py",
+            "scripts/run*.py",
             "src/**/train*.py",
+            "src/**/eval*.py",
+            "src/**/evaluate*.py",
+            "src/**/run*.py",
             "Makefile",
             "noxfile.py",
             "tox.ini",
+            "Snakefile",
+            "workflow/Snakefile",
+            "workflows/Snakefile",
+            "*.nf",
+            "workflow/*.nf",
+            "workflows/*.nf",
+            "nextflow.config",
         ]
-        if not find_files(context, patterns):
+        if not find_files(context, patterns) and not _has_documented_entrypoint(context):
             return [
                 self.finding(
                     context, message="No experiment or reproduction entrypoint was detected."
                 )
             ]
         return []
+
+
+_DOCUMENTED_ENTRYPOINT_RE = re.compile(
+    r"(?ix)"
+    r"\b("
+    r"python(?:\s+-m)?\s+(?:\./)?(?:train|main|run|eval|evaluate|reproduce)(?:\.py)?\b|"
+    r"python\s+(?:\./)?(?:scripts|src)/[^\s`]*(?:train|eval|evaluate|run|reproduce)"
+    r"[^\s`]*\.py\b|"
+    r"bash\s+(?:\./)?(?:scripts/)?(?:run|reproduce|train|eval)[^\s`]*\.sh\b|"
+    r"make\s+(?:all|run|train|eval|evaluate|reproduce|results)\b|"
+    r"snakemake\b|"
+    r"nextflow\s+run\b|"
+    r"Rscript\s+[^\s`]+|"
+    r"julia\s+[^\s`]+"
+    r")"
+)
+
+
+def _has_documented_entrypoint(context: ScanContext) -> bool:
+    readme = context.root / "README.md"
+    if not readme.exists():
+        return False
+    return bool(_DOCUMENTED_ENTRYPOINT_RE.search(read_text(readme)))
 
 
 class ConfigFilesMissingRule(Rule):

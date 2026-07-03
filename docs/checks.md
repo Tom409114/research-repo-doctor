@@ -52,3 +52,19 @@ covered by the agent fix plan (`rrdoctor plan`).
 
 This table is verified against the rule registry by the test suite, so it stays in
 sync with the code.
+
+`RRD050` recognizes common research entrypoints including root-level `train.py`,
+`main.py`, `run.py`, eval/reproduce scripts, Make targets, Snakemake/Nextflow
+workflow files, and README commands such as `python train.py ...`.
+
+`RRD030` treats a lockable dependency manifest as the strongest evidence. If no
+manifest exists but the README contains concrete install commands, the finding is
+downgraded to a warning rather than an error.
+
+`RRD040` accepts dedicated data docs and README-based evidence, including common
+dataset sections and documented `python data/.../prepare.py` style preparation
+commands.
+
+`RRD063` and `RRD090` are intentionally conservative. Generic `token`,
+`api_key`, `secret`, or `password` text must be paired with a credential-like
+random value before it is reported; known provider key prefixes are still flagged.

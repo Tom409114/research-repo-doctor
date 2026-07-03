@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
-from rrdoctor.rules.base import SECRET_PATTERNS, Rule, definition, mask_secret, read_text
+from rrdoctor.rules.base import Rule, definition, has_secret_like_value, mask_secret, read_text
 from rrdoctor.rules.paths import text_files
 
 COMMON_GITIGNORE_TERMS = (
@@ -36,7 +36,7 @@ class PotentialSecretRule(Rule):
                 continue
             text = read_text(path)
             for line_number, line in enumerate(text.splitlines(), start=1):
-                if any(pattern.search(line) for pattern in SECRET_PATTERNS):
+                if has_secret_like_value(line):
                     rel = context.rel(path)
                     return [
                         self.finding(
