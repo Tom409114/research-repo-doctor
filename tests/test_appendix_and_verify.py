@@ -5,7 +5,12 @@ from pathlib import Path
 from rrdoctor.config import DEFAULT_CONFIG, apply_cli_overrides
 from rrdoctor.reporting.appendix import badge_status, render_appendix, render_checklist
 from rrdoctor.scanner import Scanner
-from rrdoctor.verification import _run_command, render_verification, verification_failed
+from rrdoctor.verification import (
+    _entrypoint_command,
+    _run_command,
+    render_verification,
+    verification_failed,
+)
 
 
 def _report(fixture: str, profile: str = "standard"):
@@ -47,6 +52,7 @@ def test_verification_ladder_static_mode() -> None:
 
     assert "L1" in rendered and "L2" in rendered and "L3" in rendered
     assert "static" in rendered
+    assert "python scripts/train.py" in rendered
     # ml-project-repo has no error findings, so L1 should not be a failure.
     assert not verification_failed(report)
 
@@ -62,3 +68,25 @@ def test_run_command_missing_tool_returns_none(tmp_path) -> None:
 
     assert code is None
     assert "tool not found" in message
+
+
+def test_verification_detects_root_python_entrypoint(tmp_path) -> None:
+    (tmp_path / "train.py").write_text("print('train')\n", encoding="utf-8")
+
+    runnable, display = _entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[-1] == "train.py"
+    assert display == "python train.py"
+
+
+def test_verification_detects_scripts_python_entrypoint(tmp_path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "run.py").write_text("print('run')\n", encoding="utf-8")
+
+    runnable, display = _entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[-1] == "scripts/run.py"
+    assert display == "python scripts/run.py"
