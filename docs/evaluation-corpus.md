@@ -55,6 +55,50 @@ nonzero if one of those rules appears again. Use this for cases such as
 root-level `train.py` detection and notebook secret false-positive regressions,
 where a single noisy finding can undermine confidence in a first scan.
 
+## Current Maintainer Snapshot
+
+Latest local maintainer smoke run, generated on 2026-07-04:
+
+```bash
+python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --fail-on-expected-absent
+```
+
+- Repositories listed: 60
+- Scanned successfully: 51
+- Clone or scan errors: 9
+- Expected-absent regressions: 0
+- Manually reviewed repositories: 4 focused reviews
+- Average score across scanned repositories: 56.9
+
+Readiness distribution:
+
+| Readiness | Repositories |
+| --- | ---: |
+| Available | 36 |
+| Functional | 9 |
+| Needs preparation | 6 |
+
+Top actionable rule frequencies:
+
+| Rule | Error/warning findings |
+| --- | ---: |
+| RRD071 | 38 |
+| RRD040 | 34 |
+| RRD002 | 33 |
+| RRD004 | 30 |
+| RRD003 | 25 |
+| RRD070 | 25 |
+| RRD091 | 25 |
+| RRD030 | 23 |
+| RRD081 | 22 |
+| RRD043 | 21 |
+
+This snapshot is calibration evidence, not a benchmark or ranking of the scanned
+projects. The clone/scan errors came from local checkout constraints such as
+Windows path length limits or transient GitHub connectivity. The scanner still
+does not install dependencies, import target modules, build target projects, or
+execute target repository code.
+
 ## Manual Review
 
 Every corpus scan needs human review before its results are used in a public
