@@ -39,6 +39,7 @@ app = typer.Typer(
 )
 console = Console()
 err_console = Console(stderr=True)
+PROFILE_HELP = "Profile: " + ", ".join(PROFILES) + "."
 
 
 def _parse_rule_ids(raw: str | None) -> set[str]:
@@ -156,9 +157,7 @@ def scan(
             "--baseline", help="Compare against a JSON report and show new/fixed findings."
         ),
     ] = None,
-    profile: Annotated[
-        str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
-    ] = "standard",
+    profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
     include: Annotated[
         str | None, typer.Option("--include", help="Comma-separated rule IDs to include.")
     ] = None,
@@ -228,9 +227,7 @@ def scan(
 def fix(
     path: Annotated[Path, typer.Argument(help="Repository path to fix.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
-    profile: Annotated[
-        str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
-    ] = "standard",
+    profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
     write: Annotated[
         bool, typer.Option("--write", help="Apply fixes (default is a dry-run preview).")
     ] = False,
@@ -313,9 +310,7 @@ def fix(
 def plan(
     path: Annotated[Path, typer.Argument(help="Repository path to plan.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
-    profile: Annotated[
-        str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
-    ] = "standard",
+    profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
     output_format: Annotated[
         str, typer.Option("--format", help="Plan format: markdown or json.")
     ] = "markdown",
@@ -349,9 +344,7 @@ def plan(
 def badge(
     path: Annotated[Path, typer.Argument(help="Repository path to summarize.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
-    profile: Annotated[
-        str, typer.Option("--profile", help="Profile: minimal, standard, strict, ml.")
-    ] = "standard",
+    profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
     output_format: Annotated[
         str, typer.Option("--format", help="Badge format: endpoint (Shields.io JSON) or svg.")
     ] = "endpoint",
@@ -382,7 +375,7 @@ def badge(
 @app.command()
 def init(
     profile: Annotated[
-        str, typer.Option("--profile", help="Profile for the generated config.")
+        str, typer.Option("--profile", help=PROFILE_HELP + " Used for the generated config.")
     ] = "standard",
     output: Annotated[Path, typer.Option("--output", help="Config file path.")] = Path(
         ".rrdoctor.yml"
@@ -408,7 +401,7 @@ def verify(
     path: Annotated[Path, typer.Argument(help="Repository path to verify.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
     profile: Annotated[
-        str, typer.Option("--profile", help="Profile to scan with (default: standard).")
+        str, typer.Option("--profile", help=PROFILE_HELP + " Default: standard.")
     ] = "standard",
     run: Annotated[
         bool,
@@ -451,7 +444,7 @@ def appendix(
     path: Annotated[Path, typer.Argument(help="Repository path to scan.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
     profile: Annotated[
-        str, typer.Option("--profile", help="Profile to scan with (default: acm).")
+        str, typer.Option("--profile", help=PROFILE_HELP + " Default: acm.")
     ] = "acm",
     section: Annotated[
         str,
