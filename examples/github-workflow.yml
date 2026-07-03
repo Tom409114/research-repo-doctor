@@ -17,3 +17,4 @@ jobs:
           output: rrdoctor-report.md
           plan: "true"
           appendix: "true"
+          verify: "true"

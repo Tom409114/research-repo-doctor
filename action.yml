@@ -49,6 +49,22 @@ inputs:
     description: Artifact appendix output path.
     required: false
     default: ARTIFACT_APPENDIX.md
+  verify:
+    description: Also generate a reproducibility verification ladder report.
+    required: false
+    default: "false"
+  verify-run:
+    description: "Run dynamic verification steps. Executes target repository code; only use on trusted repositories."
+    required: false
+    default: "false"
+  verify-output:
+    description: Verification report output path.
+    required: false
+    default: rrdoctor-verify.md
+  verify-timeout:
+    description: Per-step timeout in seconds for dynamic verification.
+    required: false
+    default: "300"
   comment-pr:
     description: Post or update a sticky comment on the pull request with the report.
     required: false
@@ -78,6 +94,9 @@ outputs:
   appendix-path:
     description: Path to the generated Artifact Evaluation appendix when appendix is true.
     value: ${{ steps.paths.outputs.appendix-path }}
+  verify-path:
+    description: Path to the generated verification report when verify is true.
+    value: ${{ steps.paths.outputs.verify-path }}
 runs:
   using: composite
   steps:
@@ -121,10 +140,12 @@ runs:
       env:
         RRD_OUTPUT: ${{ inputs.output }}
         RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
+        RRD_VERIFY_OUTPUT: ${{ inputs.verify-output }}
       run: |
         echo "report-path=$RRD_OUTPUT" >> "$GITHUB_OUTPUT"
         echo "plan-path=rrdoctor-plan.md" >> "$GITHUB_OUTPUT"
         echo "appendix-path=$RRD_APPENDIX_OUTPUT" >> "$GITHUB_OUTPUT"
+        echo "verify-path=$RRD_VERIFY_OUTPUT" >> "$GITHUB_OUTPUT"
     - name: Generate fix plan
       if: ${{ inputs.plan == 'true' }}
       shell: bash
@@ -140,12 +161,29 @@ runs:
         RRD_PROFILE: ${{ inputs.profile }}
         RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
       run: rrdoctor appendix "$RRD_PATH" --profile "$RRD_PROFILE" --output "$RRD_APPENDIX_OUTPUT"
+    - name: Generate verification report
+      if: ${{ inputs.verify == 'true' }}
+      shell: bash
+      env:
+        RRD_PATH: ${{ inputs.path }}
+        RRD_CONFIG: ${{ inputs.config }}
+        RRD_PROFILE: ${{ inputs.profile }}
+        RRD_VERIFY_RUN: ${{ inputs.verify-run }}
+        RRD_VERIFY_OUTPUT: ${{ inputs.verify-output }}
+        RRD_VERIFY_TIMEOUT: ${{ inputs.verify-timeout }}
+      run: |
+        set -uo pipefail
+        args=(verify "$RRD_PATH" --profile "$RRD_PROFILE" --timeout "$RRD_VERIFY_TIMEOUT" --output "$RRD_VERIFY_OUTPUT" --fail-on none)
+        if [ -n "$RRD_CONFIG" ]; then args+=(--config "$RRD_CONFIG"); fi
+        if [ "$RRD_VERIFY_RUN" = "true" ]; then args+=(--run); fi
+        rrdoctor "${args[@]}"
     - name: Write job summary
       if: ${{ inputs.step-summary == 'true' }}
       shell: bash
       env:
         RRD_OUTPUT: ${{ inputs.output }}
         RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
+        RRD_VERIFY_OUTPUT: ${{ inputs.verify-output }}
       run: |
         set -uo pipefail
         if [ -f "$RRD_OUTPUT" ]; then cat "$RRD_OUTPUT" >> "$GITHUB_STEP_SUMMARY"; fi
@@ -154,6 +192,9 @@ runs:
         fi
         if [ -f "$RRD_APPENDIX_OUTPUT" ]; then
           { echo ""; echo "---"; echo ""; cat "$RRD_APPENDIX_OUTPUT"; } >> "$GITHUB_STEP_SUMMARY"
+        fi
+        if [ -f "$RRD_VERIFY_OUTPUT" ]; then
+          { echo ""; echo "---"; echo ""; cat "$RRD_VERIFY_OUTPUT"; } >> "$GITHUB_STEP_SUMMARY"
         fi
     - name: Comment on pull request
       if: ${{ inputs.comment-pr == 'true' && github.event_name == 'pull_request' }}
@@ -183,6 +224,7 @@ runs:
           ${{ inputs.output }}
           rrdoctor-plan.md
           ${{ inputs.appendix-output }}
+          ${{ inputs.verify-output }}
         if-no-files-found: ignore
     - name: Enforce result
       shell: bash
