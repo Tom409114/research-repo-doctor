@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from rrdoctor.models import Category, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
@@ -49,8 +50,15 @@ class VersionMetadataMissingRule(Rule):
         if (
             not re.search(r"(?im)^(version|__version__)\s*=", combined)
             and not (context.root / "VERSION").exists()
+            and not _has_git_tag(context.root)
         ):
-            return [self.finding(context, message="No version metadata was detected.")]
+            return [
+                self.finding(
+                    context,
+                    message="No version metadata was detected.",
+                    severity=_version_metadata_severity(context),
+                )
+            ]
         return []
 
 
@@ -75,6 +83,31 @@ class ReleaseWorkflowMissingRule(Rule):
         ):
             return [self.finding(context, message="No release or packaging workflow was detected.")]
         return []
+
+
+def _has_git_tag(root: Path) -> bool:
+    git_dir = root / ".git"
+    if not git_dir.exists():
+        return False
+    if git_dir.is_file():
+        gitdir_line = read_text(git_dir).strip()
+        if gitdir_line.lower().startswith("gitdir:"):
+            git_dir = (root / gitdir_line.split(":", 1)[1].strip()).resolve()
+    tags_dir = git_dir / "refs" / "tags"
+    if tags_dir.exists() and any(path.is_file() for path in tags_dir.rglob("*")):
+        return True
+    packed_refs = git_dir / "packed-refs"
+    if packed_refs.exists():
+        for line in read_text(packed_refs).splitlines():
+            if line and not line.startswith("#") and " refs/tags/" in line:
+                return True
+    return False
+
+
+def _version_metadata_severity(context: ScanContext) -> Severity:
+    profile = str(context.config.get("profile", "standard"))
+    strict_profiles = {"strict", "ml-paper", "neurips", "icml", "acm", "fair4rs", "joss"}
+    return Severity.WARNING if profile in strict_profiles else Severity.INFO
 
 
 RULES = [ChangelogMissingRule(), VersionMetadataMissingRule(), ReleaseWorkflowMissingRule()]
