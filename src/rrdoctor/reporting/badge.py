@@ -1,4 +1,4 @@
-"""Score badge rendering.
+"""Artifact readiness badge rendering.
 
 Produces either a Shields.io endpoint document (for a live badge that reads a
 committed JSON file) or a self-contained SVG. Both are deterministic and need no
@@ -12,18 +12,14 @@ import json
 from rrdoctor.models import ScanReport
 
 
-def _color_for(score: int) -> str:
-    if score >= 90:
+def _color_for_readiness(level: str) -> str:
+    if level == "Reproduced-ready":
         return "brightgreen"
-    if score >= 75:
+    if level == "Functional":
         return "green"
-    if score >= 60:
-        return "yellowgreen"
-    if score >= 40:
+    if level == "Available":
         return "yellow"
-    if score >= 20:
-        return "orange"
-    return "red"
+    return "orange"
 
 
 _HEX = {
@@ -42,8 +38,8 @@ def render_badge_endpoint(report: ScanReport) -> str:
     payload = {
         "schemaVersion": 1,
         "label": "rrdoctor",
-        "message": f"{report.score}/100",
-        "color": _color_for(report.score),
+        "message": report.readiness.level,
+        "color": _color_for_readiness(report.readiness.level),
     }
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
@@ -52,8 +48,8 @@ def render_badge_svg(report: ScanReport) -> str:
     """Render a self-contained SVG badge."""
 
     label = "rrdoctor"
-    message = f"{report.score}/100"
-    color = _HEX[_color_for(report.score)]
+    message = report.readiness.level
+    color = _HEX[_color_for_readiness(report.readiness.level)]
     # Approximate width using a fixed per-character estimate; good enough for a badge.
     label_w = 6 + len(label) * 7
     msg_w = 10 + len(message) * 7

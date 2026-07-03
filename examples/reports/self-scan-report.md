@@ -1,10 +1,13 @@
 # Research Repo Doctor Report
 
 - Repository: `research-repo-doctor`
-- Generated: `2026-07-03T11:29:18.582408+00:00`
+- Generated: `2026-07-03T11:36:45.718956+00:00`
 - Profile: `standard`
-- Overall score: **100/100**
+- Artifact readiness: **Reproduced-ready**
+- Heuristic score: **100/100**
 - Rules evaluated: `33`
+
+> Readiness note: Static checks found no blocking findings. Run `rrdoctor verify --run` on a trusted machine for dynamic evidence.
 
 > Heuristic note: Research Repo Doctor uses deterministic heuristics. The score is a guide, not a substitute for peer review or maintainer judgment.
 
