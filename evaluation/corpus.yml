@@ -1,0 +1,77 @@
+version: 1
+description: >
+  Seed public-repository corpus for checking rrdoctor rule signal quality.
+  Entries store only public URLs and review notes; no third-party code is copied.
+review_goal: >
+  Expand to 50-100 recent research artifacts, manually review false positives
+  and false negatives, then publish aggregate results without ranking individual
+  maintainers.
+repositories:
+  - name: nanoGPT
+    url: https://github.com/karpathy/nanoGPT
+    ecosystem: python-ml
+    reason: Root-level train.py, README run commands, notebooks, and data prep scripts.
+    expected_absent: [RRD050, RRD063]
+    review_focus: [entrypoint-detection, notebook-secret-heuristics, data-prep-docs]
+  - name: segment-anything
+    url: https://github.com/facebookresearch/segment-anything
+    ecosystem: python-ml
+    reason: Model artifact repo with notebooks, checkpoint links, and inference examples.
+    review_focus: [notebooks, model-checkpoints, install-docs]
+  - name: whisper
+    url: https://github.com/openai/whisper
+    ecosystem: python-ml
+    reason: Widely used research model release with package metadata and examples.
+    review_focus: [package-metadata, citation, model-artifacts]
+  - name: bert
+    url: https://github.com/google-research/bert
+    ecosystem: python-ml
+    reason: Classic TensorFlow research release with scripts and pretrained-model docs.
+    review_focus: [legacy-python, entrypoints, dependency-docs]
+  - name: alphafold
+    url: https://github.com/google-deepmind/alphafold
+    ecosystem: python-bioinformatics
+    reason: High-impact computational biology artifact with data and environment complexity.
+    review_focus: [data-provenance, environment, hardware-requirements]
+  - name: stable-diffusion
+    url: https://github.com/CompVis/stable-diffusion
+    ecosystem: python-ml
+    reason: Research code release with configs, checkpoints, and inference/training paths.
+    review_focus: [configs, checkpoint-hygiene, entrypoints]
+  - name: mmdetection
+    url: https://github.com/open-mmlab/mmdetection
+    ecosystem: python-ml
+    reason: Large benchmark/toolbox style research repo with many configs and docs.
+    review_focus: [large-repo-scan, config-detection, docs-noise]
+  - name: yolov5
+    url: https://github.com/ultralytics/yolov5
+    ecosystem: python-ml
+    reason: Popular applied ML repo with train/val/detect scripts and datasets docs.
+    review_focus: [root-entrypoints, data-docs, ci-docs]
+  - name: scanpy
+    url: https://github.com/scverse/scanpy
+    ecosystem: python-bioinformatics
+    reason: Scientific Python project used in single-cell analysis workflows.
+    review_focus: [package-metadata, docs, testing]
+  - name: snakemake-rna-seq
+    url: https://github.com/snakemake-workflows/rna-seq-kallisto-sleuth
+    ecosystem: workflow-r
+    reason: Snakemake workflow repository for RNA-seq reproducibility checks.
+    expected_absent: [RRD050]
+    review_focus: [snakemake-entrypoint, r-environment, workflow-docs]
+  - name: nf-core-rnaseq
+    url: https://github.com/nf-core/rnaseq
+    ecosystem: nextflow
+    reason: Mature Nextflow workflow with rich configs and pipeline docs.
+    expected_absent: [RRD050]
+    review_focus: [nextflow-entrypoint, workflow-docs, large-repo-scan]
+  - name: seurat
+    url: https://github.com/satijalab/seurat
+    ecosystem: r-bioinformatics
+    reason: R research software used for single-cell genomics.
+    review_focus: [r-environment, citation, docs]
+  - name: dynamicalsystems-jl
+    url: https://github.com/JuliaDynamics/DynamicalSystems.jl
+    ecosystem: julia-science
+    reason: Julia scientific computing package with project metadata.
+    review_focus: [julia-environment, package-metadata, docs]
