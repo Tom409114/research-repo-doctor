@@ -41,6 +41,17 @@ Review stubs are marked `needs-review`, so they do not count as manually
 reviewed repositories until a maintainer edits them and changes `status` to
 `reviewed`.
 
+To turn manually reviewed first-run trust cases into a regression gate, run:
+
+```bash
+python scripts/scan_corpus.py --only nanoGPT --fail-on-expected-absent
+```
+
+Each corpus entry can list rule IDs under `expected_absent`. The gate exits
+nonzero if one of those rules appears again. Use this for cases such as
+root-level `train.py` detection and notebook secret false-positive regressions,
+where a single noisy finding can undermine confidence in a first scan.
+
 ## Manual Review
 
 Every corpus scan needs human review before its results are used in a public
