@@ -23,6 +23,20 @@ False negatives should include the missed reproducibility risk, expected finding
 
 A rule request should describe the reproducibility risk, the deterministic evidence, expected remediation, and likely false-positive cases. Accepted rule requests become fixture-driven pull requests.
 
+## Corpus review
+
+Rule quality should be checked against public research repositories as well as
+small fixtures. Use the evaluation corpus workflow before changing broad
+heuristics such as entrypoint, data, notebook, or secret detection:
+
+```bash
+python scripts/scan_corpus.py --limit 3
+```
+
+Review `evaluation/reports/corpus-summary.md` manually. Treat expected-absent
+violations as regression candidates, then add a fixture before changing rule
+logic. See [evaluation corpus](evaluation-corpus.md).
+
 ## Pull requests
 
 Rule PRs are reviewed for deterministic behavior, evidence quality, secret masking, tests, docs, profile fit, and config compatibility. Maintainers should verify that reports remain actionable and do not expose secrets.
