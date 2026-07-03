@@ -5,6 +5,7 @@
 - Added Artifact Evaluation-style readiness levels (`Available`, `Functional`,
   `Reproduced-ready`) to scan reports, JSON output, CLI summaries, fix plans, and badges.
 - Changed `rrdoctor badge` to publish the readiness label instead of a bare numeric score.
+- Reframed the README first screen around Artifact Evaluation deadline preparation.
 - Removed internal launch notes and issue-draft documents from the public documentation tree.
 - Removed the broken README demo GIF reference and kept the live web demo link.
 - Fixed `RRD050` so common research entrypoints such as root-level `train.py`, `main.py`,
