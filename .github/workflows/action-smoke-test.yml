@@ -21,5 +21,13 @@ jobs:
           fail-on: none
           output: rrdoctor-action-report.md
           plan: "true"
+          appendix: "true"
+          appendix-output: rrdoctor-action-appendix.md
           comment-pr: "true"
           step-summary: "true"
+      - name: Check generated action outputs
+        shell: bash
+        run: |
+          test -s rrdoctor-action-report.md
+          test -s rrdoctor-plan.md
+          test -s rrdoctor-action-appendix.md

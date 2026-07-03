@@ -242,6 +242,7 @@ jobs:
           comment-pr: "true"     # sticky PR comment with the report
           step-summary: "true"   # report in the job summary
           plan: "true"           # attach an agent-ready fix plan
+          appendix: "true"       # attach an Artifact Evaluation appendix
 ```
 
 For new-finding gating and a committed baseline, see
