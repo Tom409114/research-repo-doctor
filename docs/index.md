@@ -14,5 +14,6 @@ Start with the quickstart, then read the checks and configuration reference.
 - [Pull request automation](pull-request-automation.md)
 - [Report formats](report-format.md)
 - [Rule authoring](rule-authoring.md)
+- [Evaluation corpus](evaluation-corpus.md)
 - [Research reproducibility](research-reproducibility.md)
 - [Maintainer workflows](maintainer-workflows.md)
