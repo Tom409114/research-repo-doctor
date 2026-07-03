@@ -94,9 +94,11 @@ rrdoctor verify . --profile acm --output rrdoctor-verify.md --fail-on none
 This reports L1 static readiness and explains what would block L2 environment
 setup or L3 entrypoint execution.
 
-L3 recognizes common research entrypoints such as `scripts/reproduce.sh`,
-Make targets, root-level `train.py`/`main.py`/`run.py`, matching scripts under
-`scripts/`, and executable notebooks via `papermill` when available.
+L3 prefers documented README run commands when they are conservative and
+file-backed, then falls back to common research entrypoints such as
+`scripts/reproduce.sh`, Make targets, root-level `train.py`/`main.py`/`run.py`,
+matching scripts under `scripts/`, and executable notebooks via `papermill` when
+available.
 
 For repositories you trust, run the dynamic check under a timeout:
 
