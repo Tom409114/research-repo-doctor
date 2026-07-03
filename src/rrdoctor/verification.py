@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -146,17 +147,38 @@ def _l2_step(root: Path, run: bool, timeout: int) -> LadderStep:
     return LadderStep("L2", "Environment is resolvable", status, detail, commands=display, log=log)
 
 
-def _entrypoint_command(root: Path) -> tuple[str | None, str]:
+_PYTHON_ENTRYPOINTS = (
+    "train.py",
+    "main.py",
+    "run.py",
+    "reproduce.py",
+    "eval.py",
+    "evaluate.py",
+    "scripts/train.py",
+    "scripts/main.py",
+    "scripts/run.py",
+    "scripts/reproduce.py",
+    "scripts/eval.py",
+    "scripts/evaluate.py",
+)
+
+
+def _entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
     """Return (runnable command, display) for the most likely entrypoint."""
 
     if (root / "scripts" / "reproduce.sh").exists():
-        return "bash scripts/reproduce.sh", "bash scripts/reproduce.sh"
+        return ["bash", "scripts/reproduce.sh"], "bash scripts/reproduce.sh"
+    if (root / "scripts" / "run.sh").exists():
+        return ["bash", "scripts/run.sh"], "bash scripts/run.sh"
     if (root / "Makefile").exists():
-        return "make", "make  # default target"
+        return ["make"], "make  # default target"
+    for entrypoint in _PYTHON_ENTRYPOINTS:
+        if (root / entrypoint).exists():
+            return [sys.executable, entrypoint], f"python {entrypoint}"
     notebooks = sorted(root.rglob("*.ipynb"))
     if notebooks and shutil.which("papermill"):
         rel = notebooks[0].relative_to(root).as_posix()
-        return f"papermill {rel} -", f"papermill {rel} (execute notebook)"
+        return ["papermill", rel, "-"], f"papermill {rel} (execute notebook)"
     if notebooks:
         rel = notebooks[0].relative_to(root).as_posix()
         return None, f"papermill {rel}  (papermill not installed)"
@@ -189,7 +211,7 @@ def _l3_step(root: Path, run: bool, timeout: int) -> LadderStep:
             "Entrypoint detected but its runner is not installed.",
             commands=commands,
         )
-    code, log = _run_command(runnable.split(), root, timeout)
+    code, log = _run_command(runnable, root, timeout)
     if code is None:
         status, detail = "blocked", "Entrypoint runner is not installed."
     elif code == 0:
