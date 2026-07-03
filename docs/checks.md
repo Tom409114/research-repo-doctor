@@ -44,7 +44,7 @@ covered by the agent fix plan (`rrdoctor plan`).
 | RRD082 | No pre-commit configuration found | ci | info | strict |  |
 | RRD090 | Potential committed secret detected | security | error | standard, strict, ml |  |
 | RRD091 | .gitignore missing common research artifacts | security | warning | standard, strict, ml | yes |
-| RRD100 | CHANGELOG missing | release | warning | standard, strict, ml | yes |
+| RRD100 | CHANGELOG missing | release | info | standard, strict, ml | yes |
 | RRD101 | No version metadata found | release | warning | standard, strict, ml |  |
 | RRD102 | No release or packaging workflow found | release | info | strict |  |
 | RRD110 | Python project metadata incomplete | metadata | warning | standard, strict, ml |  |
@@ -73,3 +73,7 @@ random value before it is reported; known provider key prefixes are still flagge
 coverage across generated outputs, credential files, notebook checkpoints, or
 language caches. It does not require every project to ignore optional tool
 folders such as `wandb` or `mlruns`.
+
+`RRD100` is informational in the standard profiles. Changelogs help package
+users and release maintainers, but a missing changelog is not treated as a core
+research-artifact reproducibility blocker.

@@ -14,7 +14,7 @@ class ChangelogMissingRule(Rule):
         "RRD100",
         "CHANGELOG missing",
         Category.RELEASE,
-        Severity.WARNING,
+        Severity.INFO,
         ("standard", "strict", "ml"),
         "Checks for release history documentation.",
         "A changelog helps users understand changes between research code releases.",

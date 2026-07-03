@@ -30,6 +30,11 @@
 - Reduced `RRD091` noise on real research repositories by checking `.gitignore`
   coverage groups instead of requiring every optional research-tool ignore
   entry.
+- Changed `RRD100` (missing changelog) from warning to info in standard scans so
+  release history remains visible without penalizing core artifact
+  reproducibility.
+- Updated corpus summaries to rank top actionable error/warning rules while
+  still preserving all rule frequencies in JSON.
 
 ## v0.2.3 - 2026-06-30
 

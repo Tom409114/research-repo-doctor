@@ -62,6 +62,7 @@ def test_markdown_summary_mentions_manual_review() -> None:
                 "score": 64,
                 "summary": {"error": 0, "warning": 2},
                 "findings_by_rule": {"RRD030": 1, "RRD050": 2},
+                "actionable_findings_by_rule": {"RRD030": 1, "RRD050": 2},
                 "findings_by_severity": {"warning": 3},
                 "expected_absent_violations": [],
                 "manual_review": {
@@ -75,6 +76,7 @@ def test_markdown_summary_mentions_manual_review() -> None:
     assert "Aggregate Overview" in rendered
     assert "Manually reviewed: 1" in rendered
     assert "Functional" in rendered
+    assert "Top actionable rule frequencies" in rendered
     assert "RRD050" in rendered
     assert "False positive" in rendered
     assert "Review this table manually" in rendered
@@ -93,6 +95,7 @@ def test_aggregate_summaries_counts_rules_and_violations() -> None:
                 "readiness": {"level": "Functional"},
                 "score": 64,
                 "findings_by_rule": {"RRD030": 1, "RRD050": 2},
+                "actionable_findings_by_rule": {"RRD050": 2},
                 "findings_by_severity": {"error": 1, "warning": 2},
                 "expected_absent_violations": ["RRD050"],
                 "manual_review": {
@@ -119,6 +122,8 @@ def test_aggregate_summaries_counts_rules_and_violations() -> None:
     assert aggregate["pending_review_repositories"] == 0
     assert aggregate["readiness"] == {"Functional": 1}
     assert aggregate["rules"]["RRD050"] == 2
+    assert aggregate["actionable_rules"] == {"RRD050": 2}
+    assert aggregate["top_actionable_rules"] == [{"key": "RRD050", "count": 2}]
     assert aggregate["severities"] == {"error": 1, "warning": 2}
     assert aggregate["false_positive_rules"] == {"RRD030": 1}
     assert aggregate["false_negative_rules"] == {"RRD052": 1}
@@ -172,6 +177,7 @@ def test_pending_review_stubs_do_not_count_as_reviewed() -> None:
                 "readiness": {"level": "Functional"},
                 "score": 64,
                 "findings_by_rule": {},
+                "actionable_findings_by_rule": {},
                 "findings_by_severity": {},
                 "expected_absent_violations": [],
                 "manual_review": {

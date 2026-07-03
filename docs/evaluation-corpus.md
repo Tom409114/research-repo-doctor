@@ -24,7 +24,10 @@ the static rrdoctor scanner, and writes:
 
 The scan JSON stays one object per repository. The aggregate JSON and Markdown
 summary include data-post-ready counts for readiness levels, ecosystems,
-severity totals, top rule IDs, and expected-absent violations.
+severity totals, top actionable rule IDs, and expected-absent violations. The
+aggregate JSON keeps all rule frequencies under `rules` and error/warning-only
+frequencies under `actionable_rules`; the Markdown summary uses the actionable
+view so informational maintenance hints do not dominate public data posts.
 Manual review notes from `evaluation/reviews/` are loaded automatically and add
 reviewed-repository, false-positive, and false-negative counts to the aggregate.
 
