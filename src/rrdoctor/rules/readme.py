@@ -2,10 +2,25 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, has_any_heading, read_text
+
+REPRODUCE_COMMAND_RE = re.compile(
+    r"(?im)(^|\n)\s*(?:\$|>)?\s*"
+    r"(?:(?:uv|poetry|pipenv)\s+run\s+)?"
+    r"(?:"
+    r"python(?:\s+-m)?|Rscript|julia|bash|sh|make|snakemake|nextflow(?:\s+run)?"
+    r")\b[^\n]*\b("
+    r"train|training|eval|evaluate|test|predict|infer|inference|sample|benchmark|"
+    r"reproduc|replicate|experiment|main|run|Snakefile|workflow"
+    r")\b"
+)
+REPRODUCE_TEXT_RE = re.compile(
+    r"(?is)\b(reproduce|replicate)\b.{0,80}\b(results?|experiments?|paper|figures?)\b"
+)
 
 
 def readme_path(context: ScanContext) -> Path | None:
@@ -122,14 +137,21 @@ class ReadmeReproduceRule(Rule):
         if path is None:
             return []
         text = read_text(path)
-        if not has_any_heading(text, ("reproduc", "results", "replicate")):
+        has_reproducibility_evidence = (
+            has_any_heading(text, ("reproduc", "results", "replicate"))
+            or REPRODUCE_TEXT_RE.search(text)
+            or REPRODUCE_COMMAND_RE.search(text)
+        )
+        if not has_reproducibility_evidence:
             return [
                 self.finding(
                     context,
                     message="README does not describe how to reproduce key results.",
                     evidence=[
                         Evidence(
-                            "README headings do not mention reproducibility.", context.rel(path)
+                            "README does not include a reproducibility/results section or a "
+                            "training/evaluation/reproduction command.",
+                            context.rel(path),
                         )
                     ],
                     file=context.rel(path),
