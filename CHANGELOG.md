@@ -27,6 +27,9 @@
 - Improved `rrdoctor fix` data-provenance scaffolds so generated `DATA.md` and
   `data/README.md` include local evidence such as data directories, retrieval
   scripts, README data mentions, and current `data/` contents.
+- Reduced `RRD091` noise on real research repositories by checking `.gitignore`
+  coverage groups instead of requiring every optional research-tool ignore
+  entry.
 
 ## v0.2.3 - 2026-06-30
 
