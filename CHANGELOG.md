@@ -6,8 +6,10 @@
   `Reproduced-ready`) to scan reports, JSON output, CLI summaries, fix plans, and badges.
 - Changed `rrdoctor badge` to publish the readiness label instead of a bare numeric score.
 - Reframed the README first screen around Artifact Evaluation deadline preparation.
+- Added a public-repository evaluation corpus manifest and static scan runner for
+  evidence-driven false-positive and false-negative review.
 - Polished public documentation, release notes, and project hygiene evidence.
-- Removed the broken README demo GIF reference and kept the live web demo link.
+- Removed the broken README demo GIF reference and the unavailable live demo link.
 - Fixed `RRD050` so common research entrypoints such as root-level `train.py`, `main.py`,
   `run.py`, eval scripts, Snakemake, Nextflow, and documented README commands count as
   experiment entrypoints.
