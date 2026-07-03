@@ -382,6 +382,25 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def expected_absent_failure_message(aggregate: dict[str, Any]) -> str | None:
+    """Return a regression-gate failure message for expected-absent rules."""
+
+    violations = aggregate.get("expected_absent_violations", [])
+    if not isinstance(violations, list) or not violations:
+        return None
+
+    lines = [
+        "Expected-absent rule regression(s) detected:",
+    ]
+    for item in violations:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name", "unknown")
+        rule_ids = ", ".join(str(rule_id) for rule_id in item.get("violations", []))
+        lines.append(f"- {name}: {rule_ids}")
+    return "\n".join(lines)
+
+
 def _review_is_complete(review: dict[str, Any]) -> bool:
     status = str(review.get("status", "reviewed")).strip().lower()
     return status in {"reviewed", "complete", "completed"}
@@ -601,6 +620,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--cache-dir", type=Path, default=None)
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--max-mb", type=int, default=DEFAULT_MAX_BYTES // (1024 * 1024))
+    parser.add_argument(
+        "--fail-on-expected-absent",
+        action="store_true",
+        help=(
+            "Exit nonzero if a repository emits a rule listed in its expected_absent set. "
+            "Use this as a regression gate for manually reviewed first-run trust cases."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -637,6 +664,11 @@ def main(argv: list[str] | None = None) -> int:
         stubs = write_review_stubs(summaries, args.review_stub_dir)
         message += f"; wrote {len(stubs)} review stub(s) to {args.review_stub_dir}"
     print(message)
+    if args.fail_on_expected_absent:
+        failure = expected_absent_failure_message(aggregate)
+        if failure is not None:
+            print(failure, file=sys.stderr)
+            return 1
     return 0
 
 
