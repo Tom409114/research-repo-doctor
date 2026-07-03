@@ -35,6 +35,30 @@ def test_workflow_files_count_as_experiment_entrypoint(tmp_path) -> None:
     assert not report.findings
 
 
+def test_tools_train_py_counts_as_experiment_entrypoint(tmp_path) -> None:
+    tools = tmp_path / "tools"
+    tools.mkdir()
+    (tools / "train.py").write_text("print('train')\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_readme_tools_train_command_counts_as_experiment_entrypoint(tmp_path) -> None:
+    tools = tmp_path / "tools"
+    tools.mkdir()
+    (tools / "train.py").write_text("print('train')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nRun `python tools/train.py configs/default.py` to train the model.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_unseeded_numpy_randomness_flagged(tmp_path) -> None:
     (tmp_path / "train.py").write_text(
         "import numpy as np\n\ndef train():\n    return np.random.randn(10)\n",

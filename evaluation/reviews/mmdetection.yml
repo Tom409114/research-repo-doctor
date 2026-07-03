@@ -1,0 +1,14 @@
+version: 1
+repository: mmdetection
+status: reviewed
+reviewed_at: 2026-07-04
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Focused review confirmed ML-style tools/train.py and tools/test.py entrypoints are recognized.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused regression review for common ML framework entrypoints. mmdetection
+  exposes training and evaluation entrypoints under tools/, which should not be
+  treated as missing experiment-entrypoint evidence.

@@ -4,6 +4,9 @@ This directory stores manual review notes for public corpus scans. The files do
 not copy third-party source code or notebook contents. They only record rule IDs,
 review outcomes, and short evidence summaries that help maintainers decide
 whether a finding is a false positive, a false negative, or an expected absence.
+A review note can be focus-specific: use the `notes` field to say which rule or
+regression risk was checked, and do not imply a full repository audit unless that
+work was actually done.
 
 Use one YAML file per corpus entry:
 

@@ -163,6 +163,12 @@ _PYTHON_ENTRYPOINTS = (
     "scripts/reproduce.py",
     "scripts/eval.py",
     "scripts/evaluate.py",
+    "tools/train.py",
+    "tools/test.py",
+    "tools/eval.py",
+    "tools/evaluate.py",
+    "tools/run.py",
+    "tools/reproduce.py",
 )
 
 
@@ -332,7 +338,12 @@ def _is_python_entrypoint(path: str) -> bool:
         "reproduce.py",
         "eval.py",
         "evaluate.py",
-    } or bool(re.match(r"(?i)(?:scripts|src)/.*(?:train|run|eval|evaluate|reproduce).*\.py$", rel))
+    } or bool(
+        re.match(
+            r"(?i)(?:scripts|src|tools)/.*(?:train|test|run|eval|evaluate|reproduce).*\.py$",
+            rel,
+        )
+    )
 
 
 def _is_shell_entrypoint(path: str) -> bool:

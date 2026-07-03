@@ -117,3 +117,15 @@ def test_verification_detects_scripts_python_entrypoint(tmp_path) -> None:
     assert runnable is not None
     assert runnable[-1] == "scripts/run.py"
     assert display == "python scripts/run.py"
+
+
+def test_verification_detects_tools_python_entrypoint(tmp_path) -> None:
+    tools = tmp_path / "tools"
+    tools.mkdir()
+    (tools / "train.py").write_text("print('train')\n", encoding="utf-8")
+
+    runnable, display = _entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[-1] == "tools/train.py"
+    assert display == "python tools/train.py"

@@ -41,6 +41,11 @@ class ExperimentEntrypointMissingRule(Rule):
             "scripts/eval*.py",
             "scripts/evaluate*.py",
             "scripts/run*.py",
+            "tools/train*.py",
+            "tools/eval*.py",
+            "tools/evaluate*.py",
+            "tools/test*.py",
+            "tools/run*.py",
             "src/**/train*.py",
             "src/**/eval*.py",
             "src/**/evaluate*.py",
@@ -69,7 +74,7 @@ _DOCUMENTED_ENTRYPOINT_RE = re.compile(
     r"(?ix)"
     r"\b("
     r"python(?:\s+-m)?\s+(?:\./)?(?:train|main|run|eval|evaluate|reproduce)(?:\.py)?\b|"
-    r"python\s+(?:\./)?(?:scripts|src)/[^\s`]*(?:train|eval|evaluate|run|reproduce)"
+    r"python\s+(?:\./)?(?:scripts|src|tools)/[^\s`]*(?:train|test|eval|evaluate|run|reproduce)"
     r"[^\s`]*\.py\b|"
     r"bash\s+(?:\./)?(?:scripts/)?(?:run|reproduce|train|eval)[^\s`]*\.sh\b|"
     r"make\s+(?:all|run|train|eval|evaluate|reproduce|results)\b|"

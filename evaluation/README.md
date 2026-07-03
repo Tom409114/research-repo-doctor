@@ -17,24 +17,26 @@ Latest local maintainer smoke run:
 - Date: 2026-07-04
 - Command: `python scripts/scan_corpus.py --limit 10 --timeout 120 --max-mb 500 --fail-on-expected-absent`
 - Corpus slice: first 10 public repositories in `evaluation/corpus.yml`
-- Scanned successfully: 9 of 10
-- Clone or scan errors: 1 transient clone timeout
+- Scanned successfully: 10 of 10
+- Clone or scan errors: 0
 - Average score across scanned repositories: 64.4
 - Expected-absent regressions: 0
-- Manually reviewed repositories: 1
+- Manually reviewed repositories: 2 focused reviews
 
 Top actionable rule frequencies in that snapshot:
 
 | Rule | Error/warning findings |
 | --- | ---: |
-| RRD004 | 5 |
+| RRD004 | 6 |
+| RRD060 | 6 |
+| RRD071 | 6 |
+| RRD003 | 5 |
 | RRD034 | 5 |
-| RRD060 | 5 |
-| RRD071 | 5 |
-| RRD003 | 4 |
-| RRD050 | 4 |
+| RRD080 | 5 |
+| RRD002 | 4 |
+| RRD030 | 4 |
+| RRD040 | 4 |
 | RRD070 | 4 |
-| RRD080 | 4 |
 
 This is not a benchmark and should not be read as a ranking of projects. The
 snapshot is a maintainer calibration tool: high-frequency rules are candidates
