@@ -7,6 +7,7 @@ from rrdoctor.reporting.appendix import badge_status, render_appendix, render_ch
 from rrdoctor.scanner import Scanner
 from rrdoctor.verification import (
     _entrypoint_command,
+    _readme_entrypoint_command,
     _run_command,
     render_verification,
     verification_failed,
@@ -52,7 +53,7 @@ def test_verification_ladder_static_mode() -> None:
 
     assert "L1" in rendered and "L2" in rendered and "L3" in rendered
     assert "static" in rendered
-    assert "python scripts/train.py" in rendered
+    assert "python scripts/train.py --config configs/default.yaml" in rendered
     # ml-project-repo has no error findings, so L1 should not be a failure.
     assert not verification_failed(report)
 
@@ -78,6 +79,32 @@ def test_verification_detects_root_python_entrypoint(tmp_path) -> None:
     assert runnable is not None
     assert runnable[-1] == "train.py"
     assert display == "python train.py"
+
+
+def test_verification_prefers_documented_readme_entrypoint(tmp_path) -> None:
+    (tmp_path / "train.py").write_text("print('train')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nRun `python train.py config/train_shakespeare_char.py`.\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[-2:] == ["train.py", "config/train_shakespeare_char.py"]
+    assert display == "python train.py config/train_shakespeare_char.py"
+
+
+def test_verification_ignores_non_file_backed_readme_command(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nRun `make reproduce` after setting up the project.\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is None
+    assert display == ""
 
 
 def test_verification_detects_scripts_python_entrypoint(tmp_path) -> None:
