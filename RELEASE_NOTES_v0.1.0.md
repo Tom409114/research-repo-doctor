@@ -51,4 +51,4 @@ v0.1.0 includes rules across documentation, governance, citation, environment, d
 
 ## Roadmap issues
 
-Initial issue drafts are available in `docs/initial-issues.md`. Once the public GitHub repository is available, maintainers can create the roadmap issues from those drafts.
+Initial public roadmap items are tracked in GitHub issues and ROADMAP.md.

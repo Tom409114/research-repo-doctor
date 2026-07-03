@@ -22,7 +22,7 @@ from rrdoctor.config import (
     default_config_text,
     load_config,
 )
-from rrdoctor.fixers import FixContext, apply_fix, fixable_rule_ids
+from rrdoctor.fixers import apply_fix, fixable_rule_ids, infer_fix_context
 from rrdoctor.models import DiffResult, ScanReport
 from rrdoctor.reporting.agent import render_agent_json, render_agent_markdown
 from rrdoctor.reporting.appendix import render_appendix, render_checklist
@@ -240,8 +240,12 @@ def fix(
         str | None, typer.Option("--project-name", help="Project name for scaffolded files.")
     ] = None,
     author: Annotated[
-        str, typer.Option("--author", help="Author/copyright holder for scaffolded files.")
-    ] = "The Authors",
+        str | None,
+        typer.Option(
+            "--author",
+            help="Author/copyright holder for scaffolded files. Defaults to project metadata.",
+        ),
+    ] = None,
 ) -> None:
     """Apply deterministic, idempotent auto-fixes for common reproducibility gaps.
 
@@ -271,9 +275,9 @@ def fix(
         console.print("No auto-fixable findings. Run `rrdoctor plan` for the remaining work.")
         return
 
-    ctx = FixContext(
-        root=root,
-        project_name=project_name or root.name,
+    ctx = infer_fix_context(
+        root,
+        project_name=project_name,
         author=author,
         year=datetime.now(timezone.utc).year,
     )

@@ -2,9 +2,8 @@
 
 Find the reproducibility traps in your research repo in seconds, then auto-fix the boring gaps before reviewers hit them.
 
-▶ Try it on any public repo (no install): <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
-
-![demo](docs/demo.gif)
+Try the live web demo on any public repo (no install):
+<https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
 
 [![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
 [![rrdoctor score](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tom409114/research-repo-doctor/main/.rrdoctor-badge.json)](https://github.com/Tom409114/research-repo-doctor)
@@ -118,7 +117,7 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
-## What's new in 0.3.0
+## What's new in 0.2.3
 
 - **`rrdoctor appendix`** generates an ACM-style Artifact Appendix skeleton and maps findings
   to ACM badge tiers and the NeurIPS reproducibility checklist, so you can fill the artifact
@@ -220,7 +219,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.0
+      - uses: Tom409114/research-repo-doctor@v0.2.3
         with:
           profile: standard
           fail-on: none

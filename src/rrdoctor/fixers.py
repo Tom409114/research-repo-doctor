@@ -10,6 +10,7 @@ left to the agent fix plan instead.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -29,6 +30,9 @@ class FixContext:
     author: str
     year: int
     contact: str = "the maintainers (see repository profile)"
+    repository_url: str | None = None
+    version: str | None = None
+    date_released: str | None = None
 
 
 def _write_if_missing(path: Path, content: str, rule_id: str, rel: str) -> FixResult:
@@ -37,6 +41,73 @@ def _write_if_missing(path: Path, content: str, rule_id: str, rel: str) -> FixRe
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     return FixResult(rule_id, rel, "created", f"Created {rel}.")
+
+
+def infer_fix_context(
+    root: Path,
+    *,
+    project_name: str | None = None,
+    author: str | None = None,
+    year: int | None = None,
+) -> FixContext:
+    """Infer useful scaffold metadata from local repository files."""
+
+    metadata = _read_pyproject_metadata(root)
+    inferred_name = project_name or metadata.get("name") or root.name
+    inferred_author = author or metadata.get("author") or f"{inferred_name} maintainers"
+    return FixContext(
+        root=root,
+        project_name=inferred_name,
+        author=inferred_author,
+        year=year or datetime.now(timezone.utc).year,
+        repository_url=metadata.get("repository_url") or _read_git_origin_url(root),
+        version=metadata.get("version"),
+        date_released=datetime.now(timezone.utc).date().isoformat(),
+    )
+
+
+def _read_pyproject_metadata(root: Path) -> dict[str, str]:
+    pyproject = root / "pyproject.toml"
+    if not pyproject.exists():
+        return {}
+    text = read_text(pyproject)
+    metadata: dict[str, str] = {}
+    for key in ("name", "version"):
+        match = re.search(rf"(?m)^{key}\s*=\s*\"([^\"]+)\"", text)
+        if match:
+            metadata[key] = match.group(1)
+    author = re.search(r"(?s)authors\s*=\s*\[\s*\{\s*name\s*=\s*\"([^\"]+)\"", text)
+    if author:
+        metadata["author"] = author.group(1)
+    urls = re.search(r"(?ms)^\[project\.urls\](.*?)(?:^\[|\Z)", text)
+    if urls:
+        for key in ("Repository", "Homepage"):
+            match = re.search(rf"(?m)^{key}\s*=\s*\"([^\"]+)\"", urls.group(1))
+            if match:
+                metadata["repository_url"] = match.group(1)
+                break
+    return metadata
+
+
+def _read_git_origin_url(root: Path) -> str | None:
+    config = root / ".git" / "config"
+    if not config.exists():
+        return None
+    text = read_text(config)
+    origin = re.search(r'(?ms)^\[remote "origin"\](.*?)(?:^\[|\Z)', text)
+    if not origin:
+        return None
+    url = re.search(r"(?m)^\s*url\s*=\s*(\S+)\s*$", origin.group(1))
+    if not url:
+        return None
+    return _normalize_git_url(url.group(1))
+
+
+def _normalize_git_url(url: str) -> str:
+    ssh = re.match(r"git@([^:]+):(.+?)(?:\.git)?$", url)
+    if ssh:
+        return f"https://{ssh.group(1)}/{ssh.group(2)}"
+    return url.removesuffix(".git")
 
 
 # --- Templates ---------------------------------------------------------------
@@ -136,16 +207,21 @@ def _agents(ctx: FixContext) -> str:
 
 
 def _citation(ctx: FixContext) -> str:
-    return (
+    lines = [
         "cff-version: 1.2.0\n"
         f'title: "{ctx.project_name}"\n'
         'message: "If you use this software, please cite it as below."\n'
         "type: software\n"
         "authors:\n"
         f'  - name: "{ctx.author}"\n'
-        f'date-released: "{ctx.year}-01-01"\n'
-        "# Add a DOI, repository-code URL, version, and individual authors before release.\n"
-    )
+        f'date-released: "{ctx.date_released or f"{ctx.year}-01-01"}"\n'
+    ]
+    if ctx.version:
+        lines.append(f'version: "{ctx.version}"\n')
+    if ctx.repository_url:
+        lines.append(f'repository-code: "{ctx.repository_url}"\n')
+    lines.append("# TODO: Add a DOI and individual author names before release, if available.\n")
+    return "".join(lines)
 
 
 def _data_md(ctx: FixContext) -> str:
