@@ -16,6 +16,12 @@ COMMON_GITIGNORE_TERMS = (
     "wandb",
     "mlruns",
 )
+GITIGNORE_COVERAGE_GROUPS = {
+    "credentials": (".env", "*.env", ".env*", "secret", "secrets", "credentials"),
+    "python_caches": ("__pycache__", "*.pyc", "*.pyo", "*.pyd", ".pytest_cache"),
+    "notebook_checkpoints": (".ipynb_checkpoints", "ipynb_checkpoints"),
+    "generated_outputs": ("outputs", "output", "results", "checkpoints", "wandb", "mlruns"),
+}
 
 
 class PotentialSecretRule(Rule):
@@ -64,9 +70,9 @@ class GitignoreResearchArtifactsRule(Rule):
         Category.SECURITY,
         Severity.WARNING,
         ("standard", "strict", "ml"),
-        "Checks .gitignore for common generated research artifacts.",
+        "Checks .gitignore for basic generated-artifact and credential hygiene.",
         "Ignoring generated outputs reduces accidental data and credential leakage.",
-        "Add entries for .env, caches, raw data, checkpoints, wandb, and mlruns.",
+        "Add entries for .env, caches, notebook checkpoints, generated outputs, and raw data.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
@@ -74,17 +80,32 @@ class GitignoreResearchArtifactsRule(Rule):
         if not gitignore.exists():
             return [self.finding(context, message=".gitignore is missing.")]
         text = read_text(gitignore)
-        missing = [term for term in COMMON_GITIGNORE_TERMS if term not in text]
-        if missing:
+        covered = _gitignore_coverage_groups(text)
+        if len(covered) < 2:
+            missing = sorted(set(GITIGNORE_COVERAGE_GROUPS) - covered)
             return [
                 self.finding(
                     context,
-                    message=".gitignore is missing common research artifact entries.",
-                    evidence=[Evidence("Missing entries: " + ", ".join(missing[:6]), ".gitignore")],
+                    message=".gitignore has little coverage for generated or sensitive artifacts.",
+                    evidence=[
+                        Evidence(
+                            "Missing coverage groups: " + ", ".join(missing),
+                            ".gitignore",
+                        )
+                    ],
                     file=".gitignore",
                 )
             ]
         return []
+
+
+def _gitignore_coverage_groups(text: str) -> set[str]:
+    lowered = text.lower()
+    covered: set[str] = set()
+    for group, terms in GITIGNORE_COVERAGE_GROUPS.items():
+        if any(term.lower() in lowered for term in terms):
+            covered.add(group)
+    return covered
 
 
 RULES = [PotentialSecretRule(), GitignoreResearchArtifactsRule()]
