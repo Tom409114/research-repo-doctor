@@ -13,7 +13,8 @@
 - Updated PyPI publishing documentation to match the active Trusted Publishing
   workflow and current `rrdoctor` package release.
 - Removed internal launch notes and issue-draft documents from the public documentation tree.
-- Removed the broken README demo GIF reference and the unavailable live demo link.
+- Replaced the broken README demo placeholder with a generated demo GIF and kept
+  the unavailable live demo link out of the first screen.
 - Fixed `RRD050` so common research entrypoints such as root-level `train.py`, `main.py`,
   `run.py`, eval scripts, Snakemake, Nextflow, and documented README commands count as
   experiment entrypoints.
