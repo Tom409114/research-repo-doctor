@@ -8,6 +8,8 @@
 - Reframed the README first screen around Artifact Evaluation deadline preparation.
 - Added a public-repository evaluation corpus manifest and static scan runner for
   evidence-driven false-positive and false-negative review.
+- Updated PyPI publishing documentation to match the active Trusted Publishing
+  workflow and current `rrdoctor` package release.
 - Removed internal launch notes and issue-draft documents from the public documentation tree.
 - Removed the broken README demo GIF reference and the unavailable live demo link.
 - Fixed `RRD050` so common research entrypoints such as root-level `train.py`, `main.py`,
