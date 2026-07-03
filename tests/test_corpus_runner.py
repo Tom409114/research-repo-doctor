@@ -24,8 +24,13 @@ def test_load_corpus_manifest() -> None:
 
     entries = runner.load_corpus(Path("evaluation/corpus.yml"))
 
-    assert len(entries) >= 10
+    assert len(entries) >= 50
     assert any(entry.name == "nanoGPT" for entry in entries)
+    ecosystems = {entry.ecosystem for entry in entries}
+    assert any(ecosystem.startswith("python-ml") for ecosystem in ecosystems)
+    assert "nextflow" in ecosystems
+    assert any(ecosystem.startswith("r-") for ecosystem in ecosystems)
+    assert any(ecosystem.startswith("julia-") for ecosystem in ecosystems)
 
 
 def test_expected_absent_violations_are_reported() -> None:
