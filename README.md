@@ -1,18 +1,29 @@
 # Research Repo Doctor
 
-Find the reproducibility traps in your research repo in seconds, then auto-fix the boring gaps before reviewers hit them.
-
-Try the live web demo on any public repo (no install):
-<https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
+Get your research artifact ready for Artifact Evaluation before the deadline:
+scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
 [![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
 [![rrdoctor readiness](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tom409114/research-repo-doctor/main/.rrdoctor-badge.json)](https://github.com/Tom409114/research-repo-doctor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 
-`rrdoctor` is a local CLI and GitHub Action for research code. It audits whether a repo is
-reproducible, reviewable, citable, and release-ready; scaffolds safe mechanical fixes; and
-turns the rest into a checklist any coding agent or human can finish.
+`rrdoctor` is a local CLI and GitHub Action for research artifact preparation. It audits
+whether a repo is reviewable, citable, and close to runnable; scaffolds safe mechanical
+fixes; maps findings to an AE-style readiness level; and turns the rest into a checklist
+any coding agent or human can finish.
+
+## AE deadline loop
+
+```bash
+uvx rrdoctor scan . --profile acm
+uvx rrdoctor fix . --write
+uvx rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
+uvx rrdoctor verify . --profile acm
+```
+
+For trusted repositories, `rrdoctor verify --run` can go beyond static checks and actually
+resolve dependencies and execute the declared entrypoint under a timeout.
 
 ## What it catches
 
