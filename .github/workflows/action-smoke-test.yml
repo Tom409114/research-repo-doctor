@@ -23,6 +23,8 @@ jobs:
           plan: "true"
           appendix: "true"
           appendix-output: rrdoctor-action-appendix.md
+          verify: "true"
+          verify-output: rrdoctor-action-verify.md
           comment-pr: "true"
           step-summary: "true"
       - name: Check generated action outputs
@@ -31,3 +33,4 @@ jobs:
           test -s rrdoctor-action-report.md
           test -s rrdoctor-plan.md
           test -s rrdoctor-action-appendix.md
+          test -s rrdoctor-action-verify.md
