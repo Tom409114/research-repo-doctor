@@ -78,6 +78,23 @@ Set `appendix: "true"` before a submission deadline to produce
 The appendix is uploaded with the other action artifacts and included in the job
 summary when `step-summary` is enabled.
 
+## Emit the Verification Ladder
+
+Set `verify: "true"` to include a static L1/L2/L3 verification report in the job
+summary and uploaded artifacts:
+
+```yaml
+      - uses: Tom409114/research-repo-doctor@v0.2.3
+        with:
+          profile: acm
+          fail-on: none
+          verify: "true"
+```
+
+The default is static. Add `verify-run: "true"` only for repositories you trust,
+because dynamic verification resolves dependencies and executes the detected
+entrypoint.
+
 ## Readiness badge
 
 Publish a live artifact-readiness badge by committing an endpoint file and pointing

@@ -1,8 +1,8 @@
 # GitHub Action
 
 The action lets another repository run Research Repo Doctor in pull requests and
-pushes. It can publish the reproducibility report, an agent-ready fix plan, and
-an Artifact Evaluation appendix from the same run.
+pushes. It can publish the reproducibility report, an agent-ready fix plan, an
+Artifact Evaluation appendix, and a verification ladder report from the same run.
 
 ```yaml
 name: Research Repo Doctor
@@ -24,6 +24,7 @@ jobs:
           output: rrdoctor-report.md
           plan: "true"
           appendix: "true"
+          verify: "true"
 ```
 
 ## Inputs
@@ -41,6 +42,10 @@ jobs:
 | `plan` | `false` | Also generate an agent-ready `rrdoctor-plan.md`. |
 | `appendix` | `false` | Also generate an Artifact Evaluation appendix/checklist. |
 | `appendix-output` | `ARTIFACT_APPENDIX.md` | Artifact appendix output path. |
+| `verify` | `false` | Also generate an L1/L2/L3 verification ladder report. |
+| `verify-run` | `false` | Run dynamic verification steps. Executes target repository code; only use on trusted repositories. |
+| `verify-output` | `rrdoctor-verify.md` | Verification report output path. |
+| `verify-timeout` | `300` | Per-step timeout in seconds for dynamic verification. |
 | `comment-pr` | `false` | Post or update a sticky PR comment with the report. |
 | `step-summary` | `true` | Write the report to the job summary. |
 | `upload-artifacts` | `true` | Upload the report (and plan) as artifacts. |
@@ -57,6 +62,7 @@ scanning. PR comments use the built-in `GITHUB_TOKEN`.
 | `report-path` | Path to the generated report. |
 | `plan-path` | Path to `rrdoctor-plan.md` when `plan` is `true`. |
 | `appendix-path` | Path to the appendix file when `appendix` is `true`. |
+| `verify-path` | Path to the verification report when `verify` is `true`. |
 
 ## Pull request comments and gating
 
@@ -89,3 +95,29 @@ artifact appendix and ACM/NeurIPS checklist mapping:
 The appendix is uploaded as an artifact and included in the job summary when
 `step-summary` is enabled. Treat it as a scaffold: fill in venue-specific
 hardware, runtime, data access, and expected-results details before submission.
+
+## Verification Ladder
+
+Set `verify: "true"` to emit a static L1/L2/L3 verification report:
+
+```yaml
+      - uses: Tom409114/research-repo-doctor@v0.2.3
+        with:
+          profile: acm
+          fail-on: none
+          verify: "true"
+```
+
+By default this does not execute target repository code. For repositories you
+trust, add `verify-run: "true"` to resolve dependencies and execute the detected
+entrypoint under `verify-timeout`:
+
+```yaml
+      - uses: Tom409114/research-repo-doctor@v0.2.3
+        with:
+          profile: acm
+          fail-on: none
+          verify: "true"
+          verify-run: "true"
+          verify-timeout: "600"
+```

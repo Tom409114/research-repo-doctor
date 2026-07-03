@@ -243,6 +243,7 @@ jobs:
           step-summary: "true"   # report in the job summary
           plan: "true"           # attach an agent-ready fix plan
           appendix: "true"       # attach an Artifact Evaluation appendix
+          verify: "true"         # attach the L1/L2/L3 verification ladder
 ```
 
 For new-finding gating and a committed baseline, see
