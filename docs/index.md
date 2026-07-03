@@ -5,6 +5,7 @@ Research Repo Doctor is a deterministic CLI and GitHub Action for checking wheth
 Start with the quickstart, then read the checks and configuration reference.
 
 - [Quickstart](quickstart.md)
+- [Artifact Evaluation deadline workflow](ae-deadline-workflow.md)
 - [Checks](checks.md)
 - [Auto-fix](autofix.md)
 - [Agent workflows](agent-workflows.md)

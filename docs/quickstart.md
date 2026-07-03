@@ -74,6 +74,9 @@ rrdoctor verify . --run --timeout 600        # only on repositories you trust
 Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss`. Dependency and
 runtime checks also understand R (`DESCRIPTION`, `renv.lock`) and Julia (`Project.toml`).
 
+For a fuller deadline-oriented sequence, see the
+[Artifact Evaluation deadline workflow](ae-deadline-workflow.md).
+
 ## Use from a coding agent (MCP)
 
 ```bash

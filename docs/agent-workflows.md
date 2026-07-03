@@ -2,15 +2,15 @@
 
 Research Repo Doctor is deterministic, but its output is designed to drive a
 coding agent. The result is a closed loop where the scanner is the source of truth
-and the agent does the editing — with no lock-in to any particular tool.
+and the agent does the editing, with no lock-in to any particular tool.
 
 ## The loop
 
-1. **Audit** — `rrdoctor scan .` produces deterministic findings.
-2. **Plan** — `rrdoctor plan .` turns findings into a tool-agnostic work order.
-3. **Apply** — run `rrdoctor fix --write` for the mechanical items, and hand the
+1. **Audit**: `rrdoctor scan .` produces deterministic findings.
+2. **Plan**: `rrdoctor plan .` turns findings into a tool-agnostic work order.
+3. **Apply**: run `rrdoctor fix --write` for the mechanical items, and hand the
    remaining tasks to any coding agent (or do them yourself).
-4. **Verify** — `rrdoctor scan . --baseline before.json --fail-on-new error`
+4. **Verify**: `rrdoctor scan . --baseline before.json --fail-on-new error`
    confirms the changes resolved findings without introducing new ones.
 
 Because step 4 is deterministic and needs no API key, it works as an honest grader
@@ -40,7 +40,7 @@ rrdoctor scan . --format agent --output fix-plan.md
 
 ## AGENTS.md
 
-The plan pairs naturally with an `AGENTS.md` file at the repository root — a short,
+The plan pairs naturally with an `AGENTS.md` file at the repository root: a short,
 machine-readable guide describing setup, test and lint commands, and conventions.
 `rrdoctor fix` can scaffold one (rule RRD014), and rule RRD014 flags repositories
 that lack one under the strict profile.
