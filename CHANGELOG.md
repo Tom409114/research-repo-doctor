@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Nothing yet.
+- Clarified evaluation corpus review accounting so generated summaries
+  distinguish completed focused review notes from repositories that still need
+  manual review.
 
 ## v0.2.9 - 2026-07-04
 

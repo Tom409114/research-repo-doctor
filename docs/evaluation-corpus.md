@@ -68,16 +68,17 @@ python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --fail-on-ex
 - Scanned successfully: 60
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Manually reviewed repositories: 17 focused reviews
+- Focused manual review notes: 17
+- Not yet manually reviewed: 43
 - Average score across scanned repositories: 57.9
 
 Readiness distribution:
 
 | Readiness | Repositories |
 | --- | ---: |
-| Available | 36 |
-| Functional | 9 |
-| Needs preparation | 6 |
+| Available | 40 |
+| Functional | 10 |
+| Needs preparation | 10 |
 
 Top actionable rule frequencies:
 

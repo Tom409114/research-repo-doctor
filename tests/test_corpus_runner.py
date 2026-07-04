@@ -177,6 +177,8 @@ def test_aggregate_summaries_counts_rules_and_violations() -> None:
     assert aggregate["average_score"] == 64.0
     assert aggregate["reviewed_repositories"] == 1
     assert aggregate["pending_review_repositories"] == 0
+    assert aggregate["unreviewed_repositories"] == 1
+    assert aggregate["repositories_needing_manual_review"] == 1
     assert aggregate["readiness"] == {"Functional": 1}
     assert aggregate["rules"]["RRD050"] == 2
     assert aggregate["actionable_rules"] == {"RRD050": 2}
@@ -248,6 +250,51 @@ def test_pending_review_stubs_do_not_count_as_reviewed() -> None:
 
     assert aggregate["reviewed_repositories"] == 0
     assert aggregate["pending_review_repositories"] == 1
+    assert aggregate["unreviewed_repositories"] == 0
+    assert aggregate["repositories_needing_manual_review"] == 1
+
+
+def test_unreviewed_repositories_count_without_review_notes() -> None:
+    runner = _load_runner()
+
+    aggregate = runner.aggregate_summaries(
+        [
+            {
+                "name": "reviewed",
+                "url": "https://example.invalid/reviewed",
+                "ecosystem": "python-ml",
+                "status": "scanned",
+                "readiness": {"level": "Functional"},
+                "score": 64,
+                "findings_by_rule": {},
+                "actionable_findings_by_rule": {},
+                "findings_by_severity": {},
+                "expected_absent_violations": [],
+                "manual_review": {
+                    "status": "reviewed",
+                    "false_positives": [],
+                    "false_negatives": [],
+                },
+            },
+            {
+                "name": "unreviewed",
+                "url": "https://example.invalid/unreviewed",
+                "ecosystem": "python-ml",
+                "status": "scanned",
+                "readiness": {"level": "Available"},
+                "score": 48,
+                "findings_by_rule": {},
+                "actionable_findings_by_rule": {},
+                "findings_by_severity": {},
+                "expected_absent_violations": [],
+            },
+        ]
+    )
+
+    assert aggregate["reviewed_repositories"] == 1
+    assert aggregate["pending_review_repositories"] == 0
+    assert aggregate["unreviewed_repositories"] == 1
+    assert aggregate["repositories_needing_manual_review"] == 1
 
 
 def test_review_notes_are_loaded_and_attached(tmp_path) -> None:

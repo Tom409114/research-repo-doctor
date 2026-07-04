@@ -488,6 +488,10 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
             )
 
     average_score = round(sum(scores) / len(scores), 1) if scores else None
+    unreviewed_repositories = max(
+        len(summaries) - reviewed_repositories - pending_review_repositories, 0
+    )
+    repositories_needing_manual_review = max(len(summaries) - reviewed_repositories, 0)
     return {
         "total_repositories": len(summaries),
         "scanned_repositories": len(scanned),
@@ -495,6 +499,8 @@ def aggregate_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
         "average_score": average_score,
         "reviewed_repositories": reviewed_repositories,
         "pending_review_repositories": pending_review_repositories,
+        "unreviewed_repositories": unreviewed_repositories,
+        "repositories_needing_manual_review": repositories_needing_manual_review,
         "ecosystems": _sorted_counts(ecosystem_counts),
         "readiness": _sorted_counts(readiness_counts),
         "severities": _sorted_counts(severity_counts),
@@ -555,7 +561,8 @@ def render_markdown(summaries: list[dict[str, Any]]) -> str:
         f"- Scanned successfully: {aggregate['scanned_repositories']}",
         f"- Clone or scan errors: {aggregate['error_repositories']}",
         f"- Manually reviewed: {aggregate['reviewed_repositories']}",
-        f"- Pending manual review: {aggregate['pending_review_repositories']}",
+        f"- Not yet manually reviewed: {aggregate['repositories_needing_manual_review']}",
+        f"- Pending review stubs: {aggregate['pending_review_repositories']}",
         f"- Average score: {average_score}",
         "",
         "### Readiness distribution",

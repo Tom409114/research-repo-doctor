@@ -21,7 +21,8 @@ Latest local maintainer smoke run:
 - Clone or scan errors: 0
 - Average score across scanned repositories: 57.9
 - Expected-absent regressions: 0
-- Manually reviewed repositories: 17 focused reviews
+- Focused manual review notes: 17
+- Not yet manually reviewed: 43
 
 Top actionable rule frequencies in that snapshot:
 
