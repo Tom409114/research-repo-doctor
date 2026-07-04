@@ -4,9 +4,25 @@ import json
 
 from typer.testing import CliRunner
 
+import rrdoctor
 from rrdoctor.cli import app
 
 runner = CliRunner()
+
+
+def test_version_option_reports_package_version() -> None:
+    result = runner.invoke(app, ["--version"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == f"rrdoctor {rrdoctor.__version__}"
+
+
+def test_no_args_shows_help() -> None:
+    result = runner.invoke(app, [])
+
+    assert result.exit_code == 0
+    assert "Usage:" in result.stdout
+    assert "scan" in result.stdout
 
 
 def test_scan_missing_basics_markdown_exits_zero_with_fail_none() -> None:

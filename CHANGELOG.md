@@ -4,6 +4,12 @@
 
 - Nothing yet.
 
+## v0.2.9 - 2026-07-04
+
+- Added `rrdoctor --version` for quick CLI/package version checks.
+- Made bare `rrdoctor` print the root help page and exit successfully, improving
+  the first-run CLI experience.
+
 ## v0.2.8 - 2026-07-04
 
 - Improved README entrypoint detection and verification so documented

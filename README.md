@@ -130,6 +130,12 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.9
+
+- **Clearer first-run CLI behavior**: `rrdoctor --version` now reports the
+  installed package version, and running bare `rrdoctor` prints the root help
+  page successfully.
+
 ## What's new in 0.2.8
 
 - **Better README run-path recognition**: README-documented
@@ -279,7 +285,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.8
+      - uses: Tom409114/research-repo-doctor@v0.2.9
         with:
           profile: standard
           fail-on: none
@@ -327,6 +333,7 @@ Worked examples live in [examples/reports/](examples/reports/), including a
 | `rrdoctor list-rules` | List all registered rules. |
 | `rrdoctor explain RRD0xx` | Explain a rule and how to remediate it. |
 | `rrdoctor doctor` | Self-diagnostics. |
+| `rrdoctor --version` | Show the installed package version. |
 
 ## Rule categories
 
@@ -386,7 +393,7 @@ Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.8},
+  version = {0.2.9},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

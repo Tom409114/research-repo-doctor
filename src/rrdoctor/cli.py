@@ -35,11 +35,37 @@ from rrdoctor.scanner import Scanner
 from rrdoctor.verification import render_verification, verification_failed
 
 app = typer.Typer(
-    help="Audit research repositories for reproducibility readiness.", no_args_is_help=True
+    help="Audit research repositories for reproducibility readiness.",
+    invoke_without_command=True,
 )
 console = Console()
 err_console = Console(stderr=True)
 PROFILE_HELP = "Profile: " + ", ".join(PROFILES) + "."
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        typer.echo(f"rrdoctor {__version__}")
+        raise typer.Exit()
+
+
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    version: Annotated[
+        bool,
+        typer.Option(
+            "--version",
+            help="Show the installed rrdoctor version and exit.",
+            callback=_version_callback,
+            is_eager=True,
+        ),
+    ] = False,
+) -> None:
+    """Audit research repositories for reproducibility readiness."""
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
+        raise typer.Exit()
 
 
 def _parse_rule_ids(raw: str | None) -> set[str]:
