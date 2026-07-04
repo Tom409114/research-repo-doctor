@@ -3,6 +3,8 @@
 Get your research artifact ready for Artifact Evaluation before the deadline:
 scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
+▶ Try it on any public repo (no install): <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
+
 ![rrdoctor demo](docs/demo.gif)
 
 [![CI](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/Tom409114/research-repo-doctor/actions/workflows/ci.yml)
