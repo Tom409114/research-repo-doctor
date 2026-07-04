@@ -11,16 +11,17 @@ left to the agent fix plan instead.
 from __future__ import annotations
 
 import re
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
-    import tomli as tomllib
+else:  # pragma: no cover - Python 3.10 fallback
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 from rrdoctor.models import FixResult
 from rrdoctor.rules.base import read_text
@@ -84,6 +85,7 @@ def infer_fix_context(
     metadata = _read_pyproject_metadata(root)
     inferred_name = project_name or _metadata_str(metadata, "name") or root.name
     metadata_authors = _metadata_authors(metadata)
+    inferred_authors: tuple[str, ...]
     if author:
         inferred_authors = (author,)
         inferred_author = author

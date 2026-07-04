@@ -7,10 +7,10 @@ import sys
 from collections.abc import Iterable
 from typing import Any
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
-    import tomli as tomllib
+else:  # pragma: no cover - Python 3.10 fallback
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
