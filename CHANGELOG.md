@@ -4,6 +4,15 @@
 
 - Nothing yet.
 
+## v0.2.8 - 2026-07-04
+
+- Improved README entrypoint detection and verification so documented
+  `python -m package.train ...` commands count as experiment entrypoints when
+  they point at local repository modules.
+- Improved `rrdoctor verify` support for module-runner commands such as
+  `python -m torch.distributed.run train.py ...` when the command includes a
+  file-backed local Python entrypoint.
+
 ## v0.2.7 - 2026-07-04
 
 - Improved `rrdoctor fix --write` citation scaffolds so `CITATION.cff` can use

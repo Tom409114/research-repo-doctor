@@ -75,6 +75,7 @@ class ExperimentEntrypointMissingRule(Rule):
 _DOCUMENTED_ENTRYPOINT_RE = re.compile(
     r"(?ix)"
     r"\b("
+    r"python\s+-m\s+[A-Za-z0-9_.-]*(?:train|main|run|eval|evaluate|reproduce)[A-Za-z0-9_.-]*\b|"
     r"python(?:\s+-m)?\s+(?:\./)?(?:train|main|run|eval|evaluate|reproduce)(?:\.py)?\b|"
     r"python\s+(?:\./)?(?:scripts|tools)/[^\s`]+\.py\b|"
     r"python\s+(?:\./)?src/[^\s`]*(?:train|test|eval|evaluate|run|reproduce)[^\s`]*\.py\b|"

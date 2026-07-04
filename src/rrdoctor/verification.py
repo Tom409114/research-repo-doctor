@@ -262,14 +262,24 @@ def _parse_documented_entrypoint(
 
 def _parse_documented_python(parts: list[str], root: Path) -> tuple[list[str] | None, str]:
     script_index = _python_script_index(parts)
-    if script_index is None:
-        return None, ""
-    script = _clean_relative(parts[script_index])
-    if not _is_python_entrypoint(script) or not (root / script).exists():
-        return None, ""
-    runnable = [sys.executable, *parts[1:]]
-    display = shlex.join(["python", *parts[1:]])
-    return runnable, display
+    if script_index is not None:
+        script = _clean_relative(parts[script_index])
+        if not _is_python_entrypoint(script) or not (root / script).exists():
+            return None, ""
+        runnable = [sys.executable, *parts[1:]]
+        display = shlex.join(["python", *parts[1:]])
+        return runnable, display
+
+    module_index = _python_module_index(parts)
+    if module_index is not None:
+        module = parts[module_index]
+        if _module_entrypoint_exists(module, root) or _module_runner_has_entrypoint_arg(
+            parts[module_index + 1 :], root
+        ):
+            runnable = [sys.executable, *parts[1:]]
+            display = shlex.join(["python", *parts[1:]])
+            return runnable, display
+    return None, ""
 
 
 def _python_script_index(parts: list[str]) -> int | None:
@@ -279,6 +289,38 @@ def _python_script_index(parts: list[str]) -> int | None:
     if index >= len(parts) or parts[index] == "-m":
         return None
     return index
+
+
+def _python_module_index(parts: list[str]) -> int | None:
+    index = 1
+    while index < len(parts) and parts[index] in {"-u", "-O", "-OO", "-B"}:
+        index += 1
+    if index >= len(parts) - 1 or parts[index] != "-m":
+        return None
+    return index + 1
+
+
+def _module_entrypoint_exists(module: str, root: Path) -> bool:
+    if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*$", module):
+        return False
+    rel = Path(*module.split("."))
+    candidates = (
+        root / rel.with_suffix(".py"),
+        root / rel / "__main__.py",
+        root / "src" / rel.with_suffix(".py"),
+        root / "src" / rel / "__main__.py",
+    )
+    return any(path.exists() for path in candidates)
+
+
+def _module_runner_has_entrypoint_arg(args: list[str], root: Path) -> bool:
+    for raw in args:
+        if raw.startswith("-"):
+            continue
+        script = _clean_relative(raw)
+        if _is_python_entrypoint(script) and (root / script).exists():
+            return True
+    return False
 
 
 def _parse_documented_shell(parts: list[str], root: Path) -> tuple[list[str] | None, str]:

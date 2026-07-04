@@ -88,6 +88,17 @@ def test_documented_pyproject_console_script_counts_as_experiment_entrypoint(tmp
     assert not report.findings
 
 
+def test_documented_python_module_command_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nRun `python -m demo.train --config configs/default.yaml` to reproduce.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_pyproject_console_script_prose_only_does_not_count(tmp_path) -> None:
     (tmp_path / "pyproject.toml").write_text(
         "[project]\nname = 'demo'\n\n[project.scripts]\ndemo-transcribe = 'demo.cli:main'\n",

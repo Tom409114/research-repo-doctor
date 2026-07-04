@@ -163,6 +163,49 @@ def test_verification_accepts_documented_pyproject_console_script(tmp_path) -> N
     assert display == "demo-transcribe audio.wav --model tiny"
 
 
+def test_verification_accepts_documented_python_module_entrypoint(tmp_path) -> None:
+    package = tmp_path / "demo"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "train.py").write_text("print('train')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n```bash\npython -m demo.train --config configs/default.yaml\n```\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[1:] == ["-m", "demo.train", "--config", "configs/default.yaml"]
+    assert display == "python -m demo.train --config configs/default.yaml"
+
+
+def test_verification_accepts_documented_python_module_runner_with_script(tmp_path) -> None:
+    (tmp_path / "train.py").write_text("print('train')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n```bash\npython -m torch.distributed.run train.py --epochs 1\n```\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[1:] == ["-m", "torch.distributed.run", "train.py", "--epochs", "1"]
+    assert display == "python -m torch.distributed.run train.py --epochs 1"
+
+
+def test_verification_rejects_non_local_python_module_command(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nInstall with `python -m pip install -e .`.\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is None
+    assert display == ""
+
+
 def test_verification_ignores_console_script_name_only_inline_code(tmp_path) -> None:
     (tmp_path / "pyproject.toml").write_text(
         "[project]\nname = 'demo'\n\n[project.scripts]\ndemo-transcribe = 'demo.cli:main'\n",
