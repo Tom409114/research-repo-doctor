@@ -4,6 +4,15 @@
 
 - Nothing yet.
 
+## v0.2.7 - 2026-07-04
+
+- Improved `rrdoctor fix --write` citation scaffolds so `CITATION.cff` can use
+  structured PEP 621 or Poetry metadata, preserve multiple authors, normalize
+  SSH git remotes, and read git worktree origin URLs without executing target
+  repository code.
+- Improved `RRD034` dependency parsing for PEP 621 environment markers and
+  Poetry dependency groups, reducing undeclared-import false positives.
+
 ## v0.2.6 - 2026-07-04
 
 - Reduced `RRD090` security false positives on R/pkgdown repositories by

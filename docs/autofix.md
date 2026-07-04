@@ -20,8 +20,10 @@ rrdoctor fix . --write --author "Your Lab" --project-name "my-project"
 
 If `--author` or `--project-name` is omitted, `rrdoctor` tries to infer sensible
 values from `pyproject.toml` and the local git remote. Generated citation
-metadata can include the project name, version, release date, author, and
-repository URL when those are already available locally.
+metadata can include the project name, version, release date, multiple authors,
+and repository URL when those are already available locally. PEP 621
+`[project]` metadata and Poetry `[tool.poetry]` metadata are both supported, and
+git worktree remotes are recognized without running repository code.
 
 Generated data-provenance notes also include local evidence when it exists:
 top-level data directories, likely data download or preprocessing scripts, and
@@ -54,8 +56,9 @@ Because fixers are idempotent, running them again is safe.
 | RRD091 | `.gitignore` (creates or appends research artifacts) |
 | RRD100 | `CHANGELOG.md` |
 
-Generated files are starting points. They contain placeholders (for example, the
-DOI in `CITATION.cff`) that you should complete before a release.
+Generated files are starting points. They contain placeholders (for example, a
+DOI in `CITATION.cff` when one is not already documented) that you should
+complete before a release.
 
 ## What is intentionally not auto-fixed
 

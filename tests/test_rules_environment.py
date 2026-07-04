@@ -96,6 +96,44 @@ def test_undeclared_import_reads_optional_dependencies(tmp_path) -> None:
     assert not report.findings
 
 
+def test_undeclared_import_reads_marker_dependencies(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        "dependencies = [\n"
+        '  "rich>=13.7",\n'
+        "  \"tomli>=2.0; python_version < '3.11'\",\n"
+        '  "typer>=0.12",\n'
+        "]\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "main.py").write_text("import typer\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_undeclared_import_reads_poetry_dependencies(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.poetry]\n"
+        'name = "demo"\n'
+        'version = "0.1.0"\n'
+        "\n"
+        "[tool.poetry.dependencies]\n"
+        'python = ">=3.10"\n'
+        'requests = "^2.32"\n'
+        "\n"
+        "[tool.poetry.group.dev.dependencies]\n"
+        'pytest = "^8.0"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "main.py").write_text("import requests\nimport pytest\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_undeclared_import_skipped_without_manifest(tmp_path) -> None:
     (tmp_path / "main.py").write_text("import requests\n", encoding="utf-8")
 

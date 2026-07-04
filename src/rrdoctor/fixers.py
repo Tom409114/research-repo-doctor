@@ -15,6 +15,12 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
+    import tomli as tomllib
 
 from rrdoctor.models import FixResult
 from rrdoctor.rules.base import read_text
@@ -40,6 +46,7 @@ DATA_SCRIPT_TERMS = (
 DATA_HINT_TEXT_RE = re.compile(
     r"(?i)\b(data availability|dataset|datasets|download|preprocess|zenodo|doi|kaggle)\b"
 )
+Metadata = dict[str, str | tuple[str, ...]]
 
 
 @dataclass(frozen=True)
@@ -54,6 +61,7 @@ class FixContext:
     repository_url: str | None = None
     version: str | None = None
     date_released: str | None = None
+    authors: tuple[str, ...] = ()
 
 
 def _write_if_missing(path: Path, content: str, rule_id: str, rel: str) -> FixResult:
@@ -74,44 +82,164 @@ def infer_fix_context(
     """Infer useful scaffold metadata from local repository files."""
 
     metadata = _read_pyproject_metadata(root)
-    inferred_name = project_name or metadata.get("name") or root.name
-    inferred_author = author or metadata.get("author") or f"{inferred_name} maintainers"
+    inferred_name = project_name or _metadata_str(metadata, "name") or root.name
+    metadata_authors = _metadata_authors(metadata)
+    if author:
+        inferred_authors = (author,)
+        inferred_author = author
+    elif metadata_authors:
+        inferred_authors = metadata_authors
+        inferred_author = ", ".join(metadata_authors)
+    else:
+        inferred_author = _metadata_str(metadata, "author") or f"{inferred_name} maintainers"
+        inferred_authors = (inferred_author,)
     return FixContext(
         root=root,
         project_name=inferred_name,
         author=inferred_author,
         year=year or datetime.now(timezone.utc).year,
-        repository_url=metadata.get("repository_url") or _read_git_origin_url(root),
-        version=metadata.get("version"),
+        repository_url=_metadata_str(metadata, "repository_url") or _read_git_origin_url(root),
+        version=_metadata_str(metadata, "version"),
         date_released=datetime.now(timezone.utc).date().isoformat(),
+        authors=inferred_authors,
     )
 
 
-def _read_pyproject_metadata(root: Path) -> dict[str, str]:
+def _metadata_str(metadata: Metadata, key: str) -> str | None:
+    value = metadata.get(key)
+    return value if isinstance(value, str) else None
+
+
+def _metadata_authors(metadata: Metadata) -> tuple[str, ...]:
+    value = metadata.get("authors")
+    return value if isinstance(value, tuple) else ()
+
+
+def _read_pyproject_metadata(root: Path) -> Metadata:
     pyproject = root / "pyproject.toml"
     if not pyproject.exists():
         return {}
     text = read_text(pyproject)
-    metadata: dict[str, str] = {}
+    try:
+        parsed = tomllib.loads(text)
+    except tomllib.TOMLDecodeError:
+        pass
+    else:
+        metadata = _metadata_from_toml(parsed)
+        if metadata:
+            return metadata
+    return _read_pyproject_metadata_fallback(text)
+
+
+def _read_pyproject_metadata_fallback(text: str) -> Metadata:
+    metadata: Metadata = {}
     for key in ("name", "version"):
         match = re.search(rf"(?m)^{key}\s*=\s*['\"]([^'\"]+)['\"]", text)
         if match:
             metadata[key] = match.group(1)
     author = re.search(r"(?s)authors\s*=\s*\[\s*\{\s*name\s*=\s*['\"]([^'\"]+)['\"]", text)
     if author:
-        metadata["author"] = author.group(1)
+        cleaned = _clean_author_name(author.group(1))
+        if cleaned:
+            metadata["author"] = cleaned
+            metadata["authors"] = (cleaned,)
     urls = re.search(r"(?ms)^\[project\.urls\](.*?)(?:^\[|\Z)", text)
     if urls:
         for key in ("Repository", "Homepage"):
             match = re.search(rf"(?m)^{key}\s*=\s*['\"]([^'\"]+)['\"]", urls.group(1))
             if match:
-                metadata["repository_url"] = match.group(1)
+                metadata["repository_url"] = _normalize_git_url(match.group(1))
                 break
     return metadata
 
 
+def _metadata_from_toml(data: dict[str, Any]) -> Metadata:
+    metadata: Metadata = {}
+    project = _as_mapping(data.get("project"))
+    if project:
+        _set_if_str(metadata, "name", project.get("name"))
+        _set_if_str(metadata, "version", project.get("version"))
+        authors = _author_names_from_entries(project.get("authors"))
+        if authors:
+            metadata["authors"] = authors
+            metadata["author"] = ", ".join(authors)
+        url = _url_from_mapping(project.get("urls"))
+        if url:
+            metadata["repository_url"] = url
+
+    poetry = _as_mapping(_as_mapping(data.get("tool")).get("poetry")) if data.get("tool") else {}
+    if poetry:
+        if "name" not in metadata:
+            _set_if_str(metadata, "name", poetry.get("name"))
+        if "version" not in metadata:
+            _set_if_str(metadata, "version", poetry.get("version"))
+        if not _metadata_authors(metadata):
+            authors = _author_names_from_entries(poetry.get("authors"))
+            if authors:
+                metadata["authors"] = authors
+                metadata["author"] = ", ".join(authors)
+        if "repository_url" not in metadata:
+            url = _url_from_poetry(poetry)
+            if url:
+                metadata["repository_url"] = url
+
+    return {key: value for key, value in metadata.items() if value}
+
+
+def _as_mapping(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _set_if_str(metadata: Metadata, key: str, value: Any) -> None:
+    cleaned = _clean_optional_str(value)
+    if cleaned:
+        metadata[key] = cleaned
+
+
+def _clean_optional_str(value: Any) -> str | None:
+    return value.strip() if isinstance(value, str) and value.strip() else None
+
+
+def _author_names_from_entries(entries: Any) -> tuple[str, ...]:
+    if not isinstance(entries, list):
+        return ()
+    names: list[str] = []
+    for entry in entries:
+        name: str | None = None
+        if isinstance(entry, dict):
+            name = _clean_optional_str(entry.get("name"))
+        elif isinstance(entry, str):
+            name = _clean_optional_str(entry)
+        cleaned = _clean_author_name(name or "")
+        if cleaned and cleaned not in names:
+            names.append(cleaned)
+    return tuple(names)
+
+
+def _clean_author_name(name: str) -> str:
+    return re.sub(r"\s*<[^>]+>\s*$", "", name).strip()
+
+
+def _url_from_mapping(value: Any) -> str | None:
+    urls = _as_mapping(value)
+    normalized_keys = {str(key).lower(): val for key, val in urls.items()}
+    for key in ("repository", "source", "code", "homepage"):
+        url = _clean_optional_str(normalized_keys.get(key))
+        if url:
+            return _normalize_git_url(url)
+    return None
+
+
+def _url_from_poetry(poetry: dict[str, Any]) -> str | None:
+    for key in ("repository", "homepage", "documentation"):
+        url = _clean_optional_str(poetry.get(key))
+        if url:
+            return _normalize_git_url(url)
+    return None
+
+
 def _read_git_origin_url(root: Path) -> str | None:
-    config = root / ".git" / "config"
+    config = _git_config_path(root)
     if not config.exists():
         return None
     text = read_text(config)
@@ -124,10 +252,27 @@ def _read_git_origin_url(root: Path) -> str | None:
     return _normalize_git_url(url.group(1))
 
 
+def _git_config_path(root: Path) -> Path:
+    git_path = root / ".git"
+    if git_path.is_dir():
+        return git_path / "config"
+    if git_path.is_file():
+        match = re.search(r"(?im)^gitdir:\s*(.+?)\s*$", read_text(git_path))
+        if match:
+            git_dir = Path(match.group(1))
+            if not git_dir.is_absolute():
+                git_dir = (root / git_dir).resolve()
+            return git_dir / "config"
+    return git_path / "config"
+
+
 def _normalize_git_url(url: str) -> str:
     ssh = re.match(r"git@([^:]+):(.+?)(?:\.git)?$", url)
     if ssh:
         return f"https://{ssh.group(1)}/{ssh.group(2)}"
+    ssh_url = re.match(r"ssh://git@([^/]+)/(.+?)(?:\.git)?$", url)
+    if ssh_url:
+        return f"https://{ssh_url.group(1)}/{ssh_url.group(2)}"
     return url.removesuffix(".git")
 
 
@@ -230,19 +375,26 @@ def _agents(ctx: FixContext) -> str:
 def _citation(ctx: FixContext) -> str:
     lines = [
         "cff-version: 1.2.0\n"
-        f'title: "{ctx.project_name}"\n'
+        f'title: "{_yaml_double_quoted(ctx.project_name)}"\n'
         'message: "If you use this software, please cite it as below."\n'
         "type: software\n"
         "authors:\n"
-        f'  - name: "{ctx.author}"\n'
-        f'date-released: "{ctx.date_released or f"{ctx.year}-01-01"}"\n'
     ]
+    for author in ctx.authors or (ctx.author,):
+        lines.append(f'  - name: "{_yaml_double_quoted(author)}"\n')
+    lines.extend([f'date-released: "{ctx.date_released or f"{ctx.year}-01-01"}"\n'])
     if ctx.version:
-        lines.append(f'version: "{ctx.version}"\n')
+        lines.append(f'version: "{_yaml_double_quoted(ctx.version)}"\n')
     if ctx.repository_url:
-        lines.append(f'repository-code: "{ctx.repository_url}"\n')
-    lines.append("# TODO: Add a DOI and individual author names before release, if available.\n")
+        lines.append(f'repository-code: "{_yaml_double_quoted(ctx.repository_url)}"\n')
+    lines.append(
+        "# TODO: Add a DOI and verify individual author names before release, if available.\n"
+    )
     return "".join(lines)
+
+
+def _yaml_double_quoted(value: str) -> str:
+    return value.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def _detected_data_hints(ctx: FixContext) -> list[str]:

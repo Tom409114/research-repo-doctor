@@ -57,6 +57,59 @@ def test_citation_fix_uses_pyproject_metadata(tmp_path) -> None:
     assert "The Authors" not in text
 
 
+def test_citation_fix_keeps_multiple_pyproject_authors(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        'name = "multi-author-demo"\n'
+        'authors = [{ name = "Alice Example" }, { name = "Bob Example" }]\n',
+        encoding="utf-8",
+    )
+
+    apply_fix("RRD020", infer_fix_context(tmp_path, year=2026))
+
+    text = (tmp_path / "CITATION.cff").read_text(encoding="utf-8")
+    assert 'title: "multi-author-demo"' in text
+    assert '  - name: "Alice Example"' in text
+    assert '  - name: "Bob Example"' in text
+
+
+def test_citation_fix_uses_poetry_metadata_and_normalizes_ssh_url(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.poetry]\n"
+        'name = "poetry-demo"\n'
+        'version = "0.4.0"\n'
+        'authors = ["Alice Example <alice@example.com>", "Bob Example"]\n'
+        'repository = "git@github.com:example/poetry-demo.git"\n',
+        encoding="utf-8",
+    )
+
+    apply_fix("RRD020", infer_fix_context(tmp_path, year=2026))
+
+    text = (tmp_path / "CITATION.cff").read_text(encoding="utf-8")
+    assert 'title: "poetry-demo"' in text
+    assert '  - name: "Alice Example"' in text
+    assert '  - name: "Bob Example"' in text
+    assert 'version: "0.4.0"' in text
+    assert 'repository-code: "https://github.com/example/poetry-demo"' in text
+
+
+def test_citation_fix_reads_git_worktree_origin(tmp_path) -> None:
+    git_dir = tmp_path / "actual-git"
+    git_dir.mkdir()
+    (git_dir / "config").write_text(
+        '[remote "origin"]\n    url = ssh://git@github.com/example/worktree-demo.git\n',
+        encoding="utf-8",
+    )
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".git").write_text("gitdir: ../actual-git\n", encoding="utf-8")
+
+    apply_fix("RRD020", infer_fix_context(repo, project_name="demo", author="Lab", year=2026))
+
+    text = (repo / "CITATION.cff").read_text(encoding="utf-8")
+    assert 'repository-code: "https://github.com/example/worktree-demo"' in text
+
+
 def test_gitignore_created_then_appended(tmp_path) -> None:
     created = apply_fix("RRD091", _ctx(tmp_path))
     assert created is not None and created.action == "created"

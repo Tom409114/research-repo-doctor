@@ -4,6 +4,13 @@ from __future__ import annotations
 
 import re
 import sys
+from collections.abc import Iterable
+from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
+    import tomli as tomllib
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
@@ -244,20 +251,11 @@ def _declared_distributions(context: ScanContext) -> set[str]:
     pyproject = context.root / "pyproject.toml"
     if pyproject.exists():
         text = read_text(pyproject)
-        # Pull quoted requirement specs out of any dependency array, which covers
-        # PEP 621 [project] and Poetry-style tables without a full TOML parser.
-        for block in re.findall(r"dependencies\s*=\s*\[(.*?)\]", text, re.DOTALL):
-            for spec in re.findall(r"['\"]([^'\"]+)['\"]", block):
-                match = _REQ_NAME_RE.match(spec)
-                if match:
-                    declared.add(_normalize(match.group(0)))
-        optional = re.search(r"(?ms)^\[project\.optional-dependencies\](.*?)(?:^\[|\Z)", text)
-        if optional:
-            for block in re.findall(r"(?m)^\w[\w-]*\s*=\s*\[(.*?)\]", optional.group(1), re.DOTALL):
-                for spec in re.findall(r"['\"]([^'\"]+)['\"]", block):
-                    match = _REQ_NAME_RE.match(spec)
-                    if match:
-                        declared.add(_normalize(match.group(0)))
+        parsed = _declared_from_pyproject_toml(text)
+        if parsed:
+            declared.update(parsed)
+        else:
+            declared.update(_declared_from_pyproject_text(text))
 
     for env_name in ("environment.yml", "conda.yml"):
         env = context.root / env_name
@@ -269,6 +267,65 @@ def _declared_distributions(context: ScanContext) -> set[str]:
                     declared.add(_normalize(match.group(0)))
 
     return declared
+
+
+def _declared_from_pyproject_toml(text: str) -> set[str]:
+    try:
+        data = tomllib.loads(text)
+    except tomllib.TOMLDecodeError:
+        return set()
+
+    declared: set[str] = set()
+    project = _as_mapping(data.get("project"))
+    _add_requirement_specs(declared, project.get("dependencies"))
+
+    optional = _as_mapping(project.get("optional-dependencies"))
+    for specs in optional.values():
+        _add_requirement_specs(declared, specs)
+
+    poetry = _as_mapping(_as_mapping(data.get("tool")).get("poetry"))
+    poetry_dependencies = _as_mapping(poetry.get("dependencies"))
+    for name in poetry_dependencies:
+        if str(name).lower() != "python":
+            declared.add(_normalize(str(name)))
+
+    poetry_groups = _as_mapping(poetry.get("group"))
+    for group in poetry_groups.values():
+        group_dependencies = _as_mapping(_as_mapping(group).get("dependencies"))
+        for name in group_dependencies:
+            if str(name).lower() != "python":
+                declared.add(_normalize(str(name)))
+
+    return declared
+
+
+def _declared_from_pyproject_text(text: str) -> set[str]:
+    declared: set[str] = set()
+    # Fallback for malformed TOML: pull quoted requirement specs out of dependency arrays.
+    for block in re.findall(r"dependencies\s*=\s*\[(.*?)\]", text, re.DOTALL):
+        for spec in re.findall(r"['\"]([^'\"]+)['\"]", block):
+            _add_requirement_specs(declared, [spec])
+    optional = re.search(r"(?ms)^\[project\.optional-dependencies\](.*?)(?:^\[|\Z)", text)
+    if optional:
+        for block in re.findall(r"(?m)^\w[\w-]*\s*=\s*\[(.*?)\]", optional.group(1), re.DOTALL):
+            for spec in re.findall(r"['\"]([^'\"]+)['\"]", block):
+                _add_requirement_specs(declared, [spec])
+    return declared
+
+
+def _add_requirement_specs(declared: set[str], specs: Any) -> None:
+    if not isinstance(specs, Iterable) or isinstance(specs, (str, bytes)):
+        return
+    for spec in specs:
+        if not isinstance(spec, str):
+            continue
+        match = _REQ_NAME_RE.match(spec)
+        if match:
+            declared.add(_normalize(match.group(0)))
+
+
+def _as_mapping(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
 
 
 def _local_modules(context: ScanContext) -> set[str]:

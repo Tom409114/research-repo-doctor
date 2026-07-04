@@ -130,6 +130,14 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.7
+
+- **Better citation scaffolds**: `rrdoctor fix --write` now reads structured
+  PEP 621 and Poetry metadata, preserves multiple authors, normalizes SSH git
+  remotes, and handles git worktree origin URLs when generating `CITATION.cff`.
+- **Lower-noise dependency checks**: `RRD034` now understands PEP 621 environment
+  markers and Poetry dependency groups, reducing undeclared-import false positives.
+
 ## What's new in 0.2.6
 
 - **Lower-noise secret checks**: Rcpp `Generator token` markers and public
@@ -261,7 +269,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Tom409114/research-repo-doctor@v0.2.6
+      - uses: Tom409114/research-repo-doctor@v0.2.7
         with:
           profile: standard
           fail-on: none
@@ -368,7 +376,7 @@ Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.6},
+  version = {0.2.7},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}
