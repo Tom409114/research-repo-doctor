@@ -5,6 +5,9 @@
 - Clarified evaluation corpus review accounting so generated summaries
   distinguish completed focused review notes from repositories that still need
   manual review.
+- Improved `rrdoctor doctor` optional dependency checks so it reports an MCP
+  integration as available only when the MCP package and its import-time
+  dependencies actually load.
 
 ## v0.2.9 - 2026-07-04
 
