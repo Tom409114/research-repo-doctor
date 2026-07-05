@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a public-hygiene regression test that prevents internal launch/application
+  materials, local workspace paths, and the README demo GIF regression from
+  re-entering the tracked repository.
+
 ## v0.2.13 - 2026-07-06
 
 - Added Artifact Evaluation next-step commands to Markdown scan reports and
