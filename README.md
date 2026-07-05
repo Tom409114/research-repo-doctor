@@ -3,7 +3,7 @@
 Get your research artifact ready for Artifact Evaluation before the deadline:
 scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
-▶ Try it on any public repo (no install): <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
+Try it on any public repo (no install): <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
 
 ![rrdoctor demo](docs/demo.gif)
 
@@ -390,6 +390,10 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 
 Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
 [10.5281/zenodo.21045373](https://doi.org/10.5281/zenodo.21045373).
+
+A JOSS-style draft manuscript is available in [paper/](paper/) for review and
+will be updated before any formal submission with final author metadata and
+only verified external-use claims.
 
 ```bibtex
 @software{research_repo_doctor_2026,

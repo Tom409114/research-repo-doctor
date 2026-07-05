@@ -20,3 +20,4 @@ Start with the quickstart, then read the checks and configuration reference.
 - [Evaluation corpus](evaluation-corpus.md)
 - [Research reproducibility](research-reproducibility.md)
 - [Maintainer workflows](maintainer-workflows.md)
+- [JOSS-style draft manuscript](../paper/)
