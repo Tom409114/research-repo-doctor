@@ -4,8 +4,37 @@ title: "[Feature]: "
 labels: ["enhancement"]
 body:
   - type: textarea
-    id: feature
+    id: problem
     attributes:
-      label: Feature
+      label: Problem or workflow
+      description: What research-artifact preparation workflow should this improve?
     validations:
       required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the CLI, GitHub Action, report, or documentation change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Mention existing commands, workarounds, or tools that almost solve it.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What should be true when the feature is complete?
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: The feature can stay deterministic and local-first, or any network/dynamic behavior is clearly opt-in.
+          required: true
+        - label: I removed real secrets, private data, and confidential repository content.
+          required: true

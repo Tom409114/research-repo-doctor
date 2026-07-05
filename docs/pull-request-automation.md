@@ -106,5 +106,8 @@ rrdoctor badge . --output .rrdoctor-badge.json
 ```
 
 ```markdown
-![rrdoctor](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/OWNER/REPO/main/.rrdoctor-badge.json)
+![rrdoctor](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Tom409114/research-repo-doctor/main/.rrdoctor-badge.json)
 ```
+
+For another repository, replace the GitHub owner, repository name, branch, and
+endpoint-file path in the raw URL.
