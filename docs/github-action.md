@@ -44,6 +44,7 @@ jobs:
 | `appendix-output` | `ARTIFACT_APPENDIX.md` | Artifact appendix output path. |
 | `verify` | `false` | Also generate an L1/L2/L3 verification ladder report. |
 | `verify-run` | `false` | Run dynamic verification steps. Executes target repository code; only use on trusted repositories. |
+| `verify-fail-on` | `none` | `none`, `error`, or `warning`; set to `error` to make failed dynamic verification block the workflow. |
 | `verify-output` | `rrdoctor-verify.md` | Verification report output path. |
 | `verify-timeout` | `300` | Per-step timeout in seconds for dynamic verification. |
 | `comment-pr` | `false` | Post or update a sticky PR comment with the report. |
@@ -59,6 +60,7 @@ scanning. PR comments use the built-in `GITHUB_TOKEN`.
 | Output | Description |
 | --- | --- |
 | `exit-code` | rrdoctor scan exit code before the final enforcement step. |
+| `verify-exit-code` | rrdoctor verify exit code before the final enforcement step. |
 | `report-path` | Path to the generated report. |
 | `plan-path` | Path to `rrdoctor-plan.md` when `plan` is `true`. |
 | `appendix-path` | Path to the appendix file when `appendix` is `true`. |
@@ -108,9 +110,12 @@ Set `verify: "true"` to emit a static L1/L2/L3 verification report:
           verify: "true"
 ```
 
-By default this does not execute target repository code. For repositories you
-trust, add `verify-run: "true"` to resolve dependencies and execute the detected
-entrypoint under `verify-timeout`:
+By default this does not execute target repository code and does not fail the
+workflow. For repositories you trust, add `verify-run: "true"` to resolve
+dependencies and execute the detected entrypoint under `verify-timeout`.
+
+To make dynamic verification a real release gate, also set
+`verify-fail-on: error`:
 
 ```yaml
       - uses: Tom409114/research-repo-doctor@v0.2.11
@@ -119,5 +124,9 @@ entrypoint under `verify-timeout`:
           fail-on: none
           verify: "true"
           verify-run: "true"
+          verify-fail-on: error
           verify-timeout: "600"
 ```
+
+The action still writes the verification report to the job summary and uploads it
+before enforcing the final verification exit code.

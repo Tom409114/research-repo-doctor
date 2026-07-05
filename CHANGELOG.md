@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added `verify-fail-on` to the GitHub Action so trusted `verify-run` jobs can
+  block CI on dynamic verification failures while still uploading the generated
+  verification report.
+
 ## v0.2.11 - 2026-07-05
 
 - Added a CI smoke test for the optional MCP extra and documented how to verify
