@@ -4,6 +4,7 @@ import importlib.util
 import sys
 from pathlib import Path
 from subprocess import CompletedProcess
+from types import SimpleNamespace
 
 import pytest
 
@@ -37,6 +38,30 @@ def test_demo_requirements_pin_current_rrdoctor_version() -> None:
     version = version_line.split('"', 2)[1]
 
     assert f"rrdoctor=={version}" in requirements
+
+
+def test_demo_version_label_uses_installed_package_metadata(monkeypatch) -> None:
+    app = _load_demo_app()
+
+    monkeypatch.setattr(app, "package_version", lambda package_name: "9.8.7")
+
+    assert app.rrdoctor_version_label() == "9.8.7"
+
+
+def test_demo_version_label_falls_back_to_module_version(monkeypatch) -> None:
+    app = _load_demo_app()
+
+    def missing_package(_package_name):
+        raise app.PackageNotFoundError
+
+    monkeypatch.setattr(app, "package_version", missing_package)
+    monkeypatch.setattr(
+        app.importlib,
+        "import_module",
+        lambda module_name: SimpleNamespace(__version__="1.2.3"),
+    )
+
+    assert app.rrdoctor_version_label() == "1.2.3"
 
 
 def test_parse_github_url_rejects_non_github_url() -> None:

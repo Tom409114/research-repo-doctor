@@ -9,6 +9,8 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as package_version
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -198,12 +200,28 @@ def _summary_value(report: dict[str, Any], key: str) -> int:
     return 0
 
 
+def rrdoctor_version_label() -> str:
+    try:
+        return package_version("rrdoctor")
+    except PackageNotFoundError:
+        pass
+
+    try:
+        rrdoctor_module = importlib.import_module("rrdoctor")
+    except ImportError:
+        return "unknown"
+
+    return str(getattr(rrdoctor_module, "__version__", "unknown"))
+
+
 def main() -> None:
     st = importlib.import_module("streamlit")
+    rrdoctor_version = rrdoctor_version_label()
 
     st.set_page_config(page_title="rrdoctor web demo", layout="centered")
     st.title("Research Repo Doctor")
     st.caption("Paste a public GitHub repo URL. Get an AE-style readiness level and top findings.")
+    st.caption(f"Powered by rrdoctor {rrdoctor_version}. Static, key-free scan.")
     st.info(SAFE_SCAN_NOTE)
 
     with st.form("scan-form"):
@@ -265,6 +283,7 @@ def main() -> None:
     st.markdown(
         f"Run this on your own machine: `uvx rrdoctor scan .`  \n[GitHub repo]({GITHUB_REPO})"
     )
+    st.caption(f"This web demo is running rrdoctor {rrdoctor_version}.")
 
 
 if __name__ == "__main__":
