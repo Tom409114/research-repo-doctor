@@ -137,6 +137,17 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.12
+
+- **Trusted dynamic Action gate**: GitHub Action users can now set
+  `verify-run: "true"` plus `verify-fail-on: error` so trusted dynamic
+  verification blocks CI while still uploading the verification report.
+- **Agent distribution templates**: repository Copilot instructions, an Agent
+  Skill template, and a Cursor project rule make the deterministic
+  scan -> plan -> verify loop copyable across coding-agent workflows.
+- **Tighter evidence wording**: corpus and JOSS draft wording now distinguishes
+  focused review notes from full manual repository audits.
+
 ## What's new in 0.2.11
 
 - **First-run trust tuning**: README install/run commands, seeded local RNGs,
@@ -314,7 +325,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.11
+      - uses: Tom409114/research-repo-doctor@v0.2.12
         with:
           profile: standard
           fail-on: none
@@ -427,7 +438,7 @@ only verified external-use claims.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.11},
+  version = {0.2.12},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

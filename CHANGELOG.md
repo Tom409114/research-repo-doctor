@@ -2,9 +2,16 @@
 
 ## Unreleased
 
+## v0.2.12 - 2026-07-06
+
 - Added `verify-fail-on` to the GitHub Action so trusted `verify-run` jobs can
   block CI on dynamic verification failures while still uploading the generated
   verification report.
+- Added repository-level GitHub Copilot instructions plus copyable Agent Skill
+  and Cursor rule templates for using rrdoctor as a deterministic coding-agent
+  verification loop.
+- Tightened public corpus and JOSS draft wording so focused review notes are not
+  overstated as full manual repository audits.
 
 ## v0.2.11 - 2026-07-05
 
