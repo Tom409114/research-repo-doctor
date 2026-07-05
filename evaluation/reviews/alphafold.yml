@@ -1,0 +1,16 @@
+version: 1
+repository: alphafold
+status: reviewed
+reviewed_at: 2026-07-06
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD043
+    evidence: README uses /home/user/absolute_path_to_the_output_dir as an obvious documentation placeholder, not a machine-specific local data path.
+  - rule_id: RRD052
+    evidence: run_alphafold.py declares --random_seed and applies it through process_features(..., random_seed=...) and predict(..., random_seed=...); randomness in *_test.py files is not experiment randomness.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a computational-biology artifact. This review checked
+  placeholder absolute-path handling and seeded prediction plumbing; it is not
+  a full repository audit.

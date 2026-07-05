@@ -5,6 +5,11 @@
 - Added a public-hygiene regression test that prevents internal launch/application
   materials, local workspace paths, and the README demo GIF regression from
   re-entering the tracked repository.
+- Recognized root-level `main_*.py` and `main-*.py` paper scripts as experiment
+  entrypoints and verification fallbacks, based on MAE corpus review.
+- Reduced unset-seed and local-path noise by ignoring test-file randomness,
+  recognizing `random_seed=` passed to seeded operations, and skipping obvious
+  placeholder absolute paths, based on AlphaFold corpus review.
 
 ## v0.2.13 - 2026-07-06
 

@@ -34,6 +34,8 @@ class ExperimentEntrypointMissingRule(Rule):
             "evaluate*.py",
             "run*.py",
             "main.py",
+            "main_*.py",
+            "main-*.py",
             "reproduce*.py",
             "run*.sh",
             "reproduce*.sh",
@@ -77,6 +79,7 @@ _DOCUMENTED_ENTRYPOINT_RE = re.compile(
     r"\b("
     r"python\s+-m\s+[A-Za-z0-9_.-]*(?:train|main|run|eval|evaluate|reproduce)[A-Za-z0-9_.-]*\b|"
     r"python(?:\s+-m)?\s+(?:\./)?(?:train|main|run|eval|evaluate|reproduce)(?:\.py)?\b|"
+    r"python\s+(?:\./)?(?:train|main|run|eval|evaluate|reproduce)[_-][^\s`]+\.py\b|"
     r"python\s+(?:\./)?(?:scripts|tools)/[^\s`]+\.py\b|"
     r"python\s+(?:\./)?src/[^\s`]*(?:train|test|eval|evaluate|run|reproduce)[^\s`]*\.py\b|"
     r"bash\s+(?:\./)?(?:scripts/)?(?:run|reproduce|train|eval)[^\s`]*\.sh\b|"
@@ -358,6 +361,8 @@ class _RandomnessVisitor(ast.NodeVisitor):
             return self._has_seed_argument(node)
         if self._is_known_stochastic_ml_call(full_name):
             return self._has_seed_keyword(node)
+        if self._has_seed_keyword(node) and self._looks_like_seeded_operation(full_name):
+            return True
         return self._is_tensorflow_stateless_random(full_name)
 
     def _is_randomness_use(self, full_name: str, node: ast.Call) -> bool:
@@ -395,9 +400,23 @@ class _RandomnessVisitor(ast.NodeVisitor):
 
     def _has_seed_keyword(self, node: ast.Call) -> bool:
         return any(
-            keyword.arg in {"random_state", "seed"} and not _is_none_literal(keyword.value)
+            keyword.arg in {"random_state", "random_seed", "seed"}
+            and not _is_none_literal(keyword.value)
             for keyword in node.keywords
         )
+
+    def _looks_like_seeded_operation(self, full_name: str) -> bool:
+        leaf = full_name.rsplit(".", 1)[-1].lower()
+        return leaf in {
+            "evaluate",
+            "fit",
+            "predict",
+            "process",
+            "process_features",
+            "run",
+            "sample",
+            "train",
+        }
 
     def _declares_seed_option(self, full_name: str | None, node: ast.Call) -> bool:
         if full_name is None:
@@ -463,6 +482,8 @@ def _python_sources(context: ScanContext) -> list[_PythonSource]:
     sources: list[_PythonSource] = []
     for path in context.files:
         if path.suffix.lower() == ".py":
+            if _is_test_python_path(context.rel(path)):
+                continue
             sources.append(_PythonSource(context.rel(path), read_text(path)))
         elif path.suffix.lower() == ".ipynb":
             nb = read_notebook(path)
@@ -474,6 +495,17 @@ def _python_sources(context: ScanContext) -> list[_PythonSource]:
                         _PythonSource(context.rel(path), str(cell.get("source", "")), index)
                     )
     return sources
+
+
+def _is_test_python_path(rel: str) -> bool:
+    normalized = rel.replace("\\", "/").lower()
+    name = Path(normalized).name
+    return (
+        normalized.startswith("tests/")
+        or "/tests/" in normalized
+        or name.startswith("test_")
+        or name.endswith("_test.py")
+    )
 
 
 class ResultsProvenanceMissingRule(Rule):

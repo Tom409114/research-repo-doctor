@@ -68,6 +68,30 @@ def test_readme_data_prepare_command_satisfies_data_docs_rule(tmp_path) -> None:
     assert not report.findings
 
 
+def test_local_absolute_path_rule_flags_real_user_path(tmp_path) -> None:
+    local_path = "/home/" + "alice/private-datasets/demo"
+    (tmp_path / "README.md").write_text(
+        f"# Demo\n\nSet `DATA_DIR={local_path}` before training.\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert report.findings
+    assert report.findings[0].rule_id == "RRD043"
+
+
+def test_local_absolute_path_rule_ignores_placeholder_path(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nWrite outputs to `/home/user/absolute_path_to_the_output_dir`.\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
 def test_notebook_checkpoints_rule(tmp_path) -> None:
     checkpoint_dir = tmp_path / "notebooks" / ".ipynb_checkpoints"
     checkpoint_dir.mkdir(parents=True)

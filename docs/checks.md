@@ -62,7 +62,7 @@ as `python train.py`, `python eval.py`, `make reproduce`, `snakemake`, or
 `nextflow run ...`.
 
 `RRD050` recognizes common research entrypoints including root-level `train.py`,
-`main.py`, `run.py`, `scripts/` and ML-style `tools/train.py` or
+`main.py`, `run.py`, `main_*.py`/`main-*.py`, `scripts/`, and ML-style `tools/train.py` or
 `tools/test.py` entrypoints, README-documented `python scripts/*.py` or
 `python tools/*.py` commands, README-documented `python -m package.train`
 commands, pyproject-declared console scripts shown in the README, eval/reproduce
@@ -76,6 +76,10 @@ downgraded to a warning rather than an error.
 `RRD040` accepts dedicated data docs and README-based evidence, including common
 dataset sections and documented `python data/.../prepare.py` style preparation
 commands.
+
+`RRD043` and notebook path rule `RRD062` ignore obvious documentation
+placeholders such as `/home/user/absolute_path_to_the_output_dir` while still
+flagging machine-specific personal home-directory paths.
 
 `RRD063` and `RRD090` are intentionally conservative. Generic `token`,
 `api_key`, `secret`, or `password` text must be paired with a credential-like

@@ -19,6 +19,22 @@ def test_notebook_absolute_path_detection() -> None:
     assert any(finding.rule_id == "RRD062" for finding in report.findings)
 
 
+def test_notebook_absolute_path_ignores_placeholder(tmp_path) -> None:
+    notebook_path = tmp_path / "analysis.ipynb"
+    notebook = nbformat.v4.new_notebook(
+        cells=[
+            nbformat.v4.new_markdown_cell(
+                "Write outputs to `/home/user/absolute_path_to_the_output_dir`."
+            )
+        ]
+    )
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD062"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_notebook_out_of_order_detection() -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD061"}).scan("tests/fixtures/notebook-issues-repo")
 

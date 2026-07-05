@@ -187,6 +187,8 @@ def _entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
     for entrypoint in _PYTHON_ENTRYPOINTS:
         if (root / entrypoint).exists():
             return [sys.executable, entrypoint], f"python {entrypoint}"
+    for entrypoint in _candidate_root_python_entrypoints(root):
+        return [sys.executable, entrypoint], f"python {entrypoint}"
     notebooks = sorted(root.rglob("*.ipynb"))
     if notebooks and shutil.which("papermill"):
         rel = notebooks[0].relative_to(root).as_posix()
@@ -378,19 +380,44 @@ def _is_python_command(command: str) -> bool:
 def _is_python_entrypoint(path: str) -> bool:
     rel = path.replace("\\", "/")
     name = Path(rel).name.lower()
-    return name in {
-        "train.py",
-        "main.py",
-        "run.py",
-        "reproduce.py",
-        "eval.py",
-        "evaluate.py",
-    } or bool(
-        re.match(
-            r"(?i)(?:scripts|tools)/.*\.py$|src/.*(?:train|test|run|eval|evaluate|reproduce).*\.py$",
-            rel,
+    return (
+        name
+        in {
+            "train.py",
+            "main.py",
+            "run.py",
+            "reproduce.py",
+            "eval.py",
+            "evaluate.py",
+        }
+        or bool(re.match(r"(?i)^(?:train|main|run|reproduce|eval|evaluate)[_-].+\.py$", name))
+        or bool(
+            re.match(
+                r"(?i)(?:scripts|tools)/.*\.py$|src/.*(?:train|test|run|eval|evaluate|reproduce).*\.py$",
+                rel,
+            )
         )
     )
+
+
+def _candidate_root_python_entrypoints(root: Path) -> list[str]:
+    candidates: list[str] = []
+    for pattern in (
+        "main_*.py",
+        "main-*.py",
+        "train_*.py",
+        "train-*.py",
+        "run_*.py",
+        "run-*.py",
+        "eval_*.py",
+        "eval-*.py",
+        "evaluate_*.py",
+        "evaluate-*.py",
+        "reproduce_*.py",
+        "reproduce-*.py",
+    ):
+        candidates.extend(path.name for path in root.glob(pattern) if path.is_file())
+    return sorted(set(candidates))
 
 
 def _project_console_scripts(root: Path) -> set[str]:

@@ -93,6 +93,16 @@ def test_verification_detects_root_python_entrypoint(tmp_path) -> None:
     assert display == "python train.py"
 
 
+def test_verification_detects_root_main_variant_entrypoint(tmp_path) -> None:
+    (tmp_path / "main_finetune.py").write_text("print('fine-tune')\n", encoding="utf-8")
+
+    runnable, display = _entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[-1] == "main_finetune.py"
+    assert display == "python main_finetune.py"
+
+
 def test_verification_prefers_documented_readme_entrypoint(tmp_path) -> None:
     (tmp_path / "train.py").write_text("print('train')\n", encoding="utf-8")
     (tmp_path / "README.md").write_text(
@@ -105,6 +115,20 @@ def test_verification_prefers_documented_readme_entrypoint(tmp_path) -> None:
     assert runnable is not None
     assert runnable[-2:] == ["train.py", "config/train_shakespeare_char.py"]
     assert display == "python train.py config/train_shakespeare_char.py"
+
+
+def test_verification_accepts_documented_main_variant_command(tmp_path) -> None:
+    (tmp_path / "main_finetune.py").write_text("print('fine-tune')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n```bash\npython main_finetune.py --eval --data_path ${IMAGENET_DIR}\n```\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[1:] == ["main_finetune.py", "--eval", "--data_path", "${IMAGENET_DIR}"]
+    assert display == "python main_finetune.py --eval --data_path '${IMAGENET_DIR}'"
 
 
 def test_verification_ignores_non_file_backed_readme_command(tmp_path) -> None:

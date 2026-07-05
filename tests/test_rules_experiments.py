@@ -14,9 +14,28 @@ def test_root_train_py_counts_as_experiment_entrypoint(tmp_path) -> None:
     assert not report.findings
 
 
+def test_root_main_variant_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "main_finetune.py").write_text("print('fine-tune')\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_readme_train_command_counts_as_experiment_entrypoint(tmp_path) -> None:
     (tmp_path / "README.md").write_text(
         "# Demo\n\nRun `python train.py config/default.py` to reproduce the main run.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_readme_main_variant_command_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nRun `python main_finetune.py --eval --data_path ${IMAGENET_DIR}`.\n",
         encoding="utf-8",
     )
 
@@ -160,6 +179,22 @@ def test_seeded_numpy_randomness_passes(tmp_path) -> None:
     assert not report.findings
 
 
+def test_random_seed_keyword_application_passes(tmp_path) -> None:
+    (tmp_path / "run_model.py").write_text(
+        "import random\n"
+        "\n"
+        "random_seed = FLAGS.random_seed\n"
+        "if random_seed is None:\n"
+        "    random_seed = random.randrange(1000)\n"
+        "model_runner.predict(features, random_seed=random_seed)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_local_random_generator_with_seed_passes(tmp_path) -> None:
     (tmp_path / "preprocess.py").write_text(
         "import random\n\nrng = random.Random(FLAGS.random_seed)\nrng.shuffle(rows)\n",
@@ -199,6 +234,19 @@ def test_torch_randomness_in_training_code_still_flagged(tmp_path) -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
 
     assert len(report.findings) == 1
+
+
+def test_randomness_in_test_file_does_not_flag_unseeded_experiment(tmp_path) -> None:
+    package = tmp_path / "demo"
+    package.mkdir()
+    (package / "protein_test.py").write_text(
+        "import numpy as np\n\nsample = np.random.random([10, 3])\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert not report.findings
 
 
 def test_sklearn_randomness_without_random_state_flagged(tmp_path) -> None:

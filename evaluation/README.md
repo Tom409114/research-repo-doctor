@@ -52,14 +52,16 @@ Manual review flags captured in this snapshot:
 | --- | --- | ---: |
 | False positive | RRD090 | 4 |
 
-Coverage update added on 2026-07-05:
+Coverage update added on 2026-07-05 and 2026-07-06:
 
-- Focused manual review notes now committed: 20
-- Repositories still awaiting focused manual review: 40
-- Added BERT, CLIP, and improved-diffusion reviews for README evidence,
-  experiment-entrypoint recognition, and randomness-seed signal quality.
-- Confirmed that BERT's local `random.Random(seed)` usage and CLIP model
-  parameter initialization are not reported as `RRD052` unset-seed findings.
+- Focused manual review notes now committed: 22
+- Repositories still awaiting focused manual review: 38
+- Added BERT, CLIP, improved-diffusion, MAE, and AlphaFold reviews for README
+  evidence, experiment-entrypoint recognition, path-noise handling, and
+  randomness-seed signal quality.
+- Confirmed that BERT's local `random.Random(seed)` usage, CLIP model parameter
+  initialization, MAE-style root `main_*.py` scripts, and AlphaFold
+  `random_seed=` plumbing are not reported as noisy findings.
 
 ## Reproduce The Smoke Scan
 

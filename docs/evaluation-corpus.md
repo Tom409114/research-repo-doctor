@@ -107,12 +107,13 @@ Manual review flags captured in this snapshot:
 | --- | --- | ---: |
 | False positive | RRD090 | 4 |
 
-Additional focused reviews added on 2026-07-05 cover BERT, CLIP, and
-improved-diffusion. The repository now contains 20 reviewed notes and 40
-repositories still awaiting focused manual review. Those additions confirm that
-BERT local RNG seeding via `random.Random(FLAGS.random_seed)` and CLIP model
-parameter initialization via `nn.Parameter(torch.randn(...))` no longer trigger
-`RRD052`.
+Additional focused reviews added on 2026-07-05 and 2026-07-06 cover BERT,
+CLIP, improved-diffusion, MAE, and AlphaFold. The repository now contains 22
+reviewed notes and 38 repositories still awaiting focused manual review. Those
+additions confirm that BERT local RNG seeding via
+`random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
+`nn.Parameter(torch.randn(...))`, MAE-style root `main_*.py` entrypoints, and
+AlphaFold `random_seed=` plumbing no longer trigger noisy findings.
 
 ## Manual Review
 

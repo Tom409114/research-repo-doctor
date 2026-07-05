@@ -183,9 +183,9 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   now produce fewer false positives.
 - **Real dynamic gate**: `rrdoctor verify --run --fail-on error` now exits
   nonzero when dependency resolution or the detected run path fails or is blocked.
-- **More calibration evidence**: 20 focused review notes are now committed,
-  including BERT, CLIP, and improved-diffusion follow-ups with expected-absent
-  checks for fixed noisy findings.
+- **More calibration evidence**: 22 focused review notes are now committed,
+  including BERT, CLIP, improved-diffusion, MAE, and AlphaFold follow-ups with
+  expected-absent checks for fixed noisy findings.
 
 ## What's new in 0.2.10
 

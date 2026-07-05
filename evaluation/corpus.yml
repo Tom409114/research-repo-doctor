@@ -34,6 +34,7 @@ repositories:
     url: https://github.com/google-deepmind/alphafold
     ecosystem: python-bioinformatics
     reason: High-impact computational biology artifact with data and environment complexity.
+    expected_absent: [RRD043, RRD052]
     review_focus: [data-provenance, environment, hardware-requirements]
   - name: stable-diffusion
     url: https://github.com/CompVis/stable-diffusion
@@ -91,6 +92,7 @@ repositories:
     url: https://github.com/facebookresearch/mae
     ecosystem: python-ml-legacy
     reason: Archived representation-learning artifact with training commands and checkpoints.
+    expected_absent: [RRD050]
     review_focus: [legacy-artifact, entrypoints, checkpoint-docs]
   - name: dino
     url: https://github.com/facebookresearch/dino

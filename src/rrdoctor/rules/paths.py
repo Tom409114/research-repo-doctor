@@ -72,6 +72,19 @@ def first_absolute_path(text: str) -> tuple[str, int] | None:
 
     for index, line in enumerate(text.splitlines(), start=1):
         match = ABSOLUTE_PATH_RE.search(line)
-        if match:
+        if match and not is_placeholder_absolute_path(match.group(0)):
             return match.group(0), index
     return None
+
+
+def is_placeholder_absolute_path(value: str) -> bool:
+    """Return true for documentation examples rather than leaked local paths."""
+
+    normalized = value.replace("\\", "/").lower()
+    return (
+        normalized.startswith("/home/user/")
+        or normalized.startswith("/users/user/")
+        or "/absolute_path" in normalized
+        or "/path_to_" in normalized
+        or "/path/to/" in normalized
+    )

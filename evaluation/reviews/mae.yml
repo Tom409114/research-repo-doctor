@@ -1,0 +1,14 @@
+version: 1
+repository: mae
+status: reviewed
+reviewed_at: 2026-07-06
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Root-level main_pretrain.py, main_finetune.py, and main_linprobe.py plus README/PRETRAIN/FINETUNE commands are recognized as experiment entrypoints.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a legacy representation-learning artifact. This review
+  checked MAE-style root main_*.py research scripts and their documented
+  command-line usage; it is not a full repository audit.

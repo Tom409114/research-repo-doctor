@@ -10,7 +10,7 @@ import nbformat
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, has_secret_like_value, mask_secret
-from rrdoctor.rules.paths import ABSOLUTE_PATH_RE, find_files
+from rrdoctor.rules.paths import ABSOLUTE_PATH_RE, find_files, is_placeholder_absolute_path
 
 
 def notebooks(context: ScanContext) -> list[Path]:
@@ -121,7 +121,7 @@ class NotebookAbsolutePathRule(Rule):
             for index, cell in enumerate(nb.cells, start=1):
                 source = str(cell.get("source", ""))
                 match = ABSOLUTE_PATH_RE.search(source)
-                if match:
+                if match and not is_placeholder_absolute_path(match.group(0)):
                     rel = context.rel(path)
                     return [
                         self.finding(
