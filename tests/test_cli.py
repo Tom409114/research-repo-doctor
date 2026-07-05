@@ -5,6 +5,7 @@ import json
 from typer.testing import CliRunner
 
 import rrdoctor
+from rrdoctor import cli as cli_module
 from rrdoctor.cli import app
 
 runner = CliRunner()
@@ -102,6 +103,28 @@ def test_doctor_reports_mcp_optional_dependency() -> None:
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
     assert "mcp" in payload["optional_dependencies"]
+
+
+def test_module_importable_requires_successful_import(monkeypatch) -> None:
+    def fail_import(module: str) -> None:
+        raise ModuleNotFoundError(f"{module} missing transitive dependency")
+
+    monkeypatch.setattr(cli_module.importlib, "import_module", fail_import)
+
+    assert not cli_module._module_importable("mcp.server.fastmcp")
+
+
+def test_doctor_reports_unusable_mcp_as_false(monkeypatch) -> None:
+    def fake_importable(module: str) -> bool:
+        return module != "mcp.server.fastmcp"
+
+    monkeypatch.setattr(cli_module, "_module_importable", fake_importable)
+
+    result = runner.invoke(app, ["doctor"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["optional_dependencies"]["mcp"] is False
 
 
 def test_profile_help_lists_submission_profiles() -> None:

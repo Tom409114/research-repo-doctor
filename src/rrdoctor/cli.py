@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import importlib.util
+import importlib
 import json
 import sys
 from datetime import datetime, timezone
@@ -47,6 +47,16 @@ def _version_callback(value: bool) -> None:
     if value:
         typer.echo(f"rrdoctor {__version__}")
         raise typer.Exit()
+
+
+def _module_importable(module: str) -> bool:
+    """Return true only when a module and its import-time dependencies load."""
+
+    try:
+        importlib.import_module(module)
+    except Exception:
+        return False
+    return True
 
 
 @app.callback(invoke_without_command=True)
@@ -572,10 +582,10 @@ def doctor() -> None:
         "cwd": str(Path.cwd()),
         "cwd_readable": Path.cwd().exists(),
         "optional_dependencies": {
-            "nbformat": importlib.util.find_spec("nbformat") is not None,
-            "yaml": importlib.util.find_spec("yaml") is not None,
-            "rich": importlib.util.find_spec("rich") is not None,
-            "mcp": importlib.util.find_spec("mcp") is not None,
+            "nbformat": _module_importable("nbformat"),
+            "yaml": _module_importable("yaml"),
+            "rich": _module_importable("rich"),
+            "mcp": _module_importable("mcp.server.fastmcp"),
         },
     }
     console.print_json(json.dumps(payload))
