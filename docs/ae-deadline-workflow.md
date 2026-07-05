@@ -25,6 +25,17 @@ Read the readiness label first:
 
 Treat the numeric score as triage, not as proof of reproducibility.
 
+If you only need the reviewer-facing evidence packet, generate the four main
+artifacts in one directory:
+
+```bash
+rrdoctor prepare . --profile acm --out-dir rrdoctor-prep
+```
+
+The packet contains `rrdoctor-report.md`, `rrdoctor-plan.md`,
+`ARTIFACT_APPENDIX.md`, and `rrdoctor-verify.md`. Add `--run` and, when useful,
+`--command "python train.py config/default.py"` only for repositories you trust.
+
 ## 2. Scaffold the Mechanical Fixes
 
 Preview the safe fixes:

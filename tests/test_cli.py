@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from typer.testing import CliRunner
 
@@ -190,6 +191,79 @@ def test_verify_command_rejects_unparseable_command() -> None:
     assert "Usage:" in result.stderr
 
 
+def test_prepare_writes_ae_packet(tmp_path) -> None:
+    out_dir = tmp_path / "packet"
+
+    result = runner.invoke(
+        app,
+        [
+            "prepare",
+            "tests/fixtures/ml-project-repo",
+            "--profile",
+            "acm",
+            "--out-dir",
+            str(out_dir),
+            "--command",
+            "python scripts/train.py --config configs/default.yaml",
+        ],
+    )
+
+    assert result.exit_code == 0
+    expected = {
+        "README.md",
+        "rrdoctor-report.md",
+        "rrdoctor-plan.md",
+        "ARTIFACT_APPENDIX.md",
+        "rrdoctor-verify.md",
+    }
+    assert {path.name for path in out_dir.iterdir()} == expected
+    index = (out_dir / "README.md").read_text(encoding="utf-8")
+    verify = (out_dir / "rrdoctor-verify.md").read_text(encoding="utf-8")
+    assert "Artifact Evaluation Prep Packet" in index
+    assert "rrdoctor-plan.md" in index
+    assert "python scripts/train.py --config configs/default.yaml" in verify
+    assert "- L3 command: `python scripts/train.py --config configs/default.yaml`" in verify
+
+
+def test_prepare_fail_on_error_writes_packet_then_exits_nonzero(tmp_path) -> None:
+    out_dir = tmp_path / "packet"
+
+    result = runner.invoke(
+        app,
+        [
+            "prepare",
+            "tests/fixtures/missing-basics-repo",
+            "--out-dir",
+            str(out_dir),
+            "--fail-on",
+            "error",
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert (out_dir / "rrdoctor-report.md").exists()
+    assert "Needs preparation" in (out_dir / "README.md").read_text(encoding="utf-8")
+
+
+def test_prepare_refuses_repository_root_output_dir() -> None:
+    readme = Path("tests/fixtures/ml-project-repo/README.md")
+    original = readme.read_text(encoding="utf-8")
+
+    result = runner.invoke(
+        app,
+        [
+            "prepare",
+            "tests/fixtures/ml-project-repo",
+            "--out-dir",
+            "tests/fixtures/ml-project-repo",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "Usage:" in result.stderr
+    assert readme.read_text(encoding="utf-8") == original
+
+
 def test_profile_help_lists_submission_profiles() -> None:
     scan = runner.invoke(app, ["scan", "--help"])
     init = runner.invoke(app, ["init", "--help"])
@@ -199,3 +273,4 @@ def test_profile_help_lists_submission_profiles() -> None:
     for profile in ("ml-paper", "neurips", "icml", "acm", "fair4rs", "joss"):
         assert profile in scan.stdout
         assert profile in init.stdout
+    assert "prepare" in runner.invoke(app, ["--help"]).stdout

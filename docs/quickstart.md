@@ -65,6 +65,9 @@ then re-run `rrdoctor scan` to verify. See [agent workflows](agent-workflows.md)
 ## Before a submission deadline
 
 ```bash
+# One local packet: report, fix plan, appendix, and verification ladder:
+rrdoctor prepare . --profile acm --out-dir rrdoctor-prep
+
 # ACM Artifact Appendix skeleton + ACM badge / NeurIPS checklist mapping:
 rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
 

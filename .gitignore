@@ -20,4 +20,5 @@ wandb/
 mlruns/
 rrdoctor-report.md
 rrdoctor-self-report.md
+rrdoctor-prep/
 evaluation/reports/

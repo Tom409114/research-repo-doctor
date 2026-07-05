@@ -13,6 +13,9 @@
 - Added a `rrdoctor verify --command "..."` override, plus GitHub Action and
   MCP support, so maintainers can pin an official quickstart command as the L3
   dynamic verification gate.
+- Added `rrdoctor prepare`, a one-command local Artifact Evaluation prep packet
+  that writes the static report, agent fix plan, artifact appendix, and
+  verification ladder into a single directory.
 
 ## v0.2.13 - 2026-07-06
 

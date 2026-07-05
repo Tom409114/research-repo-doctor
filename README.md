@@ -20,6 +20,9 @@ any coding agent or human can finish.
 ## AE deadline loop
 
 ```bash
+uvx rrdoctor prepare . --profile acm --out-dir rrdoctor-prep
+
+# Or run the pieces explicitly:
 uvx rrdoctor scan . --profile acm
 uvx rrdoctor fix . --write
 uvx rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
@@ -34,6 +37,8 @@ resolve dependencies and execute the declared entrypoint under a timeout. With t
 gate (`--fail-on error`), failed or blocked dynamic L2/L3 steps return a nonzero exit code.
 Use `--command` when the artifact has a specific smoke-test or quickstart command that
 reviewers should run.
+`rrdoctor prepare` writes the report, agent plan, artifact appendix, and verification ladder
+into one local evidence directory.
 
 Artifact Evaluation chairs and lab maintainers can use the
 [AE chair guide](docs/ae-chair-guide.md) for optional pre-submission wording and
@@ -311,6 +316,7 @@ rrdoctor scan . --format agent --output fix-plan.md
 Before a submission deadline:
 
 ```bash
+rrdoctor prepare . --profile acm --out-dir rrdoctor-prep          # one local AE packet
 rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md   # appendix + checklist mapping
 rrdoctor verify . --profile neurips                               # L1/L2/L3 ladder (static)
 rrdoctor verify . --run --timeout 600 --fail-on error              # build + run gate (trusted repos)
@@ -399,6 +405,7 @@ Worked examples live in [examples/reports/](examples/reports/), including a
 | `rrdoctor scan` | Run the deterministic audit; supports `--baseline` and `--fail-on-new`. |
 | `rrdoctor fix` | Apply safe, idempotent scaffolding for common gaps (`--write` to apply). |
 | `rrdoctor plan` | Emit a tool-agnostic fix plan (Markdown or JSON). |
+| `rrdoctor prepare` | Write a local AE prep packet: report, plan, appendix, and verification. |
 | `rrdoctor verify` | Reproducibility ladder L1/L2/L3; `--command` pins the official quickstart; `--run` actually builds and executes. |
 | `rrdoctor appendix` | Generate an ACM Artifact Appendix + ACM/NeurIPS checklist mapping. |
 | `rrdoctor badge` | Emit an artifact-readiness badge (Shields.io endpoint or SVG). |

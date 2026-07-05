@@ -163,6 +163,17 @@ def _write_or_echo(rendered: str, output: Path | None, label: str) -> None:
         typer.echo(rendered)
 
 
+def _validate_verify_command(command: str | None) -> None:
+    if command is None:
+        return
+    if not command.strip():
+        raise typer.BadParameter("--command cannot be empty")
+    try:
+        shlex.split(command)
+    except ValueError as exc:
+        raise typer.BadParameter(f"--command could not be parsed: {exc}") from exc
+
+
 @app.command()
 def scan(
     path: Annotated[Path, typer.Argument(help="Repository path to scan.")] = Path("."),
@@ -377,6 +388,121 @@ def plan(
         typer.echo(rendered)
 
 
+def _packet_index(
+    report: ScanReport,
+    profile: str,
+    run: bool,
+    timeout: int,
+    command: str | None,
+    verify_name: str,
+) -> str:
+    mode = "dynamic (--run)" if run else "static"
+    repository_name = Path(report.repository_path).name or report.repository_path
+    lines = [
+        "# rrdoctor Artifact Evaluation Prep Packet",
+        "",
+        f"- Repository: `{repository_name}`",
+        f"- Profile: `{profile}`",
+        f"- Readiness: **{report.readiness.level}**",
+        f"- Score: **{report.score}/100**",
+        f"- Verification mode: `{mode}`",
+    ]
+    if command is not None:
+        lines.append(f"- L3 command: `{command}`")
+    if run:
+        lines.append(f"- Timeout: `{timeout}` seconds per dynamic step")
+    lines.extend(
+        [
+            "",
+            "## Files",
+            "",
+            "- `rrdoctor-report.md`: static reproducibility audit and findings.",
+            "- `rrdoctor-plan.md`: tool-agnostic repair plan for a maintainer or coding agent.",
+            "- `ARTIFACT_APPENDIX.md`: ACM-style appendix plus checklist scaffold.",
+            f"- `{verify_name}`: L1/L2/L3 verification ladder.",
+            "",
+            "Review generated text before submitting it. Dynamic verification runs repository code "
+            "only when this packet was created with `--run`.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+@app.command()
+def prepare(
+    path: Annotated[Path, typer.Argument(help="Repository path to prepare.")] = Path("."),
+    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    profile: Annotated[
+        str, typer.Option("--profile", help=PROFILE_HELP + " Default: acm.")
+    ] = "acm",
+    out_dir: Annotated[
+        Path,
+        typer.Option("--out-dir", help="Directory for the generated AE prep packet."),
+    ] = Path("rrdoctor-prep"),
+    run: Annotated[
+        bool,
+        typer.Option(
+            "--run",
+            help="Resolve deps and execute the L3 entrypoint. Runs repo code.",
+        ),
+    ] = False,
+    timeout: Annotated[
+        int, typer.Option("--timeout", help="Per-step timeout in seconds for --run.")
+    ] = 300,
+    command: Annotated[
+        str | None,
+        typer.Option(
+            "--command",
+            help="Override the detected L3 entrypoint command. Only executes with --run.",
+        ),
+    ] = None,
+    fail_on: Annotated[
+        str, typer.Option("--fail-on", help="Failure threshold after writing files: none, error.")
+    ] = "none",
+) -> None:
+    """Generate the local AE prep packet: report, plan, appendix, and verification."""
+
+    if profile not in PROFILES:
+        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
+    if fail_on not in ("none", "error"):
+        raise typer.BadParameter("--fail-on must be one of: none, error")
+    _validate_verify_command(command)
+
+    report = _build_report(path, profile, config)
+    root = Path(path).resolve()
+    if out_dir.resolve() == root:
+        raise typer.BadParameter("--out-dir must not be the repository root")
+    steps = build_steps(report, root, run, timeout, command)
+    appendix_text = render_appendix(report) + "\n\n" + render_checklist(report)
+    verify_name = "rrdoctor-verify-run.md" if run else "rrdoctor-verify.md"
+    files = {
+        "README.md": _packet_index(report, profile, run, timeout, command, verify_name),
+        "rrdoctor-report.md": render_markdown(report),
+        "rrdoctor-plan.md": render_agent_markdown(report),
+        "ARTIFACT_APPENDIX.md": appendix_text,
+        verify_name: render_verification(report, root, run, timeout, steps=steps, command=command),
+    }
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for name, content in files.items():
+        (out_dir / name).write_text(content, encoding="utf-8")
+
+    table = Table(title="rrdoctor prepare")
+    table.add_column("File")
+    table.add_column("Purpose")
+    table.add_row("README.md", "packet index")
+    table.add_row("rrdoctor-report.md", "static audit")
+    table.add_row("rrdoctor-plan.md", "repair plan")
+    table.add_row("ARTIFACT_APPENDIX.md", "AE appendix/checklist")
+    table.add_row(verify_name, "verification ladder")
+    console.print(table)
+    err_console.print(f"Wrote AE prep packet to [bold]{out_dir}[/bold]")
+
+    if fail_on == "error" and verification_failed(report, steps if run else None):
+        raise typer.Exit(1)
+
+
 @app.command()
 def badge(
     path: Annotated[Path, typer.Argument(help="Repository path to summarize.")] = Path("."),
@@ -474,13 +600,7 @@ def verify(
         raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
     if fail_on not in ("none", "error"):
         raise typer.BadParameter("--fail-on must be one of: none, error")
-    if command is not None:
-        if not command.strip():
-            raise typer.BadParameter("--command cannot be empty")
-        try:
-            shlex.split(command)
-        except ValueError as exc:
-            raise typer.BadParameter(f"--command could not be parsed: {exc}") from exc
+    _validate_verify_command(command)
 
     report = _build_report(path, profile, config)
     root = Path(path).resolve()
