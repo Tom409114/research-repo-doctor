@@ -20,6 +20,36 @@ and arguments:
 uvx --from "rrdoctor[mcp]" rrdoctor mcp
 ```
 
+## Smoke test
+
+Check that the optional dependency is visible:
+
+```bash
+rrdoctor doctor
+```
+
+The JSON output should include:
+
+```json
+{
+  "optional_dependencies": {
+    "mcp": true
+  }
+}
+```
+
+For a local build from source, the same check is:
+
+```bash
+python -m pip install -e ".[mcp]"
+python - <<'PY'
+from rrdoctor.mcp_server import build_server
+
+build_server()
+print("rrdoctor MCP server builds successfully")
+PY
+```
+
 ## Generic stdio server config
 
 Most MCP clients accept a command-plus-args block. Use this shape and adapt the

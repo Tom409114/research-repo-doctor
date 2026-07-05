@@ -34,3 +34,20 @@ jobs:
           path: |
             rrdoctor-self-report.md
             rrdoctor-plan.md
+
+  mcp-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[mcp]"
+      - name: Build MCP server
+        run: |
+          python - <<'PY'
+          from rrdoctor.mcp_server import build_server
+
+          build_server()
+          print("rrdoctor MCP server builds successfully")
+          PY

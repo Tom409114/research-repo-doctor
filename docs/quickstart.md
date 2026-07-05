@@ -86,7 +86,8 @@ pip install 'rrdoctor[mcp]'
 rrdoctor mcp        # exposes scan/verify/appendix as MCP tools over stdio
 ```
 
-For stdio client configuration and safety notes, see [MCP integration](mcp.md).
+For stdio client configuration, smoke tests, and safety notes, see
+[MCP integration](mcp.md).
 
 ## Add the GitHub Action
 

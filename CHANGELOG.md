@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- No unreleased changes.
+- Added a CI smoke test for the optional MCP extra and documented how to verify
+  that the MCP server builds before wiring it into a coding agent.
 
 ## v0.2.10 - 2026-07-05
 
