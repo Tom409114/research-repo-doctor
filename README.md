@@ -132,6 +132,17 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.10
+
+- **More reliable corpus calibration**: the public evaluation-corpus runner now
+  falls back to GitHub archives when `git clone` times out, keeping first-run
+  trust checks less dependent on flaky transport.
+- **Cleaner maintainer automation**: first-party workflows and documentation
+  examples now use current Node 24-compatible GitHub Actions releases.
+- **Sharper diagnostics**: `rrdoctor doctor` now reports optional MCP
+  integration availability only when the package and import-time dependencies
+  actually load.
+
 ## What's new in 0.2.9
 
 - **Clearer first-run CLI behavior**: `rrdoctor --version` now reports the
@@ -287,7 +298,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.9
+      - uses: Tom409114/research-repo-doctor@v0.2.10
         with:
           profile: standard
           fail-on: none
@@ -399,7 +410,7 @@ only verified external-use claims.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.9},
+  version = {0.2.10},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rrdoctor"
-version = "0.2.9"
+version = "0.2.10"
 description = "Get your research artifact reviewer-ready before you submit: reproducibility audits, dynamic verify, auto-fix, an agent-ready fix plan, and an ACM/NeurIPS Artifact Appendix generator."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
