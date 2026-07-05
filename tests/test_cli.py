@@ -245,6 +245,27 @@ def test_prepare_fail_on_error_writes_packet_then_exits_nonzero(tmp_path) -> Non
     assert "Needs preparation" in (out_dir / "README.md").read_text(encoding="utf-8")
 
 
+def test_prepare_accepts_warning_failure_threshold(tmp_path) -> None:
+    out_dir = tmp_path / "packet"
+
+    result = runner.invoke(
+        app,
+        [
+            "prepare",
+            "tests/fixtures/ml-project-repo",
+            "--profile",
+            "standard",
+            "--out-dir",
+            str(out_dir),
+            "--fail-on",
+            "warning",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert (out_dir / "rrdoctor-report.md").exists()
+
+
 def test_prepare_refuses_repository_root_output_dir() -> None:
     readme = Path("tests/fixtures/ml-project-repo/README.md")
     original = readme.read_text(encoding="utf-8")

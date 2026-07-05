@@ -23,6 +23,8 @@ jobs:
           plan: "true"
           appendix: "true"
           appendix-output: rrdoctor-action-appendix.md
+          prepare: "true"
+          prepare-output: rrdoctor-action-prep
           verify: "true"
           verify-output: rrdoctor-action-verify.md
           comment-pr: "true"
@@ -34,6 +36,11 @@ jobs:
           test -s rrdoctor-plan.md
           test -s rrdoctor-action-appendix.md
           test -s rrdoctor-action-verify.md
+          test -s rrdoctor-action-prep/README.md
+          test -s rrdoctor-action-prep/rrdoctor-report.md
+          test -s rrdoctor-action-prep/rrdoctor-plan.md
+          test -s rrdoctor-action-prep/ARTIFACT_APPENDIX.md
+          test -s rrdoctor-action-prep/rrdoctor-verify.md
       - name: Create failing dynamic verification fixture
         shell: bash
         run: |

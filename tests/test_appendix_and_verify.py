@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 from rrdoctor.config import DEFAULT_CONFIG, apply_cli_overrides
+from rrdoctor.models import ScanReport
 from rrdoctor.reporting.appendix import badge_status, render_appendix, render_checklist
 from rrdoctor.scanner import Scanner
 from rrdoctor.verification import (
@@ -95,6 +97,17 @@ def test_verification_failed_includes_dynamic_step_failures() -> None:
     ]
 
     assert verification_failed(report, steps)
+
+
+def test_verification_failed_respects_warning_threshold() -> None:
+    report = replace(
+        ScanReport.empty(".", "standard"),
+        summary={"error": 0, "warning": 1, "info": 0},
+    )
+
+    assert not verification_failed(report, fail_on="none")
+    assert not verification_failed(report, fail_on="error")
+    assert verification_failed(report, fail_on="warning")
 
 
 def test_run_command_missing_tool_returns_none(tmp_path) -> None:

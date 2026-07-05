@@ -586,10 +586,18 @@ def render_verification(
     return "\n".join(lines)
 
 
-def verification_failed(report: ScanReport, steps: list[LadderStep] | None = None) -> bool:
+def verification_failed(
+    report: ScanReport, steps: list[LadderStep] | None = None, fail_on: str = "error"
+) -> bool:
     """Whether verification should fail the CLI gate."""
 
-    if report.summary.get("error", 0) > 0:
+    if fail_on == "none":
+        return False
+    if fail_on == "warning" and (
+        report.summary.get("error", 0) > 0 or report.summary.get("warning", 0) > 0
+    ):
+        return True
+    if fail_on == "error" and report.summary.get("error", 0) > 0:
         return True
     if steps is None:
         return False

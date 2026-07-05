@@ -2,7 +2,8 @@
 
 The action lets another repository run Research Repo Doctor in pull requests and
 pushes. It can publish the reproducibility report, an agent-ready fix plan, an
-Artifact Evaluation appendix, and a verification ladder report from the same run.
+Artifact Evaluation appendix, a verification ladder report, and a complete
+Artifact Evaluation prep packet from the same run.
 
 ```yaml
 name: Research Repo Doctor
@@ -24,6 +25,7 @@ jobs:
           output: rrdoctor-report.md
           plan: "true"
           appendix: "true"
+          prepare: "true"
           verify: "true"
 ```
 
@@ -42,11 +44,14 @@ jobs:
 | `plan` | `false` | Also generate an agent-ready `rrdoctor-plan.md`. |
 | `appendix` | `false` | Also generate an Artifact Evaluation appendix/checklist. |
 | `appendix-output` | `ARTIFACT_APPENDIX.md` | Artifact appendix output path. |
+| `prepare` | `false` | Also generate a full Artifact Evaluation prep packet directory. |
+| `prepare-output` | `rrdoctor-prep` | Artifact Evaluation prep packet output directory. |
 | `verify` | `false` | Also generate an L1/L2/L3 verification ladder report. |
 | `verify-run` | `false` | Run dynamic verification steps. Executes target repository code; only use on trusted repositories. |
 | `verify-fail-on` | `none` | `none`, `error`, or `warning`; set to `error` to make failed dynamic verification block the workflow. |
 | `verify-output` | `rrdoctor-verify.md` | Verification report output path. |
 | `verify-timeout` | `300` | Per-step timeout in seconds for dynamic verification. |
+| `verify-command` | empty | Optional L3 quickstart command for `verify` and `prepare`. |
 | `comment-pr` | `false` | Post or update a sticky PR comment with the report. |
 | `step-summary` | `true` | Write the report to the job summary. |
 | `upload-artifacts` | `true` | Upload the report (and plan) as artifacts. |
@@ -61,9 +66,11 @@ scanning. PR comments use the built-in `GITHUB_TOKEN`.
 | --- | --- |
 | `exit-code` | rrdoctor scan exit code before the final enforcement step. |
 | `verify-exit-code` | rrdoctor verify exit code before the final enforcement step. |
+| `prepare-exit-code` | rrdoctor prepare exit code before the final enforcement step. |
 | `report-path` | Path to the generated report. |
 | `plan-path` | Path to `rrdoctor-plan.md` when `plan` is `true`. |
 | `appendix-path` | Path to the appendix file when `appendix` is `true`. |
+| `prepare-path` | Path to the prep packet directory when `prepare` is `true`. |
 | `verify-path` | Path to the verification report when `verify` is `true`. |
 
 ## Pull request comments and gating
@@ -97,6 +104,26 @@ artifact appendix and ACM/NeurIPS checklist mapping:
 The appendix is uploaded as an artifact and included in the job summary when
 `step-summary` is enabled. Treat it as a scaffold: fill in venue-specific
 hardware, runtime, data access, and expected-results details before submission.
+
+## Artifact Evaluation Prep Packet
+
+Set `prepare: "true"` to generate the same local packet as
+`rrdoctor prepare`: `README.md`, `rrdoctor-report.md`, `rrdoctor-plan.md`,
+`ARTIFACT_APPENDIX.md`, and `rrdoctor-verify.md` in one uploaded directory.
+
+```yaml
+      - uses: Tom409114/research-repo-doctor@v0.2.13
+        with:
+          profile: acm
+          fail-on: none
+          prepare: "true"
+          prepare-output: rrdoctor-prep
+```
+
+For trusted repositories, `prepare` also honors `verify-run`, `verify-command`,
+`verify-timeout`, and `verify-fail-on`, so the packet can include the dynamic
+run-path evidence reviewers should inspect. Without `verify-run`, the packet is
+static and does not execute target repository code.
 
 ## Verification Ladder
 

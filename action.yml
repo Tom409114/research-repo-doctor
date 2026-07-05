@@ -49,6 +49,14 @@ inputs:
     description: Artifact appendix output path.
     required: false
     default: ARTIFACT_APPENDIX.md
+  prepare:
+    description: Also generate a local Artifact Evaluation prep packet directory.
+    required: false
+    default: "false"
+  prepare-output:
+    description: Artifact Evaluation prep packet output directory.
+    required: false
+    default: rrdoctor-prep
   verify:
     description: Also generate a reproducibility verification ladder report.
     required: false
@@ -105,6 +113,12 @@ outputs:
   appendix-path:
     description: Path to the generated Artifact Evaluation appendix when appendix is true.
     value: ${{ steps.paths.outputs.appendix-path }}
+  prepare-path:
+    description: Path to the generated Artifact Evaluation prep packet when prepare is true.
+    value: ${{ steps.paths.outputs.prepare-path }}
+  prepare-exit-code:
+    description: rrdoctor prepare exit code before the final enforcement step.
+    value: ${{ steps.prepare_step.outputs.code }}
   verify-path:
     description: Path to the generated verification report when verify is true.
     value: ${{ steps.paths.outputs.verify-path }}
@@ -152,11 +166,13 @@ runs:
         RRD_OUTPUT: ${{ inputs.output }}
         RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
         RRD_VERIFY_OUTPUT: ${{ inputs.verify-output }}
+        RRD_PREPARE_OUTPUT: ${{ inputs.prepare-output }}
       run: |
         echo "report-path=$RRD_OUTPUT" >> "$GITHUB_OUTPUT"
         echo "plan-path=rrdoctor-plan.md" >> "$GITHUB_OUTPUT"
         echo "appendix-path=$RRD_APPENDIX_OUTPUT" >> "$GITHUB_OUTPUT"
         echo "verify-path=$RRD_VERIFY_OUTPUT" >> "$GITHUB_OUTPUT"
+        echo "prepare-path=$RRD_PREPARE_OUTPUT" >> "$GITHUB_OUTPUT"
     - name: Generate fix plan
       if: ${{ inputs.plan == 'true' }}
       shell: bash
@@ -172,6 +188,28 @@ runs:
         RRD_PROFILE: ${{ inputs.profile }}
         RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
       run: rrdoctor appendix "$RRD_PATH" --profile "$RRD_PROFILE" --output "$RRD_APPENDIX_OUTPUT"
+    - name: Generate AE prep packet
+      id: prepare_step
+      if: ${{ inputs.prepare == 'true' }}
+      shell: bash
+      env:
+        RRD_PATH: ${{ inputs.path }}
+        RRD_CONFIG: ${{ inputs.config }}
+        RRD_PROFILE: ${{ inputs.profile }}
+        RRD_PREPARE_OUTPUT: ${{ inputs.prepare-output }}
+        RRD_VERIFY_RUN: ${{ inputs.verify-run }}
+        RRD_VERIFY_FAIL_ON: ${{ inputs.verify-fail-on }}
+        RRD_VERIFY_TIMEOUT: ${{ inputs.verify-timeout }}
+        RRD_VERIFY_COMMAND: ${{ inputs.verify-command }}
+      run: |
+        set -uo pipefail
+        args=(prepare "$RRD_PATH" --profile "$RRD_PROFILE" --out-dir "$RRD_PREPARE_OUTPUT" --timeout "$RRD_VERIFY_TIMEOUT" --fail-on "$RRD_VERIFY_FAIL_ON")
+        if [ -n "$RRD_CONFIG" ]; then args+=(--config "$RRD_CONFIG"); fi
+        if [ -n "$RRD_VERIFY_COMMAND" ]; then args+=(--command "$RRD_VERIFY_COMMAND"); fi
+        if [ "$RRD_VERIFY_RUN" = "true" ]; then args+=(--run); fi
+        rrdoctor "${args[@]}"
+        echo "code=$?" >> "$GITHUB_OUTPUT"
+        exit 0
     - name: Generate verification report
       id: verify_step
       if: ${{ inputs.verify == 'true' }}
@@ -201,6 +239,7 @@ runs:
         RRD_OUTPUT: ${{ inputs.output }}
         RRD_APPENDIX_OUTPUT: ${{ inputs.appendix-output }}
         RRD_VERIFY_OUTPUT: ${{ inputs.verify-output }}
+        RRD_PREPARE_OUTPUT: ${{ inputs.prepare-output }}
       run: |
         set -uo pipefail
         if [ -f "$RRD_OUTPUT" ]; then cat "$RRD_OUTPUT" >> "$GITHUB_STEP_SUMMARY"; fi
@@ -212,6 +251,9 @@ runs:
         fi
         if [ -f "$RRD_VERIFY_OUTPUT" ]; then
           { echo ""; echo "---"; echo ""; cat "$RRD_VERIFY_OUTPUT"; } >> "$GITHUB_STEP_SUMMARY"
+        fi
+        if [ -f "$RRD_PREPARE_OUTPUT/README.md" ]; then
+          { echo ""; echo "---"; echo ""; cat "$RRD_PREPARE_OUTPUT/README.md"; } >> "$GITHUB_STEP_SUMMARY"
         fi
     - name: Comment on pull request
       if: ${{ inputs.comment-pr == 'true' && github.event_name == 'pull_request' }}
@@ -242,15 +284,20 @@ runs:
           rrdoctor-plan.md
           ${{ inputs.appendix-output }}
           ${{ inputs.verify-output }}
+          ${{ inputs.prepare-output }}
         if-no-files-found: ignore
     - name: Enforce result
       shell: bash
       env:
         RRD_AUDIT_CODE: ${{ steps.audit.outputs.code }}
+        RRD_PREPARE_CODE: ${{ steps.prepare_step.outputs.code }}
         RRD_VERIFY_CODE: ${{ steps.verify_step.outputs.code }}
       run: |
         if [ -n "$RRD_AUDIT_CODE" ] && [ "$RRD_AUDIT_CODE" != "0" ]; then
           exit "$RRD_AUDIT_CODE"
+        fi
+        if [ -n "$RRD_PREPARE_CODE" ] && [ "$RRD_PREPARE_CODE" != "0" ]; then
+          exit "$RRD_PREPARE_CODE"
         fi
         if [ -n "$RRD_VERIFY_CODE" ] && [ "$RRD_VERIFY_CODE" != "0" ]; then
           exit "$RRD_VERIFY_CODE"

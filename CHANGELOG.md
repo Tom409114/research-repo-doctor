@@ -16,6 +16,9 @@
 - Added `rrdoctor prepare`, a one-command local Artifact Evaluation prep packet
   that writes the static report, agent fix plan, artifact appendix, and
   verification ladder into a single directory.
+- Added GitHub Action `prepare` / `prepare-output` inputs so CI can upload the
+  same Artifact Evaluation prep packet, and aligned `verify` / `prepare`
+  `--fail-on warning` behavior with the documented Action input.
 
 ## v0.2.13 - 2026-07-06
 

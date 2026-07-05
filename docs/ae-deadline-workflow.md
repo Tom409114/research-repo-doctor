@@ -159,10 +159,13 @@ jobs:
           comment-pr: "true"
           step-summary: "true"
           plan: "true"
+          prepare: "true"
 ```
 
 Start with `fail-on: none` while fixing old findings. Raise the gate later, for
 example to `fail-on: warning`, once the repository is ready for stricter review.
+The `prepare` artifact is the CI version of the local `rrdoctor prepare` packet:
+report, plan, appendix, and verification ladder in one uploaded directory.
 
 ## Submission-Day Checklist
 

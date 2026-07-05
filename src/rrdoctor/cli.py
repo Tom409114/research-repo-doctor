@@ -458,15 +458,18 @@ def prepare(
         ),
     ] = None,
     fail_on: Annotated[
-        str, typer.Option("--fail-on", help="Failure threshold after writing files: none, error.")
+        str,
+        typer.Option(
+            "--fail-on", help="Failure threshold after writing files: none, error, warning."
+        ),
     ] = "none",
 ) -> None:
     """Generate the local AE prep packet: report, plan, appendix, and verification."""
 
     if profile not in PROFILES:
         raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
-    if fail_on not in ("none", "error"):
-        raise typer.BadParameter("--fail-on must be one of: none, error")
+    if fail_on not in ("none", "error", "warning"):
+        raise typer.BadParameter("--fail-on must be one of: none, error, warning")
     _validate_verify_command(command)
 
     report = _build_report(path, profile, config)
@@ -499,7 +502,7 @@ def prepare(
     console.print(table)
     err_console.print(f"Wrote AE prep packet to [bold]{out_dir}[/bold]")
 
-    if fail_on == "error" and verification_failed(report, steps if run else None):
+    if verification_failed(report, steps if run else None, fail_on):
         raise typer.Exit(1)
 
 
@@ -587,7 +590,7 @@ def verify(
         ),
     ] = None,
     fail_on: Annotated[
-        str, typer.Option("--fail-on", help="Failure threshold: none, error.")
+        str, typer.Option("--fail-on", help="Failure threshold: none, error, warning.")
     ] = "error",
 ) -> None:
     """Run the reproducibility verification ladder (L1 static, L2 build, L3 run).
@@ -598,8 +601,8 @@ def verify(
 
     if profile not in PROFILES:
         raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
-    if fail_on not in ("none", "error"):
-        raise typer.BadParameter("--fail-on must be one of: none, error")
+    if fail_on not in ("none", "error", "warning"):
+        raise typer.BadParameter("--fail-on must be one of: none, error, warning")
     _validate_verify_command(command)
 
     report = _build_report(path, profile, config)
@@ -608,7 +611,7 @@ def verify(
     rendered = render_verification(report, root, run, timeout, steps=steps, command=command)
     _write_or_echo(rendered, output, "verification report")
 
-    if fail_on == "error" and verification_failed(report, steps if run else None):
+    if verification_failed(report, steps if run else None, fail_on):
         raise typer.Exit(1)
 
 

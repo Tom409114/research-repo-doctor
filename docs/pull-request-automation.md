@@ -78,6 +78,26 @@ Set `appendix: "true"` before a submission deadline to produce
 The appendix is uploaded with the other action artifacts and included in the job
 summary when `step-summary` is enabled.
 
+## Emit the full Artifact Evaluation prep packet
+
+Set `prepare: "true"` when you want the action to upload the same packet created
+by `rrdoctor prepare`: static report, agent plan, Artifact Appendix, and
+verification ladder in one directory.
+
+```yaml
+      - uses: Tom409114/research-repo-doctor@v0.2.13
+        with:
+          profile: acm
+          fail-on: none
+          prepare: "true"
+          prepare-output: rrdoctor-prep
+```
+
+For trusted repositories, combine this with `verify-run: "true"` and, when the
+artifact has an official quickstart, `verify-command`. Static `prepare` remains
+safe for untrusted code because it does not install dependencies or execute the
+target repository.
+
 ## Emit the Verification Ladder
 
 Set `verify: "true"` to include a static L1/L2/L3 verification report in the job

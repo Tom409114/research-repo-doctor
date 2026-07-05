@@ -77,11 +77,15 @@ jobs:
           comment-pr: "true"
           step-summary: "true"
           appendix: "true"
+          prepare: "true"
           verify: "true"
 ```
 
 Use `fail-on: none` while preparing an artifact. Raise the gate later only if
 the project wants a stricter release policy.
+`prepare: "true"` uploads a single packet containing the report, repair plan,
+Artifact Appendix, and verification ladder for the authors or reviewers to
+download.
 
 ## What rrdoctor Checks
 
