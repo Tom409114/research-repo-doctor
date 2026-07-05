@@ -45,6 +45,23 @@ machine-readable guide describing setup, test and lint commands, and conventions
 `rrdoctor fix` can scaffold one (rule RRD014), and rule RRD014 flags repositories
 that lack one under the strict profile.
 
+## GitHub Copilot instructions
+
+GitHub Copilot also supports repository-wide custom instructions at
+`.github/copilot-instructions.md`. Research Repo Doctor keeps one in this
+repository so Copilot Chat, Copilot code review, and Copilot cloud agent see the
+same deterministic verify loop:
+
+```bash
+rrdoctor scan . --format json --output baseline.json
+rrdoctor plan . --output plan.md
+rrdoctor scan . --baseline baseline.json --fail-on-new error
+```
+
+For your own research repository, copy the same loop into `AGENTS.md`,
+`.github/copilot-instructions.md`, or the equivalent instruction file for your
+agent so rrdoctor remains the grader and the agent remains the editor.
+
 ## Why deterministic plus agent
 
 A deterministic checker is reproducible, auditable, and trustworthy, but it cannot
