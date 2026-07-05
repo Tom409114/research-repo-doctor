@@ -96,7 +96,7 @@ For stdio client configuration, smoke tests, and safety notes, see
 ## Add the GitHub Action
 
 ```yaml
-- uses: Tom409114/research-repo-doctor@v0.2.13
+- uses: Tom409114/research-repo-doctor@v0.2.14
   with:
     profile: standard
     fail-on: warning

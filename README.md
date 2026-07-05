@@ -161,6 +161,21 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.14
+
+- **One-command AE evidence packet**: `rrdoctor prepare` writes the static
+  report, agent fix plan, Artifact Appendix, and verification ladder into one
+  local directory for deadline handoff.
+- **CI-uploaded AE packet**: the GitHub Action now supports `prepare: "true"`
+  and `prepare-output`, so pull requests and release gates can upload the same
+  reviewer-ready packet.
+- **Pinned run-path verification**: `verify --command "..."`, the Action
+  `verify-command` input, and the MCP `verify` tool let maintainers pin the
+  official quickstart command as the L3 gate.
+- **Lower first-run noise**: MAE-style root `main_*.py` scripts, AlphaFold-style
+  `random_seed=` plumbing, test-file randomness, and placeholder absolute paths
+  are handled more conservatively.
+
 ## What's new in 0.2.13
 
 - **Scan reports now lead to the AE workflow**: Markdown reports and agent fix
@@ -364,7 +379,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.13
+      - uses: Tom409114/research-repo-doctor@v0.2.14
         with:
           profile: standard
           fail-on: none
@@ -479,7 +494,7 @@ only verified external-use claims.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.13},
+  version = {0.2.14},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

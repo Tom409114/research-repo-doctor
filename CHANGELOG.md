@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- No unreleased changes yet.
+
+## v0.2.14 - 2026-07-06
+
 - Added a public-hygiene regression test that prevents internal launch/application
   materials, local workspace paths, and the README demo GIF regression from
   re-entering the tracked repository.
