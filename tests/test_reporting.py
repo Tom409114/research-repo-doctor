@@ -18,6 +18,10 @@ def test_markdown_report_generation() -> None:
     assert "Artifact readiness" in rendered
     assert "tests/fixtures/missing-basics-repo" not in rendered
     assert "How to fix first" in rendered
+    assert "Artifact Evaluation next steps" in rendered
+    assert "rrdoctor appendix . --profile standard --output ARTIFACT_APPENDIX.md" in rendered
+    assert "rrdoctor verify . --profile standard --run --timeout 600 --fail-on error" in rendered
+    assert "Do not run dynamic verification on untrusted code" in rendered
     assert "Suggested GitHub issues" in rendered
 
 

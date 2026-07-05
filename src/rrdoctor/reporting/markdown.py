@@ -56,6 +56,30 @@ def render_markdown(report: ScanReport) -> str:
     else:
         lines.append("- No findings. Keep the repository documentation and automation current.")
 
+    lines.extend(
+        [
+            "",
+            "## Artifact Evaluation next steps",
+            "",
+            "Use the static report to fix packaging gaps, then collect reviewer-facing",
+            "evidence with the appendix and verification ladder:",
+            "",
+            "```bash",
+            f"rrdoctor plan . --profile {report.profile} --output rrdoctor-plan.md",
+            f"rrdoctor appendix . --profile {report.profile} --output ARTIFACT_APPENDIX.md",
+            f"rrdoctor verify . --profile {report.profile} --fail-on none",
+            "```",
+            "",
+            "For repositories you trust, add a dynamic run-path check under a timeout:",
+            "",
+            "```bash",
+            f"rrdoctor verify . --profile {report.profile} --run --timeout 600 --fail-on error",
+            "```",
+            "",
+            "Do not run dynamic verification on untrusted code.",
+        ]
+    )
+
     grouped: dict[str, list[Finding]] = defaultdict(list)
     for finding in sorted(report.findings, key=_finding_key):
         grouped[f"{finding.severity.value} / {finding.category.value}"].append(finding)

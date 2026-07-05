@@ -122,6 +122,21 @@ def render_agent_markdown(report: ScanReport) -> str:
             "rrdoctor scan . --baseline rrdoctor-baseline.json --fail-on-new error",
             "```",
             "",
+            "For Artifact Evaluation packages, also generate reviewer-facing evidence:",
+            "",
+            "```bash",
+            f"rrdoctor appendix . --profile {plan.profile} --output ARTIFACT_APPENDIX.md",
+            f"rrdoctor verify . --profile {plan.profile} --fail-on none",
+            "```",
+            "",
+            "For repositories you trust, optionally run the dynamic path check:",
+            "",
+            "```bash",
+            f"rrdoctor verify . --profile {plan.profile} --run --timeout 600 --fail-on error",
+            "```",
+            "",
+            "Do not run dynamic verification on untrusted code.",
+            "",
         ]
     )
     return "\n".join(lines)

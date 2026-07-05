@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added Artifact Evaluation next-step commands to Markdown scan reports and
+  agent fix plans, including appendix generation, static verification, and
+  trusted-only dynamic `verify --run` guidance.
 - Made the `RRD014` `AGENTS.md` scaffold include the rrdoctor
   scan/plan/baseline verification loop and trusted-only `verify --run` guidance
   for coding agents.

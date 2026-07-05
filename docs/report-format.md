@@ -5,7 +5,8 @@
 Markdown is the default human-readable format. It includes repository name, timestamp,
 profile, Artifact Evaluation-style readiness level, heuristic score, category summary,
 prioritized fixes, grouped findings, suggested GitHub issue titles, and a reproducibility
-checklist.
+checklist. It also includes Artifact Evaluation next-step commands for
+`rrdoctor plan`, `rrdoctor appendix`, and `rrdoctor verify`.
 
 ```bash
 rrdoctor scan . --format markdown --output rrdoctor-report.md
@@ -43,7 +44,8 @@ rrdoctor scan . --format sarif --output rrdoctor.sarif --fail-on none
 
 The `agent` format renders a tool-agnostic fix plan: an ordered, verifiable work
 order that any coding agent or human can execute. The same output is available via
-the `plan` command.
+the `plan` command. The Markdown plan ends with baseline gating plus appendix and
+verification commands for Artifact Evaluation packages.
 
 ```bash
 rrdoctor scan . --format agent --output fix-plan.md

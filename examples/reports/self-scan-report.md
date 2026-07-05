@@ -1,7 +1,7 @@
 # Research Repo Doctor Report
 
 - Repository: `research-repo-doctor`
-- Generated: `2026-07-05T17:05:40.553440+00:00`
+- Generated: `2026-07-05T17:09:08.487942+00:00`
 - Profile: `standard`
 - Artifact readiness: **Reproduced-ready**
 - Heuristic score: **100/100**
@@ -20,6 +20,25 @@
 ## How to fix first
 
 - No findings. Keep the repository documentation and automation current.
+
+## Artifact Evaluation next steps
+
+Use the static report to fix packaging gaps, then collect reviewer-facing
+evidence with the appendix and verification ladder:
+
+```bash
+rrdoctor plan . --profile standard --output rrdoctor-plan.md
+rrdoctor appendix . --profile standard --output ARTIFACT_APPENDIX.md
+rrdoctor verify . --profile standard --fail-on none
+```
+
+For repositories you trust, add a dynamic run-path check under a timeout:
+
+```bash
+rrdoctor verify . --profile standard --run --timeout 600 --fail-on error
+```
+
+Do not run dynamic verification on untrusted code.
 
 ## Findings
 

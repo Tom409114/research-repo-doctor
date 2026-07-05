@@ -29,6 +29,9 @@ def test_agent_markdown_is_tool_agnostic() -> None:
     assert "Reproducibility Fix Plan" in rendered
     assert "tool-agnostic" in rendered
     assert "Verify:" in rendered
+    assert "rrdoctor appendix . --profile standard --output ARTIFACT_APPENDIX.md" in rendered
+    assert "rrdoctor verify . --profile standard --run --timeout 600 --fail-on error" in rendered
+    assert "Do not run dynamic verification on untrusted code" in rendered
 
 
 def test_agent_json_is_valid() -> None:
