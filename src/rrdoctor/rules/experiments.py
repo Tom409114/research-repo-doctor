@@ -314,6 +314,8 @@ class _RandomnessVisitor(ast.NodeVisitor):
                     node, f"Randomness call detected: `{full_name}`.", full_name
                 )
 
+        if full_name is not None and self._is_model_parameter_wrapper(full_name):
+            return
         self.generic_visit(node)
 
     def _evidence(self, node: ast.Call, message: str, value: str | None = None) -> Evidence:
@@ -381,6 +383,12 @@ class _RandomnessVisitor(ast.NodeVisitor):
 
     def _is_tensorflow_stateless_random(self, full_name: str) -> bool:
         return full_name.startswith("tensorflow.random.stateless_")
+
+    def _is_model_parameter_wrapper(self, full_name: str) -> bool:
+        return full_name in {
+            "torch.nn.Parameter",
+            "torch.nn.parameter.Parameter",
+        }
 
     def _has_seed_argument(self, node: ast.Call) -> bool:
         return any(not _is_none_literal(arg) for arg in node.args) or self._has_seed_keyword(node)

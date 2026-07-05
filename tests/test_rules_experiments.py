@@ -171,6 +171,36 @@ def test_local_random_generator_with_seed_passes(tmp_path) -> None:
     assert not report.findings
 
 
+def test_torch_parameter_initialization_does_not_count_as_unseeded_experiment(
+    tmp_path,
+) -> None:
+    (tmp_path / "model.py").write_text(
+        "import torch\n"
+        "from torch import nn\n"
+        "\n"
+        "class Model(nn.Module):\n"
+        "    def __init__(self):\n"
+        "        super().__init__()\n"
+        "        self.positional_embedding = nn.Parameter(torch.randn(10, 32))\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_torch_randomness_in_training_code_still_flagged(tmp_path) -> None:
+    (tmp_path / "train.py").write_text(
+        "import torch\n\nbatch = torch.randn(10, 32)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+
+
 def test_sklearn_randomness_without_random_state_flagged(tmp_path) -> None:
     (tmp_path / "train.py").write_text(
         "from sklearn.model_selection import train_test_split\n"

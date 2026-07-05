@@ -58,8 +58,8 @@ Coverage update added on 2026-07-05:
 - Repositories still awaiting focused manual review: 40
 - Added BERT, CLIP, and improved-diffusion reviews for README evidence,
   experiment-entrypoint recognition, and randomness-seed signal quality.
-- Added one manual false-positive note for RRD052 on CLIP model parameter
-  initialization; BERT's local `random.Random(seed)` usage is now recognized.
+- Confirmed that BERT's local `random.Random(seed)` usage and CLIP model
+  parameter initialization are not reported as `RRD052` unset-seed findings.
 
 ## Reproduce The Smoke Scan
 

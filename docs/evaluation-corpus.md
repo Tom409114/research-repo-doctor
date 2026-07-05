@@ -109,9 +109,10 @@ Manual review flags captured in this snapshot:
 
 Additional focused reviews added on 2026-07-05 cover BERT, CLIP, and
 improved-diffusion. The repository now contains 20 reviewed notes and 40
-repositories still awaiting focused manual review. Those additions record one
-RRD052 false-positive case for CLIP model initialization and confirm BERT local
-RNG seeding via `random.Random(FLAGS.random_seed)`.
+repositories still awaiting focused manual review. Those additions confirm that
+BERT local RNG seeding via `random.Random(FLAGS.random_seed)` and CLIP model
+parameter initialization via `nn.Parameter(torch.randn(...))` no longer trigger
+`RRD052`.
 
 ## Manual Review
 

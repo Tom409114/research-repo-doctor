@@ -6,9 +6,9 @@ reviewer: Research Repo Doctor maintainers
 confirmed_absent:
   - rule_id: RRD002
     evidence: README Usage section includes PyTorch, torchvision, pip, and package-install commands recognized by the current scan.
-false_positives:
   - rule_id: RRD052
-    evidence: The finding points at clip/model.py parameter initialization with torch.randn/nn.init.normal_, not an unseeded data split, training loop, or experiment script.
+    evidence: clip/model.py parameter initialization with nn.Parameter(torch.randn(...)) is not treated as unseeded experiment or data randomness.
+false_positives: []
 false_negatives: []
 notes: >
   Focused review of a model-release repository. The RRD050 finding was left as

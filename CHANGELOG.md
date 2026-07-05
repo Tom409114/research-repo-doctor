@@ -9,9 +9,11 @@
   headings.
 - Reduced `RRD052` false positives by treating `random.Random(seed)` as a
   deterministic local RNG seed application.
+- Reduced `RRD052` false positives by ignoring PyTorch parameter-initialization
+  wrappers such as `nn.Parameter(torch.randn(...))` when no other randomness is
+  present.
 - Added focused corpus review notes for BERT, CLIP, and improved-diffusion,
-  including one manual `RRD052` false-positive note for CLIP model parameter
-  initialization.
+  including expected-absent coverage for CLIP model parameter initialization.
 
 ## v0.2.10 - 2026-07-05
 
