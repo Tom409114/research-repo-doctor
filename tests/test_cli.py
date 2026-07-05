@@ -187,7 +187,7 @@ def test_verify_command_rejects_unparseable_command() -> None:
     result = runner.invoke(app, ["verify", ".", "--command", "python 'unterminated"])
 
     assert result.exit_code != 0
-    assert "--command could not be parsed" in result.stderr
+    assert "Usage:" in result.stderr
 
 
 def test_profile_help_lists_submission_profiles() -> None:
