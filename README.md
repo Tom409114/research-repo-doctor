@@ -31,6 +31,10 @@ For trusted repositories, `rrdoctor verify --run` can go beyond static checks an
 resolve dependencies and execute the declared entrypoint under a timeout. With the default
 gate (`--fail-on error`), failed or blocked dynamic L2/L3 steps return a nonzero exit code.
 
+Artifact Evaluation chairs and lab maintainers can use the
+[AE chair guide](docs/ae-chair-guide.md) for optional pre-submission wording and
+CI examples.
+
 ## What it catches
 
 - **"Your `--seed` flag does nothing."** `RRD052` spots code that declares a seed option but

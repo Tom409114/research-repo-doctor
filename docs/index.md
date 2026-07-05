@@ -6,6 +6,7 @@ Start with the quickstart, then read the checks and configuration reference.
 
 - [Quickstart](quickstart.md)
 - [Artifact Evaluation deadline workflow](ae-deadline-workflow.md)
+- [Guide for Artifact Evaluation chairs](ae-chair-guide.md)
 - [Checks](checks.md)
 - [Auto-fix](autofix.md)
 - [Agent workflows](agent-workflows.md)
