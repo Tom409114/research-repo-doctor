@@ -71,7 +71,8 @@
   Snakemake/Nextflow entrypoint regression cases and R/Rcpp secret-heuristic
   false positives.
 - Refreshed the public corpus snapshot: 60 listed repositories, 60 successful
-  static scans, 0 expected-absent regressions, and 17 focused manual reviews.
+  static scans, 0 expected-absent regressions, and 17 focused review notes loaded
+  in that snapshot.
 - Added tests for package version consistency across `pyproject.toml`,
   `rrdoctor.__version__`, `CITATION.cff`, and demo dependencies.
 

@@ -12,7 +12,7 @@ authors:
 affiliations:
   - name: Independent open-source maintainers
     index: 1
-date: 3 July 2026
+date: 6 July 2026
 bibliography: paper.bib
 ---
 
@@ -105,8 +105,9 @@ resolves dependencies and runs target code.
 `rrdoctor` is designed to improve the handoff quality of research code before
 artifact review, public archival, or lab-to-lab reuse. The current release
 provides a tested Python package, a GitHub Action, rule documentation, example
-reports, an evaluation corpus workflow for public repositories, and a Zenodo
-archive DOI. The project does not claim external adoption in this draft. Its
+reports, an evaluation corpus workflow for public repositories, agent-integration
+templates for deterministic coding-agent review loops, and a Zenodo archive DOI.
+The project does not claim external adoption in this draft. Its
 near-term significance is that it provides a concrete, repeatable artifact
 readiness gate that can be used by individual maintainers and evaluated against
 public research repositories.

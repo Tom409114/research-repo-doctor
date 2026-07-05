@@ -144,8 +144,9 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   now produce fewer false positives.
 - **Real dynamic gate**: `rrdoctor verify --run --fail-on error` now exits
   nonzero when dependency resolution or the detected run path fails or is blocked.
-- **More calibration evidence**: focused review notes now cover BERT, CLIP, and
-  improved-diffusion, with expected-absent checks for fixed noisy findings.
+- **More calibration evidence**: 20 focused review notes are now committed,
+  including BERT, CLIP, and improved-diffusion follow-ups with expected-absent
+  checks for fixed noisy findings.
 
 ## What's new in 0.2.10
 
@@ -190,9 +191,9 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
 - **More reliable corpus scans**: the evaluation runner now falls back to
   GitHub archive downloads when `git clone` transport is flaky, without
   installing or executing target repositories.
-- **More manual calibration evidence**: the public corpus snapshot now covers
-  60/60 successful static scans, 17 focused manual reviews, and 0
-  expected-absent regressions.
+- **More manual calibration evidence**: the 2026-07-04 public corpus snapshot
+  covers 60/60 successful static scans, 17 focused review notes loaded in that
+  snapshot, and 0 expected-absent regressions.
 
 ## What's new in 0.2.5
 
