@@ -113,6 +113,8 @@ Set `verify: "true"` to emit a static L1/L2/L3 verification report:
 By default this does not execute target repository code and does not fail the
 workflow. For repositories you trust, add `verify-run: "true"` to resolve
 dependencies and execute the detected entrypoint under `verify-timeout`.
+Set `verify-command` when the artifact has a specific quickstart command that
+should be used as the L3 gate.
 
 To make dynamic verification a real release gate, also set
 `verify-fail-on: error`:
@@ -124,6 +126,7 @@ To make dynamic verification a real release gate, also set
           fail-on: none
           verify: "true"
           verify-run: "true"
+          verify-command: "python train.py config/default.py"
           verify-fail-on: error
           verify-timeout: "600"
 ```

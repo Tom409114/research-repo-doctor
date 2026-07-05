@@ -45,11 +45,16 @@ def build_server() -> Any:
         return render_markdown(_scan(path, profile))
 
     @server.tool()
-    def verify(path: str = ".", profile: str = "standard", run: bool = False) -> str:
+    def verify(
+        path: str = ".",
+        profile: str = "standard",
+        run: bool = False,
+        command: str | None = None,
+    ) -> str:
         """Run the L1/L2/L3 reproducibility verification ladder."""
 
         report = _scan(path, profile)
-        return render_verification(report, Path(path).resolve(), run)
+        return render_verification(report, Path(path).resolve(), run, command=command)
 
     @server.tool()
     def appendix(path: str = ".", profile: str = "acm") -> str:

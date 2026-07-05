@@ -10,6 +10,7 @@ from rrdoctor.verification import (
     _entrypoint_command,
     _readme_entrypoint_command,
     _run_command,
+    build_steps,
     render_verification,
     verification_failed,
 )
@@ -57,6 +58,26 @@ def test_verification_ladder_static_mode() -> None:
     assert "python scripts/train.py --config configs/default.yaml" in rendered
     # ml-project-repo has no error findings, so L1 should not be a failure.
     assert not verification_failed(report)
+
+
+def test_verification_ladder_accepts_specified_l3_command(tmp_path) -> None:
+    (tmp_path / "train.py").write_text("print('train')\n", encoding="utf-8")
+    (tmp_path / "smoke.py").write_text("print('smoke')\n", encoding="utf-8")
+    report = Scanner(DEFAULT_CONFIG).scan(tmp_path)
+
+    steps = build_steps(report, tmp_path, run=False, timeout=30, command="python smoke.py --quick")
+    rendered = render_verification(
+        report,
+        tmp_path,
+        run=False,
+        timeout=30,
+        steps=steps,
+        command="python smoke.py --quick",
+    )
+
+    assert steps[2].commands == ["python smoke.py --quick"]
+    assert "python train.py" not in rendered
+    assert "- L3 command: `python smoke.py --quick`" in rendered
 
 
 def test_verification_failed_on_missing_basics() -> None:

@@ -9,6 +9,7 @@ def test_action_exposes_dynamic_verify_gate() -> None:
     inputs = action["inputs"]
     assert inputs["verify-run"]["default"] == "false"
     assert inputs["verify-fail-on"]["default"] == "none"
+    assert inputs["verify-command"]["default"] == ""
     assert "error" in inputs["verify-fail-on"]["description"]
 
     outputs = action["outputs"]
@@ -17,7 +18,9 @@ def test_action_exposes_dynamic_verify_gate() -> None:
     steps = action["runs"]["steps"]
     verify_step = next(step for step in steps if step.get("id") == "verify_step")
     assert "RRD_VERIFY_FAIL_ON" in verify_step["env"]
+    assert "RRD_VERIFY_COMMAND" in verify_step["env"]
     assert '--fail-on "$RRD_VERIFY_FAIL_ON"' in verify_step["run"]
+    assert '--command "$RRD_VERIFY_COMMAND"' in verify_step["run"]
     assert 'echo "code=$?"' in verify_step["run"]
     assert "exit 0" in verify_step["run"]
 
@@ -37,6 +40,7 @@ def test_action_smoke_workflow_covers_dynamic_gate_failure() -> None:
     assert dynamic_step["continue-on-error"] is True
     assert dynamic_step["with"]["verify-run"] == "true"
     assert dynamic_step["with"]["verify-fail-on"] == "error"
+    assert dynamic_step["with"]["verify-command"] == "python train.py"
 
     check_step = next(
         step for step in steps if step.get("name") == "Check dynamic gate failure behavior"

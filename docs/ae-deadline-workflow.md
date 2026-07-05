@@ -106,6 +106,13 @@ For repositories you trust, run the dynamic check under a timeout:
 rrdoctor verify . --profile acm --run --timeout 600 --output rrdoctor-verify-run.md --fail-on error
 ```
 
+If the artifact has an official minimal command, pin it explicitly instead of
+relying on entrypoint detection:
+
+```bash
+rrdoctor verify . --profile acm --command "python train.py config/default.py" --run --timeout 600 --output rrdoctor-verify-run.md --fail-on error
+```
+
 Only use `--run` on trusted repositories. Static scans do not execute target
 code. Dynamic verification resolves dependencies and runs the declared
 entrypoint, so it should be treated like running the repository yourself. With

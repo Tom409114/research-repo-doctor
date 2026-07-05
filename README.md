@@ -25,11 +25,15 @@ uvx rrdoctor fix . --write
 uvx rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
 uvx rrdoctor verify . --profile acm
 uvx rrdoctor verify . --profile acm --run --timeout 600 --fail-on error  # trusted repos only
+# Or pin the official quickstart command as the dynamic gate:
+uvx rrdoctor verify . --profile acm --command "python train.py config/default.py" --run --timeout 600 --fail-on error
 ```
 
 For trusted repositories, `rrdoctor verify --run` can go beyond static checks and actually
 resolve dependencies and execute the declared entrypoint under a timeout. With the default
 gate (`--fail-on error`), failed or blocked dynamic L2/L3 steps return a nonzero exit code.
+Use `--command` when the artifact has a specific smoke-test or quickstart command that
+reviewers should run.
 
 Artifact Evaluation chairs and lab maintainers can use the
 [AE chair guide](docs/ae-chair-guide.md) for optional pre-submission wording and
@@ -310,6 +314,7 @@ Before a submission deadline:
 rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md   # appendix + checklist mapping
 rrdoctor verify . --profile neurips                               # L1/L2/L3 ladder (static)
 rrdoctor verify . --run --timeout 600 --fail-on error              # build + run gate (trusted repos)
+rrdoctor verify . --command "python train.py config/default.py" --run --timeout 600
 ```
 
 Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss` (alongside the
@@ -394,7 +399,7 @@ Worked examples live in [examples/reports/](examples/reports/), including a
 | `rrdoctor scan` | Run the deterministic audit; supports `--baseline` and `--fail-on-new`. |
 | `rrdoctor fix` | Apply safe, idempotent scaffolding for common gaps (`--write` to apply). |
 | `rrdoctor plan` | Emit a tool-agnostic fix plan (Markdown or JSON). |
-| `rrdoctor verify` | Reproducibility ladder L1/L2/L3; `--run` actually builds and executes. |
+| `rrdoctor verify` | Reproducibility ladder L1/L2/L3; `--command` pins the official quickstart; `--run` actually builds and executes. |
 | `rrdoctor appendix` | Generate an ACM Artifact Appendix + ACM/NeurIPS checklist mapping. |
 | `rrdoctor badge` | Emit an artifact-readiness badge (Shields.io endpoint or SVG). |
 | `rrdoctor mcp` | Run the MCP server (`scan`/`verify`/`appendix` as agent tools). |

@@ -112,6 +112,8 @@ judgment.
 - Static scans are safe for untrusted repositories.
 - `verify --run` executes repository code and should be used only for artifacts
   the author or reviewer already trusts.
+- Chairs can ask authors to run `rrdoctor verify --command "..." --run` with the
+  artifact's official quickstart command, making the dynamic gate explicit.
 - Generated fixes are starter scaffolds and require human review.
 - rrdoctor cannot verify dataset licensing, hardware availability, private
   credentials, expected runtime, or whether the paper's claims are correct.

@@ -52,6 +52,7 @@ jobs:
           verify: "true"
           verify-run: "true"
           verify-fail-on: error
+          verify-command: "python train.py"
           verify-output: rrdoctor-action-failing-verify.md
           step-summary: "false"
           upload-artifacts: "false"

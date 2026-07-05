@@ -93,8 +93,9 @@ summary and uploaded artifacts:
 
 The default is static and report-only. Add `verify-run: "true"` only for
 repositories you trust, because dynamic verification resolves dependencies and
-executes the detected entrypoint. Add `verify-fail-on: error` when you want that
-dynamic step to block the workflow:
+executes the detected entrypoint. Add `verify-command` when you want the L3 gate
+to use the artifact's official quickstart command. Add `verify-fail-on: error`
+when you want that dynamic step to block the workflow:
 
 ```yaml
       - uses: Tom409114/research-repo-doctor@v0.2.13
@@ -103,6 +104,7 @@ dynamic step to block the workflow:
           fail-on: none
           verify: "true"
           verify-run: "true"
+          verify-command: "python train.py config/default.py"
           verify-fail-on: error
           verify-timeout: "600"
 ```

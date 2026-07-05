@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import shlex
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -452,6 +453,13 @@ def verify(
     output: Annotated[
         Path | None, typer.Option("--output", help="Write the report to this path.")
     ] = None,
+    command: Annotated[
+        str | None,
+        typer.Option(
+            "--command",
+            help="Override the detected L3 entrypoint command. Only executes with --run.",
+        ),
+    ] = None,
     fail_on: Annotated[
         str, typer.Option("--fail-on", help="Failure threshold: none, error.")
     ] = "error",
@@ -466,11 +474,18 @@ def verify(
         raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
     if fail_on not in ("none", "error"):
         raise typer.BadParameter("--fail-on must be one of: none, error")
+    if command is not None:
+        if not command.strip():
+            raise typer.BadParameter("--command cannot be empty")
+        try:
+            shlex.split(command)
+        except ValueError as exc:
+            raise typer.BadParameter(f"--command could not be parsed: {exc}") from exc
 
     report = _build_report(path, profile, config)
     root = Path(path).resolve()
-    steps = build_steps(report, root, run, timeout)
-    rendered = render_verification(report, root, run, timeout, steps=steps)
+    steps = build_steps(report, root, run, timeout, command)
+    rendered = render_verification(report, root, run, timeout, steps=steps, command=command)
     _write_or_echo(rendered, output, "verification report")
 
     if fail_on == "error" and verification_failed(report, steps if run else None):

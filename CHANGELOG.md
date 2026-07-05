@@ -10,6 +10,9 @@
 - Reduced unset-seed and local-path noise by ignoring test-file randomness,
   recognizing `random_seed=` passed to seeded operations, and skipping obvious
   placeholder absolute paths, based on AlphaFold corpus review.
+- Added a `rrdoctor verify --command "..."` override, plus GitHub Action and
+  MCP support, so maintainers can pin an official quickstart command as the L3
+  dynamic verification gate.
 
 ## v0.2.13 - 2026-07-06
 

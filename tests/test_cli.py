@@ -134,8 +134,9 @@ def test_verify_run_exits_nonzero_when_dynamic_step_fails(monkeypatch) -> None:
     def fake_build_report(path, profile, config):
         return original_build_report("tests/fixtures/ml-project-repo", profile, config)
 
-    def fake_build_steps(report, root, run, timeout):
+    def fake_build_steps(report, root, run, timeout, command=None):
         assert run is True
+        assert command is None
         return [
             LadderStep("L1", "Static release hygiene", "pass", "ok"),
             LadderStep("L2", "Environment is resolvable", "pass", "ok"),
@@ -149,6 +150,44 @@ def test_verify_run_exits_nonzero_when_dynamic_step_fails(monkeypatch) -> None:
 
     assert result.exit_code == 1
     assert "FAIL" in result.stdout
+
+
+def test_verify_command_override_is_passed_to_ladder(monkeypatch) -> None:
+    original_build_report = cli_module._build_report
+
+    def fake_build_report(path, profile, config):
+        return original_build_report("tests/fixtures/ml-project-repo", profile, config)
+
+    def fake_build_steps(report, root, run, timeout, command=None):
+        assert run is False
+        assert command == "python smoke.py --quick"
+        return [
+            LadderStep("L1", "Static release hygiene", "pass", "ok"),
+            LadderStep("L2", "Environment is resolvable", "skipped", "static"),
+            LadderStep(
+                "L3",
+                "Declared entrypoint produces output",
+                "skipped",
+                "static",
+                commands=["python smoke.py --quick"],
+            ),
+        ]
+
+    monkeypatch.setattr(cli_module, "_build_report", fake_build_report)
+    monkeypatch.setattr(cli_module, "build_steps", fake_build_steps)
+
+    result = runner.invoke(app, ["verify", ".", "--command", "python smoke.py --quick"])
+
+    assert result.exit_code == 0
+    assert "- L3 command: `python smoke.py --quick`" in result.stdout
+    assert "python smoke.py --quick" in result.stdout
+
+
+def test_verify_command_rejects_unparseable_command() -> None:
+    result = runner.invoke(app, ["verify", ".", "--command", "python 'unterminated"])
+
+    assert result.exit_code != 0
+    assert "--command could not be parsed" in result.stderr
 
 
 def test_profile_help_lists_submission_profiles() -> None:

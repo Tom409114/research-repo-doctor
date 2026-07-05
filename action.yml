@@ -69,6 +69,10 @@ inputs:
     description: Per-step timeout in seconds for dynamic verification.
     required: false
     default: "300"
+  verify-command:
+    description: Optional L3 entrypoint command to verify instead of auto-detecting one.
+    required: false
+    default: ""
   comment-pr:
     description: Post or update a sticky comment on the pull request with the report.
     required: false
@@ -180,10 +184,12 @@ runs:
         RRD_VERIFY_FAIL_ON: ${{ inputs.verify-fail-on }}
         RRD_VERIFY_OUTPUT: ${{ inputs.verify-output }}
         RRD_VERIFY_TIMEOUT: ${{ inputs.verify-timeout }}
+        RRD_VERIFY_COMMAND: ${{ inputs.verify-command }}
       run: |
         set -uo pipefail
         args=(verify "$RRD_PATH" --profile "$RRD_PROFILE" --timeout "$RRD_VERIFY_TIMEOUT" --output "$RRD_VERIFY_OUTPUT" --fail-on "$RRD_VERIFY_FAIL_ON")
         if [ -n "$RRD_CONFIG" ]; then args+=(--config "$RRD_CONFIG"); fi
+        if [ -n "$RRD_VERIFY_COMMAND" ]; then args+=(--command "$RRD_VERIFY_COMMAND"); fi
         if [ "$RRD_VERIFY_RUN" = "true" ]; then args+=(--run); fi
         rrdoctor "${args[@]}"
         echo "code=$?" >> "$GITHUB_OUTPUT"

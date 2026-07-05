@@ -71,6 +71,7 @@ rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
 # Verification ladder. Static by default; --run actually resolves deps and runs the entrypoint:
 rrdoctor verify . --profile neurips
 rrdoctor verify . --run --timeout 600        # only on repositories you trust
+rrdoctor verify . --command "python train.py config/default.py" --run --timeout 600
 ```
 
 Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss`. Dependency and

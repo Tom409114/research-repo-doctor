@@ -452,14 +452,34 @@ def _clean_relative(path: str) -> str:
     return path.replace("\\", "/").removeprefix("./")
 
 
-def _l3_step(root: Path, run: bool, timeout: int) -> LadderStep:
-    runnable, display = _entrypoint_command(root)
+def _specified_entrypoint_command(command: str | None) -> tuple[list[str] | None, str]:
+    """Parse a user-specified entrypoint command without invoking a shell."""
+
+    if command is None:
+        return None, ""
+    try:
+        parts = shlex.split(command)
+    except ValueError:
+        return None, ""
+    if not parts:
+        return None, ""
+    return parts, shlex.join(parts)
+
+
+def _l3_step(root: Path, run: bool, timeout: int, command: str | None = None) -> LadderStep:
+    specified = command is not None
+    runnable, display = (
+        _specified_entrypoint_command(command) if specified else _entrypoint_command(root)
+    )
+    source = "specified command" if specified else "entrypoint"
     if not display:
         return LadderStep(
             "L3",
             "Declared entrypoint produces output",
-            "skipped",
-            "No reproduction entrypoint or notebook detected.",
+            "blocked" if specified else "skipped",
+            "The specified command could not be parsed."
+            if specified
+            else "No reproduction entrypoint or notebook detected.",
         )
     commands = [display]
     if not run:
@@ -467,7 +487,7 @@ def _l3_step(root: Path, run: bool, timeout: int) -> LadderStep:
             "L3",
             "Declared entrypoint produces output",
             "skipped",
-            "Static mode. Re-run with --run to execute the entrypoint (runs repo code).",
+            f"Static mode. Re-run with --run to execute the {source} (runs repo code).",
             commands=commands,
         )
     if runnable is None:
@@ -493,10 +513,20 @@ def _l3_step(root: Path, run: bool, timeout: int) -> LadderStep:
 _ICON = {"pass": "PASS", "fail": "FAIL", "skipped": "SKIP", "blocked": "BLOCKED"}
 
 
-def build_steps(report: ScanReport, root: Path, run: bool, timeout: int) -> list[LadderStep]:
+def build_steps(
+    report: ScanReport,
+    root: Path,
+    run: bool,
+    timeout: int,
+    command: str | None = None,
+) -> list[LadderStep]:
     """Compute all ladder steps."""
 
-    return [_l1_step(report), _l2_step(root, run, timeout), _l3_step(root, run, timeout)]
+    return [
+        _l1_step(report),
+        _l2_step(root, run, timeout),
+        _l3_step(root, run, timeout, command),
+    ]
 
 
 def render_verification(
@@ -505,19 +535,26 @@ def render_verification(
     run: bool,
     timeout: int = DEFAULT_TIMEOUT,
     steps: list[LadderStep] | None = None,
+    command: str | None = None,
 ) -> str:
     """Render the verification ladder as Markdown."""
 
-    steps = steps or build_steps(report, root, run, timeout)
+    steps = steps or build_steps(report, root, run, timeout, command)
     lines = [
         "# Reproducibility verification",
         "",
         f"- Repository: `{report.repository_path}`",
         f"- Mode: {'dynamic (--run)' if run else 'static'}",
-        "",
-        "| Level | Check | Status |",
-        "| --- | --- | --- |",
     ]
+    if command is not None:
+        lines.append(f"- L3 command: `{command}`")
+    lines.extend(
+        [
+            "",
+            "| Level | Check | Status |",
+            "| --- | --- | --- |",
+        ]
+    )
     for step in steps:
         lines.append(f"| {step.level} | {step.title} | {_ICON.get(step.status, step.status)} |")
     lines.append("")
