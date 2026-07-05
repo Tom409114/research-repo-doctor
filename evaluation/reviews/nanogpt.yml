@@ -3,6 +3,14 @@ repository: nanoGPT
 status: reviewed
 reviewed_at: 2026-07-03
 reviewer: Research Repo Doctor maintainers
+last_verified_at: 2026-07-06
+last_verified_version: 0.2.14
+last_verified_result:
+  readiness: Functional
+  score: 76
+  errors: 0
+  warnings: 6
+  info: 2
 confirmed_absent:
   - rule_id: RRD050
     evidence: Root-level train.py and README training commands are recognized.
@@ -12,4 +20,6 @@ false_positives: []
 false_negatives: []
 notes: >
   Regression seed case for the first-run trust issues found during nanoGPT
-  scanning. Keep RRD050 and RRD063 absent unless new evidence justifies a finding.
+  scanning. A PyPI v0.2.14 smoke scan reported Functional readiness, 76/100,
+  0 errors, and no RRD050/RRD063 findings. Keep RRD050 and RRD063 absent unless
+  new evidence justifies a finding.

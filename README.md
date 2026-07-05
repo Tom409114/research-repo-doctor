@@ -4,6 +4,7 @@ Get your research artifact ready for Artifact Evaluation before the deadline:
 scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
 Try it on any public repo (no install): <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
+Streamlit may take a minute to wake the app after inactivity.
 
 ![rrdoctor demo](docs/demo.gif)
 

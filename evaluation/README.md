@@ -63,6 +63,12 @@ Coverage update added on 2026-07-05 and 2026-07-06:
   initialization, MAE-style root `main_*.py` scripts, and AlphaFold
   `random_seed=` plumbing are not reported as noisy findings.
 
+First-run trust spot check added on 2026-07-06:
+
+- Command: `uvx --refresh --from rrdoctor==0.2.14 rrdoctor scan <nanoGPT> --profile standard --format json --fail-on none`
+- Result: `Functional`, 76/100, 0 errors, 6 warnings, 2 info
+- Regression checks: `RRD050` and `RRD063` were absent
+
 ## Reproduce The Smoke Scan
 
 Run a small smoke scan:
