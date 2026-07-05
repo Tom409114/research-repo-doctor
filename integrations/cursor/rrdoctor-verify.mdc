@@ -1,0 +1,40 @@
+---
+description: Use rrdoctor as the deterministic grader for research-repository reproducibility work.
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# rrdoctor Verify Loop
+
+Use this rule when editing a research repository for reproducibility, Artifact
+Evaluation, public release, notebook cleanup, dependency documentation, data
+provenance, citation metadata, or coding-agent remediation.
+
+rrdoctor is the grader. Cursor is the editor. Do not weaken rrdoctor checks to
+make a task pass.
+
+Run the loop:
+
+```bash
+uvx rrdoctor scan . --format json --output baseline.json
+uvx rrdoctor plan . --output plan.md
+# Work through plan.md without weakening checks.
+uvx rrdoctor scan . --baseline baseline.json --fail-on-new error
+```
+
+The final command is the definition of done. If it reports a new error, continue
+fixing from the finding and re-run the gate.
+
+The default scan is static and safe for untrusted repositories: it does not
+install, import, build, or execute target code.
+
+For trusted repositories only, use the dynamic gate:
+
+```bash
+uvx rrdoctor verify . --run --timeout 600 --fail-on error
+```
+
+Prioritize high-signal reproducibility blockers: missing run paths, unpinned or
+missing dependency metadata, local-only data paths, stale notebook outputs,
+missing citation/data/results provenance, and seed flags that do not actually
+seed randomness.

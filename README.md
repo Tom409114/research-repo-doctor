@@ -107,6 +107,9 @@ rrdoctor scan . --baseline baseline.json --fail-on-new error
 The final command is the objective gate: it verifies the agent's work against the starting
 baseline and fails only on newly introduced errors.
 
+Copyable agent templates are available for Agent Skills / Claude Code-style workflows and
+Cursor project rules under [integrations/](integrations/).
+
 Keywords: research software, reproducibility, artifact evaluation, repository audit, auto-fix,
 coding agents, AGENTS.md, GitHub Action, notebooks, data availability, citation metadata.
 

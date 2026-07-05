@@ -62,6 +62,19 @@ For your own research repository, copy the same loop into `AGENTS.md`,
 `.github/copilot-instructions.md`, or the equivalent instruction file for your
 agent so rrdoctor remains the grader and the agent remains the editor.
 
+## Copyable agent templates
+
+Ready-to-copy templates live under `integrations/`:
+
+- `integrations/agent-skills/rrdoctor-verify/SKILL.md` for Agent Skills /
+  Claude Code-style skill workflows.
+- `integrations/cursor/rrdoctor-verify.mdc` for Cursor project rules.
+
+Copy the relevant template into the research repository you want the agent to
+edit. The template tells the agent to create a baseline, work through
+`rrdoctor plan`, and treat `rrdoctor scan --baseline baseline.json
+--fail-on-new error` as the definition of done.
+
 ## Why deterministic plus agent
 
 A deterministic checker is reproducible, auditable, and trustworthy, but it cannot
