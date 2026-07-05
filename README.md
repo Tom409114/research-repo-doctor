@@ -134,6 +134,16 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.11
+
+- **First-run trust tuning**: README install/run commands, seeded local RNGs,
+  PyTorch parameter initialization, UUID-like identifiers, and classic ML repos
+  now produce fewer false positives.
+- **Real dynamic gate**: `rrdoctor verify --run --fail-on error` now exits
+  nonzero when dependency resolution or the detected run path fails or is blocked.
+- **More calibration evidence**: focused review notes now cover BERT, CLIP, and
+  improved-diffusion, with expected-absent checks for fixed noisy findings.
+
 ## What's new in 0.2.10
 
 - **More reliable corpus calibration**: the public evaluation-corpus runner now
@@ -300,7 +310,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.10
+      - uses: Tom409114/research-repo-doctor@v0.2.11
         with:
           profile: standard
           fail-on: none
@@ -412,7 +422,7 @@ only verified external-use claims.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.10},
+  version = {0.2.11},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

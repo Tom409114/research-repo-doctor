@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.11 - 2026-07-05
+
 - Added a CI smoke test for the optional MCP extra and documented how to verify
   that the MCP server builds before wiring it into a coding agent.
 - Reduced first-run false positives by recognizing README install/usage commands
