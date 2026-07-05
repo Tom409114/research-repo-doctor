@@ -123,6 +123,19 @@ def test_gitignore_created_then_appended(tmp_path) -> None:
     assert "wandb" in text and text.count(".env") == 1
 
 
+def test_agents_scaffold_contains_rrdoctor_agent_loop(tmp_path) -> None:
+    created = apply_fix("RRD014", _ctx(tmp_path))
+
+    assert created is not None and created.action == "created"
+    text = (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
+    assert "deterministic, offline grader" in text
+    assert "rrdoctor scan . --format json --output baseline.json --fail-on none" in text
+    assert "rrdoctor plan . --output plan.md" in text
+    assert "rrdoctor scan . --baseline baseline.json --fail-on-new error" in text
+    assert "rrdoctor verify . --run --timeout 600 --fail-on error" in text
+    assert "Do not run dynamic verification on untrusted code" in text
+
+
 def test_data_readme_only_when_dir_exists(tmp_path) -> None:
     skipped = apply_fix("RRD041", _ctx(tmp_path))
     assert skipped is not None and skipped.action == "skipped"

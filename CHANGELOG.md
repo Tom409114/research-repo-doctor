@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Made the `RRD014` `AGENTS.md` scaffold include the rrdoctor
+  scan/plan/baseline verification loop and trusted-only `verify --run` guidance
+  for coding agents.
 - Made the `RRD053` results-provenance scaffold include local project context,
   repository URL, readable git commit, existing `results/` contents, and a
   structured result-inventory table.

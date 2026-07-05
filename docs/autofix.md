@@ -34,6 +34,11 @@ Generated results-provenance notes include the project name, repository URL,
 current git commit when it can be read locally, existing `results/` contents,
 and a table for commands, data snapshots, code commits, and validation notes.
 
+Generated `AGENTS.md` files include the rrdoctor agent repair loop:
+`scan --format json --output baseline.json`, `plan --output plan.md`, and the
+final `scan --baseline baseline.json --fail-on-new error` gate. They also call
+out that `verify --run` is optional and only for trusted repositories.
+
 When unseeded randomness is detected, rrdoctor can scaffold a small
 `set_global_seed(seed: int)` helper. It does not edit your training script; the
 generated file includes a TODO showing where to import and call the helper.
