@@ -79,7 +79,8 @@ commands.
 
 `RRD063` and `RRD090` are intentionally conservative. Generic `token`,
 `api_key`, `secret`, or `password` text must be paired with a credential-like
-random value before it is reported; known provider key prefixes are still flagged.
+random value before it is reported; canonical UUID values are treated as public
+identifiers, and known provider key prefixes are still flagged.
 
 `RRD091` is likewise conservative: an existing `.gitignore` only needs basic
 coverage across generated outputs, credential files, notebook checkpoints, or

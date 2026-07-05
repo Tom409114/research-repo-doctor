@@ -12,6 +12,8 @@
 - Reduced `RRD052` false positives by ignoring PyTorch parameter-initialization
   wrappers such as `nn.Parameter(torch.randn(...))` when no other randomness is
   present.
+- Reduced secret-scanning false positives by treating canonical UUID values as
+  public identifiers rather than generic `token`/`secret` credentials.
 - Added focused corpus review notes for BERT, CLIP, and improved-diffusion,
   including expected-absent coverage for CLIP model parameter initialization.
 

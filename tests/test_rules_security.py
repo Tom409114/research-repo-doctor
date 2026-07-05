@@ -20,6 +20,11 @@ def test_generator_token_marker_is_not_a_secret() -> None:
     assert has_secret_like_value("token = " + fake_secret)
 
 
+def test_uuid_token_value_is_not_a_secret() -> None:
+    assert not has_secret_like_value("token: 10BE3573-1514-4C36-9D1C-5A225CD40393")
+    assert not has_secret_like_value("secret = 10be3573-1514-4c36-9d1c-5a225cd40393")
+
+
 def test_pkgdown_docsearch_key_is_not_a_secret(tmp_path) -> None:
     public_search_key = "ead918d7fe8467a2" + "fd38e97f5bbe3ecb"
     (tmp_path / "_pkgdown.yaml").write_text(

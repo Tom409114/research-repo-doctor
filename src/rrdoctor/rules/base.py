@@ -10,6 +10,7 @@ from rrdoctor.models import Category, Evidence, Finding, RuleDefinition, ScanCon
 GENERIC_SECRET_ASSIGNMENT_RE = re.compile(
     r"(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*['\"]?([A-Za-z0-9_\-+/=]{16,})"
 )
+UUID_RE = re.compile(r"(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 PROVIDER_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"sk-[A-Za-z0-9]{20,}"),
     re.compile(r"ghp_[A-Za-z0-9]{20,}"),
@@ -24,6 +25,8 @@ SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
 def _looks_like_random_secret(value: str) -> bool:
     stripped = value.strip("'\"` ,;)]}")
     if len(stripped) < 20:
+        return False
+    if UUID_RE.fullmatch(stripped):
         return False
     classes = sum(
         (
