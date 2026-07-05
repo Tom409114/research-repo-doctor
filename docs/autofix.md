@@ -30,6 +30,10 @@ top-level data directories, likely data download or preprocessing scripts, and
 README data/access mentions. rrdoctor does not infer the actual dataset license
 or access terms; it gives maintainers a better starting point to verify.
 
+Generated results-provenance notes include the project name, repository URL,
+current git commit when it can be read locally, existing `results/` contents,
+and a table for commands, data snapshots, code commits, and validation notes.
+
 When unseeded randomness is detected, rrdoctor can scaffold a small
 `set_global_seed(seed: int)` helper. It does not edit your training script; the
 generated file includes a TODO showing where to import and call the helper.

@@ -63,6 +63,7 @@ class FixContext:
     version: str | None = None
     date_released: str | None = None
     authors: tuple[str, ...] = ()
+    git_commit: str | None = None
 
 
 def _write_if_missing(path: Path, content: str, rule_id: str, rel: str) -> FixResult:
@@ -104,6 +105,7 @@ def infer_fix_context(
         version=_metadata_str(metadata, "version"),
         date_released=datetime.now(timezone.utc).date().isoformat(),
         authors=inferred_authors,
+        git_commit=_read_git_head_commit(root),
     )
 
 
@@ -252,6 +254,39 @@ def _read_git_origin_url(root: Path) -> str | None:
     if not url:
         return None
     return _normalize_git_url(url.group(1))
+
+
+def _read_git_head_commit(root: Path) -> str | None:
+    git_path = root / ".git"
+    if git_path.is_dir():
+        return _read_commit_from_git_dir(git_path)
+    if git_path.is_file():
+        match = re.search(r"(?im)^gitdir:\s*(.+?)\s*$", read_text(git_path))
+        if not match:
+            return None
+        git_dir = Path(match.group(1))
+        if not git_dir.is_absolute():
+            git_dir = (root / git_dir).resolve()
+        return _read_commit_from_git_dir(git_dir)
+    return None
+
+
+def _read_commit_from_git_dir(git_dir: Path) -> str | None:
+    head = git_dir / "HEAD"
+    if not head.exists():
+        return None
+    value = read_text(head).strip()
+    if re.fullmatch(r"[0-9a-fA-F]{40}", value):
+        return value.lower()
+    ref_match = re.fullmatch(r"ref:\s*(.+)", value)
+    if not ref_match:
+        return None
+    ref_path = git_dir / ref_match.group(1)
+    if ref_path.exists():
+        ref_value = read_text(ref_path).strip()
+        if re.fullmatch(r"[0-9a-fA-F]{40}", ref_value):
+            return ref_value.lower()
+    return None
 
 
 def _git_config_path(root: Path) -> Path:
@@ -458,6 +493,17 @@ def _data_dir_children(ctx: FixContext) -> list[str]:
     return children[:20]
 
 
+def _results_dir_children(ctx: FixContext) -> list[str]:
+    results_dir = ctx.root / "results"
+    if not results_dir.exists() or not results_dir.is_dir():
+        return []
+    children: list[str] = []
+    for child in sorted(results_dir.iterdir()):
+        suffix = "/" if child.is_dir() else ""
+        children.append(_rel_posix(child, ctx.root) + suffix)
+    return children[:20]
+
+
 def _data_md(ctx: FixContext) -> str:
     lines = [
         "# Data Availability\n\n",
@@ -527,14 +573,47 @@ def _data_dir_readme(ctx: FixContext) -> str:
 
 
 def _results_readme(ctx: FixContext) -> str:
-    return (
-        "# Results provenance\n\n"
-        "For each stored result, record:\n\n"
-        "- The command used to produce it.\n"
-        "- The commit hash of the code.\n"
-        "- The data version or snapshot.\n"
-        "- The environment (dependency versions, hardware, random seed).\n"
+    lines = [
+        "# Results provenance\n\n",
+        f"Project: {ctx.project_name}\n",
+    ]
+    if ctx.repository_url:
+        lines.append(f"Repository: {ctx.repository_url}\n")
+    if ctx.git_commit:
+        lines.append(f"Repository commit when this scaffold was created: `{ctx.git_commit}`\n")
+    lines.extend(
+        [
+            "\n",
+            "This file was scaffolded from local repository evidence. Replace the prompts\n",
+            "below with the exact commands, data versions, hardware, and random seeds used\n",
+            "to produce each committed or archived result.\n\n",
+        ]
     )
+    children = _results_dir_children(ctx)
+    if children:
+        lines.extend(["## Current results directory contents\n\n"])
+        lines.extend(f"- `{child}`\n" for child in children)
+        lines.append("\n")
+    lines.extend(
+        [
+            "## Result inventory\n\n",
+            "| Result artifact | Producing command | Data snapshot | Code commit | Notes |\n",
+            "| --- | --- | --- | --- | --- |\n",
+            "| TODO | TODO | TODO | TODO | TODO |\n\n",
+            "## Reproduction context\n\n",
+            "- Main command or notebook:\n",
+            "- Configuration file or CLI arguments:\n",
+            "- Dependency/environment file:\n",
+            "- Hardware used:\n",
+            "- Runtime:\n",
+            "- Random seed or deterministic setting:\n\n",
+            "## Validation\n\n",
+            "- Expected metric, figure, table, or checksum:\n",
+            "- Tolerance for stochastic results:\n",
+            "- Known reasons results may differ:\n",
+        ]
+    )
+    return "".join(lines)
 
 
 def _seed_helper(ctx: FixContext) -> str:

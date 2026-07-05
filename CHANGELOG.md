@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Made the `RRD053` results-provenance scaffold include local project context,
+  repository URL, readable git commit, existing `results/` contents, and a
+  structured result-inventory table.
 - Expanded the first-party Action smoke test to assert that trusted dynamic
   verification failures are reported and block the composite action when
   `verify-run` and `verify-fail-on: error` are enabled.

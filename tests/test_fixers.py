@@ -175,6 +175,37 @@ def test_data_dir_readme_lists_existing_contents(tmp_path) -> None:
     assert "`data/sample.csv`" in text
 
 
+def test_results_readme_includes_context_and_existing_contents(tmp_path) -> None:
+    commit = "1234567890abcdef1234567890abcdef12345678"
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        'name = "paper-demo"\n'
+        "\n"
+        "[project.urls]\n"
+        'Repository = "git@github.com:example/paper-demo.git"\n',
+        encoding="utf-8",
+    )
+    git_dir = tmp_path / ".git"
+    git_dir.mkdir()
+    (git_dir / "HEAD").write_text(commit + "\n", encoding="utf-8")
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+    (results_dir / "figures").mkdir()
+    (results_dir / "metrics.csv").write_text("metric,value\nacc,0.9\n", encoding="utf-8")
+
+    created = apply_fix("RRD053", infer_fix_context(tmp_path, year=2026))
+
+    assert created is not None and created.action == "created"
+    text = (tmp_path / "results" / "README.md").read_text(encoding="utf-8")
+    assert "Project: paper-demo" in text
+    assert "Repository: https://github.com/example/paper-demo" in text
+    assert f"Repository commit when this scaffold was created: `{commit}`" in text
+    assert "`results/figures/`" in text
+    assert "`results/metrics.csv`" in text
+    assert "| Result artifact | Producing command | Data snapshot | Code commit | Notes |" in text
+    assert "Random seed or deterministic setting" in text
+
+
 def test_seed_helper_created_under_src_package_and_is_idempotent(tmp_path) -> None:
     (tmp_path / "pyproject.toml").write_text("[project]\nname = 'demo-package'\n", encoding="utf-8")
     package = tmp_path / "src" / "demo_package"
