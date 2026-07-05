@@ -8,6 +8,8 @@
 - Improved `rrdoctor doctor` optional dependency checks so it reports an MCP
   integration as available only when the MCP package and its import-time
   dependencies actually load.
+- Updated first-party workflows, the composite action, and documentation
+  examples to current Node 24-compatible GitHub Actions releases.
 
 ## v0.2.9 - 2026-07-04
 

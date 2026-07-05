@@ -131,7 +131,7 @@ jobs:
   rrdoctor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: Tom409114/research-repo-doctor@v0.2.9
         with:
           profile: acm
