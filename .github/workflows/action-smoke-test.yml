@@ -34,3 +34,33 @@ jobs:
           test -s rrdoctor-plan.md
           test -s rrdoctor-action-appendix.md
           test -s rrdoctor-action-verify.md
+      - name: Create failing dynamic verification fixture
+        shell: bash
+        run: |
+          mkdir -p rrdoctor-action-failing-repo
+          printf '# Failing fixture\n\nRun `python train.py`.\n' > rrdoctor-action-failing-repo/README.md
+          printf 'import sys\nprint("intentional failure")\nsys.exit(7)\n' > rrdoctor-action-failing-repo/train.py
+      - name: Verify trusted dynamic gate fails
+        id: dynamic_verify_gate
+        continue-on-error: true
+        uses: ./
+        with:
+          path: rrdoctor-action-failing-repo
+          profile: minimal
+          fail-on: none
+          output: rrdoctor-action-failing-report.md
+          verify: "true"
+          verify-run: "true"
+          verify-fail-on: error
+          verify-output: rrdoctor-action-failing-verify.md
+          step-summary: "false"
+          upload-artifacts: "false"
+      - name: Check dynamic gate failure behavior
+        shell: bash
+        env:
+          DYNAMIC_GATE_OUTCOME: ${{ steps.dynamic_verify_gate.outcome }}
+        run: |
+          test "$DYNAMIC_GATE_OUTCOME" = "failure"
+          test -s rrdoctor-action-failing-report.md
+          test -s rrdoctor-action-failing-verify.md
+          grep -q "exit 7" rrdoctor-action-failing-verify.md

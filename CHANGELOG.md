@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Expanded the first-party Action smoke test to assert that trusted dynamic
+  verification failures are reported and block the composite action when
+  `verify-run` and `verify-fail-on: error` are enabled.
+
 ## v0.2.12 - 2026-07-06
 
 - Added `verify-fail-on` to the GitHub Action so trusted `verify-run` jobs can
