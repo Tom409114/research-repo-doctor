@@ -107,6 +107,39 @@ def test_extract_github_archive_rejects_unsafe_paths(tmp_path) -> None:
         raise AssertionError("unsafe archive path was accepted")
 
 
+def test_clone_repo_uses_archive_fallback_on_git_timeout(tmp_path, monkeypatch) -> None:
+    runner = _load_runner()
+    entry = runner.CorpusEntry(
+        name="demo",
+        url="https://github.com/example/demo",
+        ecosystem="fixture",
+        reason="test",
+        expected_absent=(),
+        review_focus=(),
+    )
+    calls = {}
+
+    def fake_run(*args, **kwargs):
+        raise runner.subprocess.TimeoutExpired(cmd="git clone", timeout=1)
+
+    def fake_archive_fallback(entry_arg, root, destination, timeout, max_bytes, clone_error):
+        calls["entry"] = entry_arg.name
+        calls["clone_error"] = clone_error
+        destination.mkdir()
+        return destination
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(runner, "_download_github_archive", fake_archive_fallback)
+
+    destination = runner.clone_repo(entry, tmp_path, timeout=1, max_bytes=1024)
+
+    assert destination == tmp_path / "demo"
+    assert calls == {
+        "entry": "demo",
+        "clone_error": "git clone timed out after 1 seconds",
+    }
+
+
 def test_markdown_summary_mentions_manual_review() -> None:
     runner = _load_runner()
     rendered = runner.render_markdown(

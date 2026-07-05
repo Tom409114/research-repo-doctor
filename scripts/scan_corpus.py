@@ -179,8 +179,15 @@ def clone_repo(entry: CorpusEntry, root: Path, timeout: int, max_bytes: int) -> 
             timeout=timeout,
             check=False,
         )
-    except subprocess.TimeoutExpired as exc:
-        raise RuntimeError(f"git clone timed out after {timeout} seconds") from exc
+    except subprocess.TimeoutExpired:
+        return _download_github_archive(
+            entry,
+            root,
+            destination,
+            timeout,
+            max_bytes,
+            f"git clone timed out after {timeout} seconds",
+        )
     if completed.returncode != 0:
         detail = (completed.stderr or completed.stdout).strip()
         return _download_github_archive(

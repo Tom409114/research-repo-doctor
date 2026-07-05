@@ -10,6 +10,8 @@
   dependencies actually load.
 - Updated first-party workflows, the composite action, and documentation
   examples to current Node 24-compatible GitHub Actions releases.
+- Made the evaluation corpus runner fall back to GitHub archives when
+  `git clone` times out, not only when clone exits with an error.
 
 ## v0.2.9 - 2026-07-04
 

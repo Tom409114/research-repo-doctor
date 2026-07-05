@@ -1,7 +1,7 @@
 # Research Repo Doctor Report
 
 - Repository: `research-repo-doctor`
-- Generated: `2026-07-05T14:43:02.281589+00:00`
+- Generated: `2026-07-05T14:54:34.739464+00:00`
 - Profile: `standard`
 - Artifact readiness: **Reproduced-ready**
 - Heuristic score: **100/100**
