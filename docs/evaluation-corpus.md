@@ -107,6 +107,12 @@ Manual review flags captured in this snapshot:
 | --- | --- | ---: |
 | False positive | RRD090 | 4 |
 
+Additional focused reviews added on 2026-07-05 cover BERT, CLIP, and
+improved-diffusion. The repository now contains 20 reviewed notes and 40
+repositories still awaiting focused manual review. Those additions record one
+RRD052 false-positive case for CLIP model initialization and confirm BERT local
+RNG seeding via `random.Random(FLAGS.random_seed)`.
+
 ## Manual Review
 
 Every corpus scan needs human review before its results are used in a public

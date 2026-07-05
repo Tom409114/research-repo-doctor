@@ -1,0 +1,17 @@
+version: 1
+repository: clip
+status: reviewed
+reviewed_at: 2026-07-05
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD002
+    evidence: README Usage section includes PyTorch, torchvision, pip, and package-install commands recognized by the current scan.
+false_positives:
+  - rule_id: RRD052
+    evidence: The finding points at clip/model.py parameter initialization with torch.randn/nn.init.normal_, not an unseeded data split, training loop, or experiment script.
+false_negatives: []
+notes: >
+  Focused review of a model-release repository. The RRD050 finding was left as
+  an intentionally conservative artifact-review signal because the repository
+  primarily documents package usage and notebooks, not a file-backed
+  reproduction entrypoint for the reported results.

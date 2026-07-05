@@ -160,6 +160,17 @@ def test_seeded_numpy_randomness_passes(tmp_path) -> None:
     assert not report.findings
 
 
+def test_local_random_generator_with_seed_passes(tmp_path) -> None:
+    (tmp_path / "preprocess.py").write_text(
+        "import random\n\nrng = random.Random(FLAGS.random_seed)\nrng.shuffle(rows)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_sklearn_randomness_without_random_state_flagged(tmp_path) -> None:
     (tmp_path / "train.py").write_text(
         "from sklearn.model_selection import train_test_split\n"

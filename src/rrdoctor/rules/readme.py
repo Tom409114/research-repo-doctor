@@ -8,6 +8,17 @@ from pathlib import Path
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, has_any_heading, read_text
 
+INSTALL_COMMAND_RE = re.compile(
+    r"(?im)(^|\n)\s*(?:\$|>)?\s*"
+    r"(?:(?:python\s+-m\s+)?pip|pipx|uv|uvx|conda|mamba|poetry|pdm)\s+"
+    r"(?:install|add|sync|run|create|env)\b"
+)
+USAGE_COMMAND_RE = re.compile(
+    r"(?im)(^|\n)\s*(?:\$|>)?\s*"
+    r"(?:(?:uv|poetry|pipenv)\s+run\s+)?"
+    r"(?:python(?:\s+-m)?|Rscript|julia|bash|sh|make|snakemake|nextflow(?:\s+run)?)\b"
+)
+GET_STARTED_TEXT_RE = re.compile(r"(?i)\b(get started|getting started|quick start)\b")
 REPRODUCE_COMMAND_RE = re.compile(
     r"(?im)(^|\n)\s*(?:\$|>)?\s*"
     r"(?:(?:uv|poetry|pipenv)\s+run\s+)?"
@@ -70,7 +81,10 @@ class ReadmeSetupRule(Rule):
         if path is None:
             return []
         text = read_text(path)
-        if not has_any_heading(text, ("install", "installation", "setup", "environment")):
+        has_setup_evidence = has_any_heading(
+            text, ("install", "installation", "setup", "environment")
+        ) or INSTALL_COMMAND_RE.search(text)
+        if not has_setup_evidence:
             return [
                 self.finding(
                     context,
@@ -104,7 +118,12 @@ class ReadmeUsageRule(Rule):
         if path is None:
             return []
         text = read_text(path)
-        if not has_any_heading(text, ("quickstart", "usage", "example", "run")):
+        has_usage_evidence = (
+            has_any_heading(text, ("quickstart", "usage", "example", "run"))
+            or GET_STARTED_TEXT_RE.search(text)
+            or USAGE_COMMAND_RE.search(text)
+        )
+        if not has_usage_evidence:
             return [
                 self.finding(
                     context,

@@ -1,0 +1,18 @@
+version: 1
+repository: bert
+status: reviewed
+reviewed_at: 2026-07-05
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD003
+    evidence: README includes "get started" guidance and file-backed commands for run_classifier.py, run_squad.py, create_pretraining_data.py, and run_pretraining.py.
+  - rule_id: RRD050
+    evidence: README commands point at root-level training, fine-tuning, feature-extraction, pretraining, and SQuAD scripts recognized by the current scan.
+  - rule_id: RRD052
+    evidence: create_pretraining_data.py declares --random_seed and applies it through random.Random(FLAGS.random_seed) before using rng.shuffle/rng.random.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a legacy TensorFlow research release. This review checked
+  first-run README evidence, experiment-entrypoint recognition, and local RNG
+  seed handling; it is not a full repository audit.

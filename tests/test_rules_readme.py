@@ -24,6 +24,30 @@ def test_missing_license_rule() -> None:
     assert report.findings[0].rule_id == "RRD010"
 
 
+def test_setup_rule_accepts_install_command_without_heading(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nClone the repo, then run:\n\n```bash\npip install -e .\n```\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD002")
+
+    assert not report.findings
+
+
+def test_usage_rule_accepts_get_started_command_without_heading(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n"
+        "If you just want to get started, run the training script:\n\n"
+        "```bash\npython run_classifier.py --do_train=true\n```\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD003")
+
+    assert not report.findings
+
+
 def test_reproduce_rule_accepts_training_command(tmp_path) -> None:
     (tmp_path / "README.md").write_text(
         "# Demo\n\n"

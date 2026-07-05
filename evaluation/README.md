@@ -52,6 +52,15 @@ Manual review flags captured in this snapshot:
 | --- | --- | ---: |
 | False positive | RRD090 | 4 |
 
+Coverage update added on 2026-07-05:
+
+- Focused manual review notes now committed: 20
+- Repositories still awaiting focused manual review: 40
+- Added BERT, CLIP, and improved-diffusion reviews for README evidence,
+  experiment-entrypoint recognition, and randomness-seed signal quality.
+- Added one manual false-positive note for RRD052 on CLIP model parameter
+  initialization; BERT's local `random.Random(seed)` usage is now recognized.
+
 ## Reproduce The Smoke Scan
 
 Run a small smoke scan:

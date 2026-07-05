@@ -350,6 +350,8 @@ class _RandomnessVisitor(ast.NodeVisitor):
             "tensorflow.keras.utils.set_random_seed",
         }:
             return True
+        if full_name == "random.Random":
+            return self._has_seed_argument(node)
         if full_name == "numpy.random.default_rng":
             return self._has_seed_argument(node)
         if self._is_known_stochastic_ml_call(full_name):
@@ -358,7 +360,10 @@ class _RandomnessVisitor(ast.NodeVisitor):
 
     def _is_randomness_use(self, full_name: str, node: ast.Call) -> bool:
         if full_name.startswith("random."):
-            return full_name.rsplit(".", 1)[-1] not in self._PY_RANDOM_IGNORED
+            last = full_name.rsplit(".", 1)[-1]
+            return last not in self._PY_RANDOM_IGNORED and not self._is_seed_application(
+                full_name, node
+            )
         if full_name.startswith("numpy.random."):
             last = full_name.rsplit(".", 1)[-1]
             return last not in {"seed"} and not self._is_seed_application(full_name, node)

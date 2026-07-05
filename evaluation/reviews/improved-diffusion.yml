@@ -1,0 +1,15 @@
+version: 1
+repository: improved-diffusion
+status: reviewed
+reviewed_at: 2026-07-05
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README training and sampling commands point at scripts/image_train.py and scripts/image_sample.py, which are recognized as experiment entrypoints.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a diffusion-model artifact. The remaining RRD052 finding is
+  kept as actionable because training and sampling code uses torch randomness
+  while no seed application or seed CLI/config plumbing was found in the static
+  scan.

@@ -4,6 +4,14 @@
 
 - Added a CI smoke test for the optional MCP extra and documented how to verify
   that the MCP server builds before wiring it into a coding agent.
+- Reduced first-run false positives by recognizing README install/usage commands
+  even when legacy research repositories do not use modern setup/quickstart
+  headings.
+- Reduced `RRD052` false positives by treating `random.Random(seed)` as a
+  deterministic local RNG seed application.
+- Added focused corpus review notes for BERT, CLIP, and improved-diffusion,
+  including one manual `RRD052` false-positive note for CLIP model parameter
+  initialization.
 
 ## v0.2.10 - 2026-07-05
 
