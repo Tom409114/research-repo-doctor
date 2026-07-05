@@ -24,6 +24,14 @@ ruff format --check .
 
 Rules must be deterministic, local-first, and explainable. A rule should emit concise evidence, avoid scanning binary content except for size checks, respect configured excludes, and never print full secrets.
 
+## Reporting rule quality issues
+
+False-positive and false-negative reports are high-value contributions. Run
+`uvx rrdoctor scan . --format json --output rrdoctor-report.json --fail-on none`,
+then open the matching GitHub issue template with the rule ID, rrdoctor version,
+command, and a sanitized minimal repository shape. See
+[docs/feedback.md](docs/feedback.md) for the full checklist.
+
 ## Rule contribution process
 
 1. Open or link a rule request describing the reproducibility risk.

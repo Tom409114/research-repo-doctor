@@ -113,6 +113,17 @@ Cursor project rules under [integrations/](integrations/).
 Keywords: research software, reproducibility, artifact evaluation, repository audit, auto-fix,
 coding agents, AGENTS.md, GitHub Action, notebooks, data availability, citation metadata.
 
+## Help calibrate the rules
+
+The fastest way to improve rrdoctor is real scan feedback from real research
+repositories. If a finding looks wrong, missing, or too severe, please open a
+[false-positive](https://github.com/Tom409114/research-repo-doctor/issues/new?template=false_positive.yml),
+[false-negative](https://github.com/Tom409114/research-repo-doctor/issues/new?template=false_negative.yml),
+or [scan-case](https://github.com/Tom409114/research-repo-doctor/issues/new?template=scan_case.yml)
+issue. Include the rule ID, command, rrdoctor version, and a sanitized minimal
+repo shape. See [feedback and calibration](docs/feedback.md) for the short
+checklist.
+
 ## Why this matters
 
 Research code often lands on GitHub under deadline pressure. A reviewer or future lab
