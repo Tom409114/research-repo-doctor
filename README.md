@@ -152,6 +152,19 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.13
+
+- **Scan reports now lead to the AE workflow**: Markdown reports and agent fix
+  plans now include next-step commands for `rrdoctor plan`, `rrdoctor appendix`,
+  static `rrdoctor verify`, and trusted-only dynamic `verify --run`.
+- **Stronger auto-fix scaffolds**: generated `AGENTS.md` files now include the
+  scan -> plan -> baseline verification loop, and generated results-provenance
+  notes include local repository context, current result files, and a structured
+  result inventory table.
+- **Better adoption materials**: public docs now include a feedback/calibration
+  path and an Artifact Evaluation chair guide with optional pre-submission
+  wording and CI examples.
+
 ## What's new in 0.2.12
 
 - **Trusted dynamic Action gate**: GitHub Action users can now set
@@ -340,7 +353,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.12
+      - uses: Tom409114/research-repo-doctor@v0.2.13
         with:
           profile: standard
           fail-on: none
@@ -453,7 +466,7 @@ only verified external-use claims.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.12},
+  version = {0.2.13},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

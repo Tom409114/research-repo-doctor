@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.13 - 2026-07-06
+
 - Added Artifact Evaluation next-step commands to Markdown scan reports and
   agent fix plans, including appendix generation, static verification, and
   trusted-only dynamic `verify --run` guidance.

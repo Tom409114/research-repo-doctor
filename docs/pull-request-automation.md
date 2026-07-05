@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.12
+      - uses: Tom409114/research-repo-doctor@v0.2.13
         with:
           profile: standard
           fail-on: none
@@ -46,7 +46,7 @@ git add .rrdoctor-baseline.json && git commit -m "Add rrdoctor baseline"
 ```
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.12
+      - uses: Tom409114/research-repo-doctor@v0.2.13
         with:
           profile: standard
           baseline: .rrdoctor-baseline.json
@@ -68,7 +68,7 @@ Set `appendix: "true"` before a submission deadline to produce
 `ARTIFACT_APPENDIX.md` from the same scan:
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.12
+      - uses: Tom409114/research-repo-doctor@v0.2.13
         with:
           profile: acm
           fail-on: none
@@ -84,7 +84,7 @@ Set `verify: "true"` to include a static L1/L2/L3 verification report in the job
 summary and uploaded artifacts:
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.12
+      - uses: Tom409114/research-repo-doctor@v0.2.13
         with:
           profile: acm
           fail-on: none
@@ -97,7 +97,7 @@ executes the detected entrypoint. Add `verify-fail-on: error` when you want that
 dynamic step to block the workflow:
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.12
+      - uses: Tom409114/research-repo-doctor@v0.2.13
         with:
           profile: acm
           fail-on: none
