@@ -7,6 +7,7 @@ from typer.testing import CliRunner
 import rrdoctor
 from rrdoctor import cli as cli_module
 from rrdoctor.cli import app
+from rrdoctor.verification import LadderStep
 
 runner = CliRunner()
 
@@ -125,6 +126,29 @@ def test_doctor_reports_unusable_mcp_as_false(monkeypatch) -> None:
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
     assert payload["optional_dependencies"]["mcp"] is False
+
+
+def test_verify_run_exits_nonzero_when_dynamic_step_fails(monkeypatch) -> None:
+    original_build_report = cli_module._build_report
+
+    def fake_build_report(path, profile, config):
+        return original_build_report("tests/fixtures/ml-project-repo", profile, config)
+
+    def fake_build_steps(report, root, run, timeout):
+        assert run is True
+        return [
+            LadderStep("L1", "Static release hygiene", "pass", "ok"),
+            LadderStep("L2", "Environment is resolvable", "pass", "ok"),
+            LadderStep("L3", "Declared entrypoint produces output", "fail", "exit 7"),
+        ]
+
+    monkeypatch.setattr(cli_module, "_build_report", fake_build_report)
+    monkeypatch.setattr(cli_module, "build_steps", fake_build_steps)
+
+    result = runner.invoke(app, ["verify", ".", "--run"])
+
+    assert result.exit_code == 1
+    assert "FAIL" in result.stdout
 
 
 def test_profile_help_lists_submission_profiles() -> None:

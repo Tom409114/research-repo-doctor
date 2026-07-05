@@ -14,6 +14,9 @@
   present.
 - Reduced secret-scanning false positives by treating canonical UUID values as
   public identifiers rather than generic `token`/`secret` credentials.
+- Made `rrdoctor verify --run` a real automation gate: with the default
+  `--fail-on error`, dynamic L2/L3 failures or blocked run steps now return a
+  nonzero exit code instead of only appearing in the Markdown report.
 - Added focused corpus review notes for BERT, CLIP, and improved-diffusion,
   including expected-absent coverage for CLIP model parameter initialization.
 

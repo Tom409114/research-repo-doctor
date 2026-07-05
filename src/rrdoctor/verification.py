@@ -473,11 +473,15 @@ def build_steps(report: ScanReport, root: Path, run: bool, timeout: int) -> list
 
 
 def render_verification(
-    report: ScanReport, root: Path, run: bool, timeout: int = DEFAULT_TIMEOUT
+    report: ScanReport,
+    root: Path,
+    run: bool,
+    timeout: int = DEFAULT_TIMEOUT,
+    steps: list[LadderStep] | None = None,
 ) -> str:
     """Render the verification ladder as Markdown."""
 
-    steps = build_steps(report, root, run, timeout)
+    steps = steps or build_steps(report, root, run, timeout)
     lines = [
         "# Reproducibility verification",
         "",
@@ -518,7 +522,11 @@ def render_verification(
     return "\n".join(lines)
 
 
-def verification_failed(report: ScanReport) -> bool:
-    """Whether L1 failed (used for exit codes)."""
+def verification_failed(report: ScanReport, steps: list[LadderStep] | None = None) -> bool:
+    """Whether verification should fail the CLI gate."""
 
-    return report.summary.get("error", 0) > 0
+    if report.summary.get("error", 0) > 0:
+        return True
+    if steps is None:
+        return False
+    return any(step.status in {"fail", "blocked"} for step in steps)

@@ -24,10 +24,12 @@ uvx rrdoctor scan . --profile acm
 uvx rrdoctor fix . --write
 uvx rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
 uvx rrdoctor verify . --profile acm
+uvx rrdoctor verify . --profile acm --run --timeout 600 --fail-on error  # trusted repos only
 ```
 
 For trusted repositories, `rrdoctor verify --run` can go beyond static checks and actually
-resolve dependencies and execute the declared entrypoint under a timeout.
+resolve dependencies and execute the declared entrypoint under a timeout. With the default
+gate (`--fail-on error`), failed or blocked dynamic L2/L3 steps return a nonzero exit code.
 
 ## What it catches
 
@@ -254,7 +256,7 @@ Before a submission deadline:
 ```bash
 rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md   # appendix + checklist mapping
 rrdoctor verify . --profile neurips                               # L1/L2/L3 ladder (static)
-rrdoctor verify . --run --timeout 600                             # actually build + run (trusted repos)
+rrdoctor verify . --run --timeout 600 --fail-on error              # build + run gate (trusted repos)
 ```
 
 Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss` (alongside the

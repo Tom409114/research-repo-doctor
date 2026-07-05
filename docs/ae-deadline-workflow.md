@@ -103,12 +103,14 @@ available.
 For repositories you trust, run the dynamic check under a timeout:
 
 ```bash
-rrdoctor verify . --profile acm --run --timeout 600 --output rrdoctor-verify-run.md --fail-on none
+rrdoctor verify . --profile acm --run --timeout 600 --output rrdoctor-verify-run.md --fail-on error
 ```
 
 Only use `--run` on trusted repositories. Static scans do not execute target
 code. Dynamic verification resolves dependencies and runs the declared
-entrypoint, so it should be treated like running the repository yourself.
+entrypoint, so it should be treated like running the repository yourself. With
+`--fail-on error`, static L1 errors and dynamic L2/L3 failures or blocked steps
+return a nonzero exit code, making the command usable as a CI or release gate.
 
 ## 6. Add the Pull Request Gate
 

@@ -6,6 +6,7 @@ from rrdoctor.config import DEFAULT_CONFIG, apply_cli_overrides
 from rrdoctor.reporting.appendix import badge_status, render_appendix, render_checklist
 from rrdoctor.scanner import Scanner
 from rrdoctor.verification import (
+    LadderStep,
     _entrypoint_command,
     _readme_entrypoint_command,
     _run_command,
@@ -62,6 +63,17 @@ def test_verification_failed_on_missing_basics() -> None:
     report = _report("tests/fixtures/missing-basics-repo", "standard")
 
     assert verification_failed(report)
+
+
+def test_verification_failed_includes_dynamic_step_failures() -> None:
+    report = _report("tests/fixtures/ml-project-repo", "standard")
+    steps = [
+        LadderStep("L1", "Static release hygiene", "pass", "ok"),
+        LadderStep("L2", "Environment is resolvable", "pass", "ok"),
+        LadderStep("L3", "Declared entrypoint produces output", "fail", "exit 7"),
+    ]
+
+    assert verification_failed(report, steps)
 
 
 def test_run_command_missing_tool_returns_none(tmp_path) -> None:

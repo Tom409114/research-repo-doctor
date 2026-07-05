@@ -32,7 +32,7 @@ from rrdoctor.reporting.markdown import render_markdown
 from rrdoctor.reporting.sarif import render_sarif
 from rrdoctor.rules.registry import all_rules, get_rule
 from rrdoctor.scanner import Scanner
-from rrdoctor.verification import render_verification, verification_failed
+from rrdoctor.verification import build_steps, render_verification, verification_failed
 
 app = typer.Typer(
     help="Audit research repositories for reproducibility readiness.",
@@ -468,10 +468,12 @@ def verify(
         raise typer.BadParameter("--fail-on must be one of: none, error")
 
     report = _build_report(path, profile, config)
-    rendered = render_verification(report, Path(path).resolve(), run, timeout)
+    root = Path(path).resolve()
+    steps = build_steps(report, root, run, timeout)
+    rendered = render_verification(report, root, run, timeout, steps=steps)
     _write_or_echo(rendered, output, "verification report")
 
-    if fail_on == "error" and verification_failed(report):
+    if fail_on == "error" and verification_failed(report, steps if run else None):
         raise typer.Exit(1)
 
 
