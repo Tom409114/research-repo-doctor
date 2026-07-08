@@ -50,6 +50,7 @@ repositories:
     url: https://github.com/ultralytics/yolov5
     ecosystem: python-ml
     reason: Popular applied ML repo with train/val/detect scripts and datasets docs.
+    expected_absent: [RRD020, RRD050, RRD070, RRD071, RRD080]
     review_focus: [root-entrypoints, data-docs, ci-docs]
   - name: scanpy
     url: https://github.com/scverse/scanpy
@@ -77,6 +78,7 @@ repositories:
     url: https://github.com/JuliaDynamics/DynamicalSystems.jl
     ecosystem: julia-science
     reason: Julia scientific computing package with project metadata.
+    expected_absent: [RRD070, RRD071, RRD081]
     review_focus: [julia-environment, package-metadata, docs]
   - name: detectron2
     url: https://github.com/facebookresearch/detectron2
@@ -87,6 +89,7 @@ repositories:
     url: https://github.com/facebookresearch/detr
     ecosystem: python-ml-legacy
     reason: Archived high-impact object detection artifact with root scripts and pretrained model docs.
+    expected_absent: [RRD050]
     review_focus: [legacy-artifact, entrypoints, checkpoint-docs]
   - name: mae
     url: https://github.com/facebookresearch/mae

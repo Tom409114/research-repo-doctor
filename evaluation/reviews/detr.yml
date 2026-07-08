@@ -1,0 +1,14 @@
+version: 1
+repository: detr
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README training/evaluation commands invoke root-level main.py, and the current scan recognizes that entrypoint instead of reporting it missing.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of an archived DETR research artifact. This checked the
+  first-run entrypoint signal, pretrained checkpoint documentation, and the
+  current warning set; it is not a full repository audit.

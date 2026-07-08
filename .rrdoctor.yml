@@ -16,6 +16,7 @@ paths:
     - "tests/fixtures"
     - "examples/unseeded-ml-repo"
     - "examples/reports"
+    - "evaluation/reports"
     - "rrdoctor-report.md"
     - "rrdoctor-self-report.md"
 thresholds:

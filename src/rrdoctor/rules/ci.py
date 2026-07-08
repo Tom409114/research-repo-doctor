@@ -53,7 +53,18 @@ class CiNoTestsRule(Rule):
             return []
         combined = "\n".join(read_text(path).lower() for path in workflows)
         if not any(
-            term in combined for term in ("pytest", "ruff", "tox", "nox", "npm test", "rrdoctor")
+            term in combined
+            for term in (
+                "pytest",
+                "ruff",
+                "tox",
+                "nox",
+                "npm test",
+                "rrdoctor",
+                "julia-actions/julia-runtest",
+                "julia-runtest",
+                "pkg.test",
+            )
         ):
             return [
                 self.finding(
@@ -61,7 +72,8 @@ class CiNoTestsRule(Rule):
                     message="CI exists but no obvious test/lint step was found.",
                     evidence=[
                         Evidence(
-                            "Workflow text lacks pytest, ruff, tox, nox, npm test, or rrdoctor."
+                            "Workflow text lacks pytest, ruff, tox, nox, npm test, "
+                            "rrdoctor, or Julia test actions."
                         )
                     ],
                 )

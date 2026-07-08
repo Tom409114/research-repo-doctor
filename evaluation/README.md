@@ -19,25 +19,25 @@ Latest local maintainer smoke run:
 - Corpus slice: all 60 public repositories currently listed in `evaluation/corpus.yml`
 - Scanned successfully: 60 of 60
 - Clone or scan errors: 0
-- Average score across scanned repositories: 60.8
+- Average score across scanned repositories: 62.1
 - Expected-absent regressions: 0
-- Focused manual review notes: 22
-- Not yet manually reviewed: 38
+- Focused manual review notes: 26
+- Not yet manually reviewed: 34
 
 Top actionable rule frequencies in that snapshot:
 
 | Rule | Error/warning findings |
 | --- | ---: |
 | RRD040 | 41 |
-| RRD071 | 38 |
 | RRD004 | 37 |
+| RRD071 | 32 |
 | RRD002 | 30 |
-| RRD043 | 27 |
 | RRD091 | 26 |
-| RRD070 | 25 |
+| RRD043 | 25 |
 | RRD034 | 24 |
 | RRD030 | 23 |
-| RRD081 | 22 |
+| RRD070 | 19 |
+| RRD060 | 18 |
 
 This is not a benchmark and should not be read as a ranking of projects. The
 snapshot is a maintainer calibration tool: high-frequency rules are candidates
@@ -54,14 +54,19 @@ Manual review flags captured in this snapshot:
 
 Focused review coverage in the current snapshot:
 
-- Focused manual review notes loaded: 22
-- Repositories still awaiting focused manual review: 38
-- Includes BERT, CLIP, improved-diffusion, MAE, and AlphaFold reviews for README
-  evidence, experiment-entrypoint recognition, path-noise handling, and
-  randomness-seed signal quality.
+- Focused manual review notes loaded: 26
+- Repositories still awaiting focused manual review: 34
+- Includes BERT, CLIP, improved-diffusion, MAE, AlphaFold, DETR, YOLOv5,
+  DynamicalSystems.jl, and Scanpy reviews for README evidence,
+  experiment-entrypoint recognition, path-noise handling, Julia test/CI
+  recognition, and randomness-seed signal quality.
 - Confirmed that BERT's local `random.Random(seed)` usage, CLIP model parameter
   initialization, MAE-style root `main_*.py` scripts, and AlphaFold
   `random_seed=` plumbing are not reported as noisy findings.
+- Confirmed that Julia `test/runtests.jl` and `Project.toml` test targets are
+  recognized as test evidence, `julia-actions/julia-runtest` is recognized as a
+  CI test runner, and regex-escaped warning filters do not look like Windows
+  absolute paths.
 
 First-run trust spot check added on 2026-07-06:
 

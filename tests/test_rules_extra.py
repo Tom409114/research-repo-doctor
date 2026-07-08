@@ -92,6 +92,30 @@ def test_local_absolute_path_rule_ignores_placeholder_path(tmp_path) -> None:
     assert not report.findings
 
 
+def test_local_absolute_path_rule_flags_real_windows_path(tmp_path) -> None:
+    path_hint = "C:" + "\\Users\\alice\\private-datasets\\demo"
+    (tmp_path / "README.md").write_text(
+        f"# Demo\n\nSet `DATA_DIR={path_hint}` before training.\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert report.findings
+    assert report.findings[0].rule_id == "RRD043"
+
+
+def test_local_absolute_path_rule_ignores_regex_escapes(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.pytest.ini_options]\nfilterwarnings = ["ignore:\\\\n*.*scipy\\\\.sparse"]\n',
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
 def test_notebook_checkpoints_rule(tmp_path) -> None:
     checkpoint_dir = tmp_path / "notebooks" / ".ipynb_checkpoints"
     checkpoint_dir.mkdir(parents=True)
@@ -108,3 +132,29 @@ def test_precommit_rule(tmp_path) -> None:
     (tmp_path / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
     present = _scan(tmp_path, "RRD082")
     assert not present.findings
+
+
+def test_julia_test_directory_and_runner_are_detected(tmp_path) -> None:
+    test_dir = tmp_path / "test"
+    workflow_dir = tmp_path / ".github" / "workflows"
+    test_dir.mkdir()
+    workflow_dir.mkdir(parents=True)
+    (test_dir / "runtests.jl").write_text("using Test\n@test true\n", encoding="utf-8")
+    (tmp_path / "Project.toml").write_text(
+        '[extras]\nTest = "8dfed614-e22c-5e08-85e1-65c5234f0b40"\n\n[targets]\ntest = ["Test"]\n',
+        encoding="utf-8",
+    )
+    (workflow_dir / "ci.yml").write_text(
+        "name: CI\n"
+        "jobs:\n"
+        "  test:\n"
+        "    runs-on: ubuntu-latest\n"
+        "    steps:\n"
+        "      - uses: julia-actions/setup-julia@v2\n"
+        "      - uses: julia-actions/julia-runtest@v1\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071", "RRD081"}).scan(tmp_path)
+
+    assert not report.findings

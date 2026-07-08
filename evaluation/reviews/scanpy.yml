@@ -1,0 +1,14 @@
+version: 1
+repository: scanpy
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent: []
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a mature scientific Python package. The initial RRD043
+  review exposed a regex-escape false positive in pyproject warning filters; the
+  path heuristic was tightened. The remaining RRD043 finding points to a real
+  historical macOS home-directory path embedded in a small dataset text file, so
+  this pass does not mark it as a false positive.

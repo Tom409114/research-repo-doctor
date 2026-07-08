@@ -1,0 +1,23 @@
+version: 1
+repository: yolov5
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD020
+    evidence: CITATION.cff is present at the repository root.
+  - rule_id: RRD050
+    evidence: README commands and root-level train.py, val.py, detect.py, export.py, and task subcommands are recognized.
+  - rule_id: RRD070
+    evidence: tests/ contains pytest-style test files.
+  - rule_id: RRD071
+    evidence: pyproject.toml declares pytest configuration and dependencies.
+  - rule_id: RRD080
+    evidence: .github/workflows includes CI workflows.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a widely used applied ML repository. This checked citation,
+  root entrypoints, data documentation, tests, and CI detection. Remaining
+  warnings concern unpinned/optional dependencies, data/README absence, and
+  changelog hygiene.

@@ -1,0 +1,19 @@
+version: 1
+repository: dynamicalsystems-jl
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD070
+    evidence: Julia's conventional test/runtests.jl layout is recognized as test evidence.
+  - rule_id: RRD071
+    evidence: Project.toml declares a Julia test target and the repository includes test/runtests.jl.
+  - rule_id: RRD081
+    evidence: GitHub Actions uses julia-actions/julia-runtest, which is recognized as a CI test step.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a mature Julia scientific package. The review found and
+  fixed Julia-specific testing/CI false positives exposed by this corpus entry.
+  Remaining findings are README/data/gitignore signals and were not treated as
+  regressions in this pass.

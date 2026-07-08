@@ -71,9 +71,9 @@ python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress -
 - Scanned successfully: 60
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Focused manual review notes: 22
-- Not yet manually reviewed: 38
-- Average score across scanned repositories: 60.8
+- Focused manual review notes: 26
+- Not yet manually reviewed: 34
+- Average score across scanned repositories: 62.1
 
 Readiness distribution:
 
@@ -88,15 +88,15 @@ Top actionable rule frequencies:
 | Rule | Error/warning findings |
 | --- | ---: |
 | RRD040 | 41 |
-| RRD071 | 38 |
 | RRD004 | 37 |
+| RRD071 | 32 |
 | RRD002 | 30 |
-| RRD043 | 27 |
 | RRD091 | 26 |
-| RRD070 | 25 |
+| RRD043 | 25 |
 | RRD034 | 24 |
 | RRD030 | 23 |
-| RRD081 | 22 |
+| RRD070 | 19 |
+| RRD060 | 18 |
 
 This snapshot is calibration evidence, not a benchmark or ranking of the scanned
 projects. The scanner does not install dependencies, import target modules,
@@ -110,12 +110,15 @@ Manual review flags captured in this snapshot:
 | --- | --- | ---: |
 | False positive | RRD090 | 4 |
 
-Focused reviews currently cover BERT, CLIP, improved-diffusion, MAE, and
-AlphaFold. The repository contains 22 reviewed notes and 38 repositories still
-awaiting focused manual review. Those additions confirm that BERT local RNG seeding via
+Focused reviews currently cover BERT, CLIP, improved-diffusion, MAE,
+AlphaFold, DETR, YOLOv5, DynamicalSystems.jl, and Scanpy. The repository
+contains 26 reviewed notes and 34 repositories still awaiting focused manual
+review. Those additions confirm that BERT local RNG seeding via
 `random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
-`nn.Parameter(torch.randn(...))`, MAE-style root `main_*.py` entrypoints, and
-AlphaFold `random_seed=` plumbing no longer trigger noisy findings.
+`nn.Parameter(torch.randn(...))`, MAE-style root `main_*.py` entrypoints,
+AlphaFold `random_seed=` plumbing, Julia `test/runtests.jl` test evidence,
+Julia CI runners, and regex-escaped warning filters no longer trigger noisy
+findings.
 
 The v0.2.14 PyPI package was also spot-checked against nanoGPT, the original
 first-run trust regression case. The static scan reported `Functional`, 76/100,
