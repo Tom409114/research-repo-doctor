@@ -19,6 +19,7 @@ FORBIDDEN_PUBLIC_TEXT = (
     "docs" + "/" + "starter-issues.md",
     "docs" + "/" + "release-checklist.md",
     "CONTRIB" + "_awesome_entry.md",
+    "once the public repo" + " is launched",
 )
 
 TEXT_SUFFIXES = {

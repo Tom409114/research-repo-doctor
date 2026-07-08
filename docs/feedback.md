@@ -40,6 +40,10 @@ paths, private dataset locations, or credentials. If a finding involves a
 secret-like value, replace the value with a fake value that preserves the shape
 of the example.
 
+For suspected credential exposure, secret masking bypasses, unsafe dynamic
+verification behavior, or report-generation leaks, do not open a public issue.
+Use the private process in [SECURITY.md](../SECURITY.md).
+
 ## What Makes A Good Rule Change
 
 A strong calibration report usually answers three questions:
