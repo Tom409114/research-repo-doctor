@@ -45,7 +45,7 @@ def _decode_public_guard_terms(values: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(b64decode(value).decode("utf-8") for value in values)
 
 
-def test_private_planning_materials_are_not_tracked() -> None:
+def test_out_of_scope_working_files_are_not_tracked() -> None:
     tracked = _tracked_files()
     forbidden_path_parts = _decode_public_guard_terms(FORBIDDEN_TRACKED_PATH_PARTS)
 
@@ -58,7 +58,7 @@ def test_private_planning_materials_are_not_tracked() -> None:
     assert leaked_paths == []
 
 
-def test_public_text_files_do_not_expose_local_workspace_or_private_notes() -> None:
+def test_public_text_files_do_not_expose_local_workspace_or_working_notes() -> None:
     leaks: list[str] = []
     forbidden_text = _decode_public_guard_terms(FORBIDDEN_PUBLIC_TEXT)
 

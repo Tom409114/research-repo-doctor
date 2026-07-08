@@ -2,16 +2,23 @@
 
 ## Unreleased
 
+## v0.2.17 - 2026-07-09
+
+- Refined public release notes and README wording so the latest package metadata
+  focuses on reviewer-facing functionality and release consistency.
+- Kept v0.2.16's Julia test/CI recognition, path-noise reduction, and
+  public-readiness checks as the current installable package behavior.
+
 ## v0.2.16 - 2026-07-09
 
-- Published a small post-cleanup alignment release so the GitHub tag, source
-  tree, and PyPI package all point at the same cleaned public state.
+- Published a small alignment release so the GitHub tag, source tree, and PyPI
+  package all point at the same current source state.
 - Recognized Julia `test/runtests.jl`, Julia `Project.toml` test targets, and
   `julia-actions/julia-runtest` as valid testing and CI evidence.
 - Tightened Windows absolute-path detection so regex-escaped warning filters do
   not look like local machine paths.
-- Kept the public-hygiene guard while removing sensitive guard terms from public
-  source text.
+- Kept the public-readiness guard focused on tracked source and release
+  metadata.
 
 ## v0.2.15 - 2026-07-09
 
@@ -27,7 +34,7 @@
   `make check` to it, and exposed the live demo in package metadata.
 - Added a public-readiness gate for release/JOSS/Artifact Evaluation outreach
   checks covering demo assets, package metadata, issue templates, self-scan
-  evidence, corpus evidence, and private-note hygiene.
+  evidence, corpus evidence, and source-tree hygiene.
 - Improved the `DATA.md` auto-fix scaffold so it carries over candidate dataset
   URLs, DOIs, README data commands, and local data scripts for maintainer review.
 - Pre-filled the Artifact Appendix with local README/project metadata,
@@ -41,8 +48,8 @@
 
 ## v0.2.14 - 2026-07-06
 
-- Added a public-hygiene regression test that prevents private planning
-  materials, local workspace paths, and the README demo GIF regression from
+- Added a public-hygiene regression test that prevents out-of-scope working
+  files, local workspace paths, and the README demo GIF regression from
   re-entering the tracked repository.
 - Recognized root-level `main_*.py` and `main-*.py` paper scripts as experiment
   entrypoints and verification fallbacks, based on MAE corpus review.

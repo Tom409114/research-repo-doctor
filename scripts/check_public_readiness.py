@@ -112,7 +112,7 @@ def _check_internal_materials(root: Path, tracked_files: list[str], failures: li
         if any(part.lower() in path.lower() for part in forbidden_path_parts)
     ]
     if leaked_paths:
-        failures.append("private planning files are tracked: " + ", ".join(leaked_paths))
+        failures.append("out-of-scope working files are tracked: " + ", ".join(leaked_paths))
 
     leaks: list[str] = []
     for tracked_path in tracked_files:
@@ -127,7 +127,9 @@ def _check_internal_materials(root: Path, tracked_files: list[str], failures: li
             if forbidden in text:
                 leaks.append(f"{tracked_path}: {forbidden}")
     if leaks:
-        failures.append("public text leaks private or placeholder material: " + "; ".join(leaks))
+        failures.append(
+            "public text leaks out-of-scope or placeholder material: " + "; ".join(leaks)
+        )
 
 
 def _check_readme_and_demo(root: Path, failures: list[str]) -> None:
