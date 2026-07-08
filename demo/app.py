@@ -287,4 +287,19 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:  # pragma: no cover - defensive Streamlit Cloud fallback
+        try:
+            st = importlib.import_module("streamlit")
+        except Exception:
+            raise
+
+        st.error("The web demo hit an unexpected startup issue.")
+        st.write(
+            "The scanner itself is still available locally and does not require an API key "
+            "or a hosted service."
+        )
+        st.code("uvx rrdoctor scan .", language="bash")
+        st.markdown(f"[GitHub repo]({GITHUB_REPO})")
+        st.caption(f"Startup detail for maintainers: {type(exc).__name__}: {exc}")
