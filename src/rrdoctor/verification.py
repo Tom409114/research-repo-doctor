@@ -536,27 +536,54 @@ def render_verification(
     timeout: int = DEFAULT_TIMEOUT,
     steps: list[LadderStep] | None = None,
     command: str | None = None,
+    fail_on: str = "error",
 ) -> str:
     """Render the verification ladder as Markdown."""
 
     steps = steps or build_steps(report, root, run, timeout, command)
+    failed = verification_failed(report, steps if run else None, fail_on)
+    repo_label = root.name or "."
     lines = [
         "# Reproducibility verification",
         "",
-        f"- Repository: `{report.repository_path}`",
+        f"- Repository: `{repo_label}`",
         f"- Mode: {'dynamic (--run)' if run else 'static'}",
+        f"- Gate outcome: **{'FAIL' if failed else 'PASS'}**",
+        f"- Failure threshold: `{fail_on}`",
+        f"- Timeout per dynamic step: `{timeout}s`",
     ]
     if command is not None:
         lines.append(f"- L3 command: `{command}`")
     lines.extend(
         [
             "",
-            "| Level | Check | Status |",
-            "| --- | --- | --- |",
+            "## Evidence summary",
+            "",
+            "- L1 always uses deterministic local static checks.",
+            "- L2 resolves the dependency environment only when dynamic mode is enabled.",
+            "- L3 executes the detected or specified entrypoint only when dynamic mode is enabled.",
+            (
+                "- Trust boundary: dynamic mode executed target-repository commands in this "
+                "checkout."
+                if run
+                else "- Trust boundary: static mode did not execute target-repository code."
+            ),
+            "",
+            "Recommended rerun:",
+            "",
+            "```bash",
+            *(_rerun_commands(root, report.profile, run, timeout, command, fail_on)),
+            "```",
+            "",
+            "| Level | Check | Status | Detail |",
+            "| --- | --- | --- | --- |",
         ]
     )
     for step in steps:
-        lines.append(f"| {step.level} | {step.title} | {_ICON.get(step.status, step.status)} |")
+        detail = step.detail.replace("|", "\\|").replace("\n", " ")
+        lines.append(
+            f"| {step.level} | {step.title} | {_ICON.get(step.status, step.status)} | {detail} |"
+        )
     lines.append("")
     for step in steps:
         lines.append(f"## {step.level} - {step.title}")
@@ -584,6 +611,32 @@ def render_verification(
         )
         lines.append("")
     return "\n".join(lines)
+
+
+def _rerun_commands(
+    root: Path,
+    profile: str,
+    run: bool,
+    timeout: int,
+    command: str | None,
+    fail_on: str,
+) -> list[str]:
+    args = [
+        "rrdoctor",
+        "verify",
+        ".",
+        "--profile",
+        profile,
+        "--timeout",
+        str(timeout),
+        "--fail-on",
+        fail_on,
+    ]
+    if command is not None:
+        args.extend(["--command", command])
+    if run:
+        args.append("--run")
+    return ["cd <repository-root>", shlex.join(args)]
 
 
 def verification_failed(

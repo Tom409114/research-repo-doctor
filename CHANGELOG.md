@@ -20,6 +20,9 @@
 - Pre-filled the Artifact Appendix with local README/project metadata,
   dependency manifests, data/results docs, config files, and detected entrypoint
   commands where available.
+- Improved verification reports with a top-level evidence summary, explicit
+  gate outcome, failure threshold, timeout, trust boundary, per-step details,
+  and a copyable rerun command.
 
 ## v0.2.14 - 2026-07-06
 

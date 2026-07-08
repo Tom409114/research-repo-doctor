@@ -64,6 +64,13 @@ def test_verification_ladder_static_mode() -> None:
 
     assert "L1" in rendered and "L2" in rendered and "L3" in rendered
     assert "static" in rendered
+    assert "Gate outcome: **PASS**" in rendered
+    assert "Failure threshold: `error`" in rendered
+    assert "static mode did not execute target-repository code" in rendered
+    assert "Recommended rerun:" in rendered
+    assert "cd <repository-root>" in rendered
+    assert "rrdoctor verify . --profile standard --timeout 300 --fail-on error" in rendered
+    assert str(root) not in rendered
     assert "python scripts/train.py --config configs/default.yaml" in rendered
     # ml-project-repo has no error findings, so L1 should not be a failure.
     assert not verification_failed(report)
@@ -87,6 +94,24 @@ def test_verification_ladder_accepts_specified_l3_command(tmp_path) -> None:
     assert steps[2].commands == ["python smoke.py --quick"]
     assert "python train.py" not in rendered
     assert "- L3 command: `python smoke.py --quick`" in rendered
+    assert "rrdoctor verify . --profile standard --timeout 30 --fail-on error --command" in rendered
+
+
+def test_verification_summary_reports_dynamic_failure() -> None:
+    report = _report("tests/fixtures/ml-project-repo", "standard")
+    root = Path("tests/fixtures/ml-project-repo").resolve()
+    steps = [
+        LadderStep("L1", "Static release hygiene", "pass", "ok"),
+        LadderStep("L2", "Environment is resolvable", "pass", "ok"),
+        LadderStep("L3", "Declared entrypoint produces output", "fail", "exit 7"),
+    ]
+
+    rendered = render_verification(report, root, run=True, timeout=10, steps=steps)
+
+    assert "Gate outcome: **FAIL**" in rendered
+    assert "dynamic mode executed target-repository commands" in rendered
+    assert "| L3 | Declared entrypoint produces output | FAIL | exit 7 |" in rendered
+    assert "rrdoctor verify . --profile standard --timeout 10 --fail-on error --run" in rendered
 
 
 def test_verification_failed_on_missing_basics() -> None:

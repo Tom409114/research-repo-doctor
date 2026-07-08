@@ -105,7 +105,9 @@ rrdoctor verify . --profile acm --output rrdoctor-verify.md --fail-on none
 ```
 
 This reports L1 static readiness and explains what would block L2 environment
-setup or L3 entrypoint execution.
+setup or L3 entrypoint execution. The report starts with an evidence summary:
+gate outcome, `--fail-on` threshold, timeout, trust boundary, and a copyable
+rerun command.
 
 L3 prefers documented README run commands when they are conservative and
 file-backed, then falls back to common research entrypoints such as
@@ -131,6 +133,9 @@ code. Dynamic verification resolves dependencies and runs the declared
 entrypoint, so it should be treated like running the repository yourself. With
 `--fail-on error`, static L1 errors and dynamic L2/L3 failures or blocked steps
 return a nonzero exit code, making the command usable as a CI or release gate.
+The same gate decision is shown at the top of the generated verification report
+so authors can paste the report into an Artifact Evaluation response or pull
+request.
 
 ## 6. Add the Pull Request Gate
 

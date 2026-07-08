@@ -144,7 +144,9 @@ By default this does not execute target repository code and does not fail the
 workflow. For repositories you trust, add `verify-run: "true"` to resolve
 dependencies and execute the detected entrypoint under `verify-timeout`.
 Set `verify-command` when the artifact has a specific quickstart command that
-should be used as the L3 gate.
+should be used as the L3 gate. The generated report includes the gate outcome,
+failure threshold, timeout, trust boundary, per-step details, and a copyable
+rerun command.
 
 To make dynamic verification a real release gate, also set
 `verify-fail-on: error`:

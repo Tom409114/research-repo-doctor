@@ -484,7 +484,15 @@ def prepare(
         "rrdoctor-report.md": render_markdown(report),
         "rrdoctor-plan.md": render_agent_markdown(report),
         "ARTIFACT_APPENDIX.md": appendix_text,
-        verify_name: render_verification(report, root, run, timeout, steps=steps, command=command),
+        verify_name: render_verification(
+            report,
+            root,
+            run,
+            timeout,
+            steps=steps,
+            command=command,
+            fail_on=fail_on,
+        ),
     }
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -608,7 +616,15 @@ def verify(
     report = _build_report(path, profile, config)
     root = Path(path).resolve()
     steps = build_steps(report, root, run, timeout, command)
-    rendered = render_verification(report, root, run, timeout, steps=steps, command=command)
+    rendered = render_verification(
+        report,
+        root,
+        run,
+        timeout,
+        steps=steps,
+        command=command,
+        fail_on=fail_on,
+    )
     _write_or_echo(rendered, output, "verification report")
 
     if verification_failed(report, steps if run else None, fail_on):
