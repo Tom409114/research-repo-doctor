@@ -93,6 +93,26 @@ def test_citation_fix_uses_poetry_metadata_and_normalizes_ssh_url(tmp_path) -> N
     assert 'repository-code: "https://github.com/example/poetry-demo"' in text
 
 
+def test_citation_fix_uses_setup_cfg_metadata(tmp_path) -> None:
+    (tmp_path / "setup.cfg").write_text(
+        "[metadata]\n"
+        "name = setup-demo\n"
+        "version = 2.0.0\n"
+        "author = Setup Lab\n"
+        "project_urls =\n"
+        "    Source = git@github.com:example/setup-demo.git\n",
+        encoding="utf-8",
+    )
+
+    apply_fix("RRD020", infer_fix_context(tmp_path, year=2026))
+
+    text = (tmp_path / "CITATION.cff").read_text(encoding="utf-8")
+    assert 'title: "setup-demo"' in text
+    assert '  - name: "Setup Lab"' in text
+    assert 'version: "2.0.0"' in text
+    assert 'repository-code: "https://github.com/example/setup-demo"' in text
+
+
 def test_citation_fix_reads_git_worktree_origin(tmp_path) -> None:
     git_dir = tmp_path / "actual-git"
     git_dir.mkdir()
@@ -147,6 +167,7 @@ def test_data_readme_only_when_dir_exists(tmp_path) -> None:
 
 
 def test_data_md_includes_local_repository_hints(tmp_path) -> None:
+    commit = "abcdef1234567890abcdef1234567890abcdef12"
     (tmp_path / "pyproject.toml").write_text(
         "[project]\n"
         'name = "paper-demo"\n'
@@ -165,6 +186,10 @@ def test_data_md_includes_local_repository_hints(tmp_path) -> None:
         encoding="utf-8",
     )
     (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "raw").mkdir()
+    (tmp_path / "data" / "sample.csv").write_text("x\n1\n", encoding="utf-8")
+    (tmp_path / ".git").mkdir()
+    (tmp_path / ".git" / "HEAD").write_text(commit + "\n", encoding="utf-8")
     (tmp_path / "scripts").mkdir()
     (tmp_path / "scripts" / "download_data.py").write_text("# static fixture\n", encoding="utf-8")
 
@@ -174,7 +199,11 @@ def test_data_md_includes_local_repository_hints(tmp_path) -> None:
     text = (tmp_path / "DATA.md").read_text(encoding="utf-8")
     assert "Project: paper-demo" in text
     assert "Repository: https://github.com/example/paper-demo" in text
+    assert f"Repository commit when this scaffold was created: `{commit}`" in text
     assert "Local data-related directory: `data/`" in text
+    assert "## Current data directory contents" in text
+    assert "`data/raw/`" in text
+    assert "`data/sample.csv`" in text
     assert "Possible data retrieval/preprocessing script: `scripts/download_data.py`" in text
     assert "README mentions data" in text
     assert "README candidate data reference: `https://zenodo.org/records/12345`" in text

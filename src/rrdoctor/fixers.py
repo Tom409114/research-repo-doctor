@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 import sys
 from collections.abc import Callable
+from configparser import ConfigParser
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -88,7 +89,8 @@ def infer_fix_context(
 ) -> FixContext:
     """Infer useful scaffold metadata from local repository files."""
 
-    metadata = _read_pyproject_metadata(root)
+    metadata = _read_setup_cfg_metadata(root)
+    metadata.update(_read_pyproject_metadata(root))
     inferred_name = project_name or _metadata_str(metadata, "name") or root.name
     metadata_authors = _metadata_authors(metadata)
     inferred_authors: tuple[str, ...]
@@ -138,6 +140,54 @@ def _read_pyproject_metadata(root: Path) -> Metadata:
         if metadata:
             return metadata
     return _read_pyproject_metadata_fallback(text)
+
+
+def _read_setup_cfg_metadata(root: Path) -> Metadata:
+    setup_cfg = root / "setup.cfg"
+    if not setup_cfg.exists():
+        return {}
+
+    parser = ConfigParser(interpolation=None)
+    try:
+        parser.read_string(read_text(setup_cfg))
+    except Exception:
+        return {}
+    if not parser.has_section("metadata"):
+        return {}
+
+    metadata: Metadata = {}
+    _set_if_str(metadata, "name", parser.get("metadata", "name", fallback=None))
+    _set_if_str(metadata, "version", parser.get("metadata", "version", fallback=None))
+    author = _clean_author_name(parser.get("metadata", "author", fallback=""))
+    if author:
+        metadata["author"] = author
+        metadata["authors"] = (author,)
+
+    url = _url_from_setup_cfg(parser)
+    if url:
+        metadata["repository_url"] = url
+    return metadata
+
+
+def _url_from_setup_cfg(parser: ConfigParser) -> str | None:
+    project_urls = parser.get("metadata", "project_urls", fallback="")
+    parsed_urls: dict[str, str] = {}
+    for line in project_urls.splitlines():
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        cleaned = _clean_optional_str(value)
+        if cleaned:
+            parsed_urls[key.strip().lower()] = cleaned
+    url = _url_from_mapping(parsed_urls)
+    if url:
+        return url
+
+    for key in ("url", "home_page", "download_url"):
+        fallback_url = _clean_optional_str(parser.get("metadata", key, fallback=None))
+        if fallback_url:
+            return _normalize_git_url(fallback_url)
+    return None
 
 
 def _read_pyproject_metadata_fallback(text: str) -> Metadata:
@@ -585,6 +635,7 @@ def _results_dir_children(ctx: FixContext) -> list[str]:
 
 def _data_md(ctx: FixContext) -> str:
     data_scripts = _data_related_scripts(ctx.root)
+    data_children = _data_dir_children(ctx)
     readme_references = _readme_data_references(ctx)
     readme_commands = _readme_data_commands(ctx)
     lines = [
@@ -593,6 +644,8 @@ def _data_md(ctx: FixContext) -> str:
     ]
     if ctx.repository_url:
         lines.append(f"Repository: {ctx.repository_url}\n")
+    if ctx.git_commit:
+        lines.append(f"Repository commit when this scaffold was created: `{ctx.git_commit}`\n")
     lines.extend(
         [
             "\n",
@@ -607,6 +660,9 @@ def _data_md(ctx: FixContext) -> str:
         lines.extend(f"{hint}\n" for hint in hints)
     else:
         lines.append("- No obvious local data directories or retrieval scripts were detected.\n")
+    if data_children:
+        lines.extend(["\n", "## Current data directory contents\n\n"])
+        lines.extend(f"- `{child}`\n" for child in data_children)
     lines.extend(
         [
             "\n",
@@ -644,7 +700,16 @@ def _data_md(ctx: FixContext) -> str:
             "- Inputs and outputs:\n",
             "- Random seed or deterministic ordering assumptions:\n\n",
             "## Storage\n\n",
-            "- Files committed to this repository:\n",
+            "- Files committed to this repository:",
+        ]
+    )
+    if data_children:
+        lines.append("\n")
+        lines.extend(f"  - `{child}`\n" for child in data_children)
+    else:
+        lines.append(" TODO\n")
+    lines.extend(
+        [
             "- Files intentionally excluded from git:\n",
             "- Checksum or archive snapshot, if available:\n",
         ]

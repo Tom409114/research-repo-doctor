@@ -22,14 +22,17 @@ If `--author` or `--project-name` is omitted, `rrdoctor` tries to infer sensible
 values from `pyproject.toml` and the local git remote. Generated citation
 metadata can include the project name, version, release date, multiple authors,
 and repository URL when those are already available locally. PEP 621
-`[project]` metadata and Poetry `[tool.poetry]` metadata are both supported, and
-git worktree remotes are recognized without running repository code.
+`[project]` metadata, Poetry `[tool.poetry]` metadata, and `setup.cfg`
+`[metadata]` are supported, and git worktree remotes are recognized without
+running repository code.
 
 Generated data-provenance notes also include local evidence when it exists:
 top-level data directories, likely data download or preprocessing scripts, and
 README data/access mentions. When the README already contains likely dataset
 URLs, DOIs, or data/download commands, those are copied into the scaffold as
-candidate source and retrieval entries for review. rrdoctor does not infer the
+candidate source and retrieval entries for review. If `data/` exists, current
+top-level contents and the readable git commit are included so the scaffold is
+closer to an Artifact Evaluation evidence note. rrdoctor does not infer the
 actual dataset license or access terms; it gives maintainers a better starting
 point to verify.
 
