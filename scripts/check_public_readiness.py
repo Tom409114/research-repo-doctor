@@ -218,34 +218,80 @@ def _check_self_scan_badge(root: Path, failures: list[str]) -> None:
 
 
 def _check_corpus_evidence(root: Path, failures: list[str]) -> None:
-    aggregate_path = root / "evaluation" / "reports" / "corpus-aggregate.json"
-    summary_path = root / "evaluation" / "reports" / "corpus-summary.md"
-    if not aggregate_path.exists():
-        failures.append("evaluation/reports/corpus-aggregate.json is missing.")
+    snapshot_path = root / "docs" / "evaluation-corpus.md"
+    if not snapshot_path.exists():
+        failures.append("docs/evaluation-corpus.md is missing.")
         return
-    if not summary_path.exists():
-        failures.append("evaluation/reports/corpus-summary.md is missing.")
+
+    snapshot = snapshot_path.read_text(encoding="utf-8")
+    listed = _markdown_count(snapshot, "Repositories listed")
+    scanned = _markdown_count(snapshot, "Scanned successfully")
+    errors = _markdown_count(snapshot, "Clone or scan errors")
+    expected_absent = _markdown_count(snapshot, "Expected-absent regressions")
+    reviewed = _markdown_count(snapshot, "Focused manual review notes")
+
+    _check_corpus_counts(
+        source="docs/evaluation-corpus.md",
+        scanned=scanned if scanned is not None else listed,
+        reviewed=reviewed,
+        errors=errors,
+        expected_absent=expected_absent,
+        failures=failures,
+    )
+
+    aggregate_path = root / "evaluation" / "reports" / "corpus-aggregate.json"
+    if not aggregate_path.exists():
+        return
 
     aggregate = json.loads(aggregate_path.read_text(encoding="utf-8"))
-    scanned = int(aggregate.get("scanned_repositories", 0))
-    reviewed = int(aggregate.get("reviewed_repositories", 0))
-    errors = int(aggregate.get("error_repositories", 0))
-    expected_absent = aggregate.get("expected_absent_violations", [])
+    aggregate_expected_absent = aggregate.get("expected_absent_violations", [])
+    _check_corpus_counts(
+        source="evaluation/reports/corpus-aggregate.json",
+        scanned=int(aggregate.get("scanned_repositories", 0)),
+        reviewed=int(aggregate.get("reviewed_repositories", 0)),
+        errors=int(aggregate.get("error_repositories", 0)),
+        expected_absent=len(aggregate_expected_absent)
+        if isinstance(aggregate_expected_absent, list)
+        else 1,
+        failures=failures,
+    )
 
+
+def _check_corpus_counts(
+    *,
+    source: str,
+    scanned: int | None,
+    reviewed: int | None,
+    errors: int | None,
+    expected_absent: int | None,
+    failures: list[str],
+) -> None:
+    if scanned is None:
+        failures.append(f"{source} does not report scanned repository count.")
+        return
+    if reviewed is None:
+        failures.append(f"{source} does not report reviewed repository count.")
+        return
+    if errors is None:
+        failures.append(f"{source} does not report clone or scan error count.")
+        return
+    if expected_absent is None:
+        failures.append(f"{source} does not report expected-absent regression count.")
+        return
     if scanned < MIN_CORPUS_REPOSITORIES:
         failures.append(
-            f"evaluation corpus has {scanned} scanned repositories; expected at least "
+            f"{source} has {scanned} scanned repositories; expected at least "
             f"{MIN_CORPUS_REPOSITORIES}."
         )
     if reviewed < MIN_REVIEWED_CORPUS_REPOSITORIES:
         failures.append(
-            f"evaluation corpus has {reviewed} reviewed repositories; expected at least "
+            f"{source} has {reviewed} reviewed repositories; expected at least "
             f"{MIN_REVIEWED_CORPUS_REPOSITORIES}."
         )
     if errors != 0:
-        failures.append(f"evaluation corpus has {errors} clone or scan errors.")
-    if expected_absent:
-        failures.append("evaluation corpus has expected-absent regressions.")
+        failures.append(f"{source} has {errors} clone or scan errors.")
+    if expected_absent != 0:
+        failures.append(f"{source} has expected-absent regressions.")
 
 
 def _check_docs_index(root: Path, failures: list[str]) -> None:
@@ -298,6 +344,11 @@ def _latest_changelog_version(path: Path) -> str | None:
 def _markdown_field(markdown: str, field: str) -> str | None:
     match = re.search(rf"^- {re.escape(field)}: \*\*(?P<value>[^*]+)\*\*$", markdown, re.MULTILINE)
     return match.group("value") if match else None
+
+
+def _markdown_count(markdown: str, field: str) -> int | None:
+    match = re.search(rf"^- {re.escape(field)}: (?P<value>\d+)$", markdown, re.MULTILINE)
+    return int(match.group("value")) if match else None
 
 
 def main() -> int:

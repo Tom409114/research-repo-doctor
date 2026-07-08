@@ -24,7 +24,12 @@ def test_public_readiness_gate_passes_for_current_repository() -> None:
 
 def test_markdown_field_extracts_bold_report_values() -> None:
     script = _load_public_readiness_script()
-    markdown = "- Artifact readiness: **Reproduced-ready**\n- Heuristic score: **100/100**\n"
+    markdown = (
+        "- Artifact readiness: **Reproduced-ready**\n"
+        "- Heuristic score: **100/100**\n"
+        "- Scanned successfully: 60\n"
+    )
 
     assert script._markdown_field(markdown, "Artifact readiness") == "Reproduced-ready"
     assert script._markdown_field(markdown, "Heuristic score") == "100/100"
+    assert script._markdown_count(markdown, "Scanned successfully") == 60
