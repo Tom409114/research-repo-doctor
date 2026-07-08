@@ -23,6 +23,8 @@
 - Improved verification reports with a top-level evidence summary, explicit
   gate outcome, failure threshold, timeout, trust boundary, per-step details,
   and a copyable rerun command.
+- Made verification reports show the L3 command source, distinguishing explicit
+  `--command`, README-documented commands, and conservative fallback entrypoints.
 
 ## v0.2.14 - 2026-07-06
 

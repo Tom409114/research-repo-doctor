@@ -67,6 +67,8 @@ def test_verification_ladder_static_mode() -> None:
     assert "Gate outcome: **PASS**" in rendered
     assert "Failure threshold: `error`" in rendered
     assert "static mode did not execute target-repository code" in rendered
+    assert "L3 command source: README command." in rendered
+    assert "Static mode. L3 command source: README command." in rendered
     assert "Recommended rerun:" in rendered
     assert "cd <repository-root>" in rendered
     assert "rrdoctor verify . --profile standard --timeout 300 --fail-on error" in rendered
@@ -94,6 +96,7 @@ def test_verification_ladder_accepts_specified_l3_command(tmp_path) -> None:
     assert steps[2].commands == ["python smoke.py --quick"]
     assert "python train.py" not in rendered
     assert "- L3 command: `python smoke.py --quick`" in rendered
+    assert "L3 command source: specified --command." in rendered
     assert "rrdoctor verify . --profile standard --timeout 30 --fail-on error --command" in rendered
 
 
@@ -103,14 +106,24 @@ def test_verification_summary_reports_dynamic_failure() -> None:
     steps = [
         LadderStep("L1", "Static release hygiene", "pass", "ok"),
         LadderStep("L2", "Environment is resolvable", "pass", "ok"),
-        LadderStep("L3", "Declared entrypoint produces output", "fail", "exit 7"),
+        LadderStep(
+            "L3",
+            "Declared entrypoint produces output",
+            "fail",
+            "Entrypoint failed (exit 7). Command source: README command. See log.",
+            source="README command",
+        ),
     ]
 
     rendered = render_verification(report, root, run=True, timeout=10, steps=steps)
 
     assert "Gate outcome: **FAIL**" in rendered
     assert "dynamic mode executed target-repository commands" in rendered
-    assert "| L3 | Declared entrypoint produces output | FAIL | exit 7 |" in rendered
+    assert "L3 command source: README command." in rendered
+    assert (
+        "| L3 | Declared entrypoint produces output | FAIL | "
+        "Entrypoint failed (exit 7). Command source: README command. See log. |"
+    ) in rendered
     assert "rrdoctor verify . --profile standard --timeout 10 --fail-on error --run" in rendered
 
 

@@ -106,14 +106,17 @@ rrdoctor verify . --profile acm --output rrdoctor-verify.md --fail-on none
 
 This reports L1 static readiness and explains what would block L2 environment
 setup or L3 entrypoint execution. The report starts with an evidence summary:
-gate outcome, `--fail-on` threshold, timeout, trust boundary, and a copyable
-rerun command.
+gate outcome, `--fail-on` threshold, timeout, L3 command source, trust boundary,
+and a copyable rerun command.
 
 L3 prefers documented README run commands when they are conservative and
 file-backed, then falls back to common research entrypoints such as
 `scripts/reproduce.sh`, Make targets, root-level `train.py`/`main.py`/`run.py`,
 root-level paper scripts such as `main_finetune.py`, matching scripts under
 `scripts/`, and executable notebooks via `papermill` when available.
+The chosen source is reported explicitly so reviewers can tell whether the gate
+used an author-documented command, an explicit `--command`, or a conservative
+fallback.
 
 For repositories you trust, run the dynamic check under a timeout:
 

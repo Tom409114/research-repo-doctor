@@ -36,6 +36,7 @@ class LadderStep:
     detail: str
     commands: list[str] = field(default_factory=list)
     log: str = ""
+    source: str = ""
 
 
 def _run_command(cmd: list[str], cwd: Path, timeout: int) -> tuple[int | None, str]:
@@ -175,28 +176,47 @@ _PYTHON_ENTRYPOINTS = (
 def _entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
     """Return (runnable command, display) for the most likely entrypoint."""
 
+    runnable, display, _source = _entrypoint_command_with_source(root)
+    return runnable, display
+
+
+def _entrypoint_command_with_source(root: Path) -> tuple[list[str] | None, str, str]:
+    """Return (runnable command, display, source) for the most likely entrypoint."""
+
     documented = _readme_entrypoint_command(root)
     if documented[1]:
-        return documented
+        return documented[0], documented[1], "README command"
     if (root / "scripts" / "reproduce.sh").exists():
-        return ["bash", "scripts/reproduce.sh"], "bash scripts/reproduce.sh"
+        return ["bash", "scripts/reproduce.sh"], "bash scripts/reproduce.sh", "scripts/reproduce.sh"
     if (root / "scripts" / "run.sh").exists():
-        return ["bash", "scripts/run.sh"], "bash scripts/run.sh"
+        return ["bash", "scripts/run.sh"], "bash scripts/run.sh", "scripts/run.sh"
     if (root / "Makefile").exists():
-        return ["make"], "make  # default target"
+        return ["make"], "make  # default target", "Makefile default target"
     for entrypoint in _PYTHON_ENTRYPOINTS:
         if (root / entrypoint).exists():
-            return [sys.executable, entrypoint], f"python {entrypoint}"
+            return (
+                [sys.executable, entrypoint],
+                f"python {entrypoint}",
+                f"common entrypoint `{entrypoint}`",
+            )
     for entrypoint in _candidate_root_python_entrypoints(root):
-        return [sys.executable, entrypoint], f"python {entrypoint}"
+        return (
+            [sys.executable, entrypoint],
+            f"python {entrypoint}",
+            f"root paper script `{entrypoint}`",
+        )
     notebooks = sorted(root.rglob("*.ipynb"))
     if notebooks and shutil.which("papermill"):
         rel = notebooks[0].relative_to(root).as_posix()
-        return ["papermill", rel, "-"], f"papermill {rel} (execute notebook)"
+        return (
+            ["papermill", rel, "-"],
+            f"papermill {rel} (execute notebook)",
+            f"first notebook `{rel}`",
+        )
     if notebooks:
         rel = notebooks[0].relative_to(root).as_posix()
-        return None, f"papermill {rel}  (papermill not installed)"
-    return None, ""
+        return None, f"papermill {rel}  (papermill not installed)", f"first notebook `{rel}`"
+    return None, "", ""
 
 
 def _readme_entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
@@ -468,10 +488,12 @@ def _specified_entrypoint_command(command: str | None) -> tuple[list[str] | None
 
 def _l3_step(root: Path, run: bool, timeout: int, command: str | None = None) -> LadderStep:
     specified = command is not None
-    runnable, display = (
-        _specified_entrypoint_command(command) if specified else _entrypoint_command(root)
-    )
-    source = "specified command" if specified else "entrypoint"
+    if specified:
+        runnable, display = _specified_entrypoint_command(command)
+        source = "specified --command"
+    else:
+        runnable, display, source = _entrypoint_command_with_source(root)
+    source_label = source or "entrypoint"
     if not display:
         return LadderStep(
             "L3",
@@ -480,6 +502,7 @@ def _l3_step(root: Path, run: bool, timeout: int, command: str | None = None) ->
             "The specified command could not be parsed."
             if specified
             else "No reproduction entrypoint or notebook detected.",
+            source=source,
         )
     commands = [display]
     if not run:
@@ -487,26 +510,44 @@ def _l3_step(root: Path, run: bool, timeout: int, command: str | None = None) ->
             "L3",
             "Declared entrypoint produces output",
             "skipped",
-            f"Static mode. Re-run with --run to execute the {source} (runs repo code).",
+            f"Static mode. L3 command source: {source_label}. "
+            "Re-run with --run to execute it (runs repo code).",
             commands=commands,
+            source=source,
         )
     if runnable is None:
         return LadderStep(
             "L3",
             "Declared entrypoint produces output",
             "blocked",
-            "Entrypoint detected but its runner is not installed.",
+            f"Entrypoint detected from {source_label}, but its runner is not installed.",
             commands=commands,
+            source=source,
         )
     code, log = _run_command(runnable, root, timeout)
     if code is None:
-        status, detail = "blocked", "Entrypoint runner is not installed."
+        status, detail = (
+            "blocked",
+            f"Entrypoint runner is not installed. Command source: {source_label}.",
+        )
     elif code == 0:
-        status, detail = "pass", "Entrypoint executed without error."
+        status, detail = (
+            "pass",
+            f"Entrypoint executed without error. Command source: {source_label}.",
+        )
     else:
-        status, detail = "fail", f"Entrypoint failed (exit {code}). See log."
+        status, detail = (
+            "fail",
+            f"Entrypoint failed (exit {code}). Command source: {source_label}. See log.",
+        )
     return LadderStep(
-        "L3", "Declared entrypoint produces output", status, detail, commands=commands, log=log
+        "L3",
+        "Declared entrypoint produces output",
+        status,
+        detail,
+        commands=commands,
+        log=log,
+        source=source,
     )
 
 
@@ -542,6 +583,7 @@ def render_verification(
 
     steps = steps or build_steps(report, root, run, timeout, command)
     failed = verification_failed(report, steps if run else None, fail_on)
+    l3_source = _l3_source(steps)
     repo_label = root.name or "."
     lines = [
         "# Reproducibility verification",
@@ -562,6 +604,9 @@ def render_verification(
             "- L1 always uses deterministic local static checks.",
             "- L2 resolves the dependency environment only when dynamic mode is enabled.",
             "- L3 executes the detected or specified entrypoint only when dynamic mode is enabled.",
+            f"- L3 command source: {l3_source}."
+            if l3_source
+            else "- L3 command source: none detected.",
             (
                 "- Trust boundary: dynamic mode executed target-repository commands in this "
                 "checkout."
@@ -611,6 +656,13 @@ def render_verification(
         )
         lines.append("")
     return "\n".join(lines)
+
+
+def _l3_source(steps: list[LadderStep]) -> str:
+    for step in steps:
+        if step.level == "L3":
+            return step.source
+    return ""
 
 
 def _rerun_commands(
