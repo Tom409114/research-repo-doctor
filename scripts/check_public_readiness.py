@@ -12,6 +12,7 @@ import json
 import re
 import subprocess
 import sys
+from base64 import b64decode
 from pathlib import Path
 from typing import Any
 
@@ -45,23 +46,23 @@ REQUIRED_DOC_INDEX_LINKS = {
     "Maintainer workflows": "maintainer-workflows.md",
 }
 FORBIDDEN_TRACKED_PATH_PARTS = (
-    "codex-for-oss" + "-application",
-    "initial" + "-issues",
-    "launch" + "-checklist",
-    "CONTRIB" + "_awesome_entry",
-    "MAKING" + "_THE_GIF",
+    "Y29kZXgtZm9yLW9zcy1hcHBsaWNhdGlvbg==",
+    "aW5pdGlhbC1pc3N1ZXM=",
+    "bGF1bmNoLWNoZWNrbGlzdA==",
+    "Q09OVFJJQl9hd2Vzb21lX2VudHJ5",
+    "TUFLSU5HX1RIRV9HSUY=",
 )
 FORBIDDEN_PUBLIC_TEXT = (
-    "C:" + "\\" + "Users" + "\\" + "thuah",
-    "files-mentioned-by-the-user" + "-txt",
-    ".codex" + "/" + "attachments",
-    "codex-for-oss" + "-application",
-    "docs" + "/" + "starter-issues.md",
-    "docs" + "/" + "release-checklist.md",
-    "CONTRIB" + "_awesome_entry.md",
-    "once the public repo" + " is launched",
-    "@" + "OWNER",
-    "<PASTE" + "_DEMO_URL>",
+    "QzpcVXNlcnNcdGh1YWg=",
+    "ZmlsZXMtbWVudGlvbmVkLWJ5LXRoZS11c2VyLXR4dA==",
+    "LmNvZGV4L2F0dGFjaG1lbnRz",
+    "Y29kZXgtZm9yLW9zcy1hcHBsaWNhdGlvbg==",
+    "ZG9jcy9pbml0aWFsLWlzc3Vlcy5tZA==",
+    "ZG9jcy9sYXVuY2gtY2hlY2tsaXN0Lm1k",
+    "Q09OVFJJQl9hd2Vzb21lX2VudHJ5Lm1k",
+    "b25jZSB0aGUgcHVibGljIHJlcG8gaXMgbGF1bmNoZWQ=",
+    "QE9XTkVS",
+    "PFBBU1RFX0RFTU9fVVJMPg==",
 )
 TEXT_SUFFIXES = {
     ".cff",
@@ -78,6 +79,10 @@ TEXT_SUFFIXES = {
     ".yaml",
     ".yml",
 }
+
+
+def _decode_public_guard_terms(values: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(b64decode(value).decode("utf-8") for value in values)
 
 
 def check_public_readiness(root: Path = ROOT) -> list[str]:
@@ -99,13 +104,15 @@ def check_public_readiness(root: Path = ROOT) -> list[str]:
 
 
 def _check_internal_materials(root: Path, tracked_files: list[str], failures: list[str]) -> None:
+    forbidden_path_parts = _decode_public_guard_terms(FORBIDDEN_TRACKED_PATH_PARTS)
+    forbidden_text = _decode_public_guard_terms(FORBIDDEN_PUBLIC_TEXT)
     leaked_paths = [
         path
         for path in tracked_files
-        if any(part.lower() in path.lower() for part in FORBIDDEN_TRACKED_PATH_PARTS)
+        if any(part.lower() in path.lower() for part in forbidden_path_parts)
     ]
     if leaked_paths:
-        failures.append("internal launch/application files are tracked: " + ", ".join(leaked_paths))
+        failures.append("private planning files are tracked: " + ", ".join(leaked_paths))
 
     leaks: list[str] = []
     for tracked_path in tracked_files:
@@ -116,11 +123,11 @@ def _check_internal_materials(root: Path, tracked_files: list[str], failures: li
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        for forbidden in FORBIDDEN_PUBLIC_TEXT:
+        for forbidden in forbidden_text:
             if forbidden in text:
                 leaks.append(f"{tracked_path}: {forbidden}")
     if leaks:
-        failures.append("public text leaks internal or placeholder material: " + "; ".join(leaks))
+        failures.append("public text leaks private or placeholder material: " + "; ".join(leaks))
 
 
 def _check_readme_and_demo(root: Path, failures: list[str]) -> None:

@@ -14,9 +14,9 @@
   work instead of rule families that are already implemented.
 - Added a cross-platform `python scripts/check.py` maintainer gate, wired
   `make check` to it, and exposed the live demo in package metadata.
-- Added a public-readiness gate for launch/JOSS/Artifact Evaluation outreach
+- Added a public-readiness gate for release/JOSS/Artifact Evaluation outreach
   checks covering demo assets, package metadata, issue templates, self-scan
-  evidence, corpus evidence, and internal-material hygiene.
+  evidence, corpus evidence, and private-note hygiene.
 - Improved the `DATA.md` auto-fix scaffold so it carries over candidate dataset
   URLs, DOIs, README data commands, and local data scripts for maintainer review.
 - Pre-filled the Artifact Appendix with local README/project metadata,
@@ -30,7 +30,7 @@
 
 ## v0.2.14 - 2026-07-06
 
-- Added a public-hygiene regression test that prevents internal launch/application
+- Added a public-hygiene regression test that prevents private planning
   materials, local workspace paths, and the README demo GIF regression from
   re-entering the tracked repository.
 - Recognized root-level `main_*.py` and `main-*.py` paper scripts as experiment
