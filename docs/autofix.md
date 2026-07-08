@@ -27,8 +27,11 @@ git worktree remotes are recognized without running repository code.
 
 Generated data-provenance notes also include local evidence when it exists:
 top-level data directories, likely data download or preprocessing scripts, and
-README data/access mentions. rrdoctor does not infer the actual dataset license
-or access terms; it gives maintainers a better starting point to verify.
+README data/access mentions. When the README already contains likely dataset
+URLs, DOIs, or data/download commands, those are copied into the scaffold as
+candidate source and retrieval entries for review. rrdoctor does not infer the
+actual dataset license or access terms; it gives maintainers a better starting
+point to verify.
 
 Generated results-provenance notes include the project name, repository URL,
 current git commit when it can be read locally, existing `results/` contents,

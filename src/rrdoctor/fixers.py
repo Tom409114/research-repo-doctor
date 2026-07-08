@@ -47,6 +47,11 @@ DATA_SCRIPT_TERMS = (
 DATA_HINT_TEXT_RE = re.compile(
     r"(?i)\b(data availability|dataset|datasets|download|preprocess|zenodo|doi|kaggle)\b"
 )
+URL_RE = re.compile(r"https?://[^\s)>\]\"']+")
+DOI_RE = re.compile(r"\b10\.\d{4,9}/[-._;()/:A-Z0-9]+", re.IGNORECASE)
+README_DATA_COMMAND_RE = re.compile(
+    r"(?im)^\s*(?:\$?\s*)?(?P<command>(?:python|python3|Rscript|julia|bash|sh|snakemake|nextflow|wget|curl|kaggle)\s+[^\n]+)"
+)
 Metadata = dict[str, str | tuple[str, ...]]
 
 
@@ -474,7 +479,50 @@ def _detected_data_hints(ctx: FixContext) -> list[str]:
     readme = ctx.root / "README.md"
     if readme.exists() and DATA_HINT_TEXT_RE.search(read_text(readme)):
         hints.append("- README mentions data, datasets, downloads, DOI, or preprocessing.")
+    for reference in _readme_data_references(ctx):
+        hints.append(f"- README candidate data reference: `{reference}`")
+    for command in _readme_data_commands(ctx):
+        hints.append(f"- README candidate data command: `{command}`")
     return hints
+
+
+def _readme_data_references(ctx: FixContext) -> list[str]:
+    readme = ctx.root / "README.md"
+    if not readme.exists():
+        return []
+    text = read_text(readme)
+    references: list[str] = []
+    for pattern in (URL_RE, DOI_RE):
+        for match in pattern.finditer(text):
+            value = match.group(0).rstrip(".,;")
+            line_start = text.rfind("\n", 0, match.start()) + 1
+            line_end = text.find("\n", match.end())
+            line = text[line_start : len(text) if line_end == -1 else line_end]
+            if _line_mentions_data(line) and value not in references:
+                references.append(value)
+            if len(references) >= 8:
+                return references
+    return references
+
+
+def _readme_data_commands(ctx: FixContext) -> list[str]:
+    readme = ctx.root / "README.md"
+    if not readme.exists():
+        return []
+    commands: list[str] = []
+    for match in README_DATA_COMMAND_RE.finditer(read_text(readme)):
+        command = match.group("command").strip().strip("`")
+        if _line_mentions_data(command) and command not in commands:
+            commands.append(command)
+        if len(commands) >= 8:
+            break
+    return commands
+
+
+def _line_mentions_data(line: str) -> bool:
+    return bool(
+        DATA_HINT_TEXT_RE.search(line) or re.search(r"(?i)\b(data|dataset|datasets)\b", line)
+    )
 
 
 def _top_level_data_dirs(root: Path) -> list[str]:
@@ -536,6 +584,9 @@ def _results_dir_children(ctx: FixContext) -> list[str]:
 
 
 def _data_md(ctx: FixContext) -> str:
+    data_scripts = _data_related_scripts(ctx.root)
+    readme_references = _readme_data_references(ctx)
+    readme_commands = _readme_data_commands(ctx)
     lines = [
         "# Data Availability\n\n",
         f"Project: {ctx.project_name}\n",
@@ -560,11 +611,32 @@ def _data_md(ctx: FixContext) -> str:
         [
             "\n",
             "## Sources\n\n",
-            "- Dataset name and version:\n",
-            "- Original source or archive URL/DOI:\n",
+            "- Dataset name and version: TODO\n",
+            "- Original source or archive URL/DOI:",
+        ]
+    )
+    if readme_references:
+        lines.append("\n")
+        lines.extend(
+            f"  - Candidate from README: `{reference}`\n" for reference in readme_references
+        )
+    else:
+        lines.append(" TODO\n")
+    lines.extend(
+        [
             "- License, terms of use, or access restrictions:\n\n",
             "## Retrieval\n\n",
-            "- Command or script to obtain the data:\n",
+            "- Command or script to obtain the data:",
+        ]
+    )
+    if readme_commands or data_scripts:
+        lines.append("\n")
+        lines.extend(f"  - Candidate from README: `{command}`\n" for command in readme_commands)
+        lines.extend(f"  - Candidate local script: `{script}`\n" for script in data_scripts)
+    else:
+        lines.append(" TODO\n")
+    lines.extend(
+        [
             "- Expected download size and runtime:\n",
             "- Required credentials or manual approval, if any:\n\n",
             "## Preprocessing\n\n",

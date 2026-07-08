@@ -15,6 +15,8 @@
 - Added a public-readiness gate for launch/JOSS/Artifact Evaluation outreach
   checks covering demo assets, package metadata, issue templates, self-scan
   evidence, corpus evidence, and internal-material hygiene.
+- Improved the `DATA.md` auto-fix scaffold so it carries over candidate dataset
+  URLs, DOIs, README data commands, and local data scripts for maintainer review.
 
 ## v0.2.14 - 2026-07-06
 

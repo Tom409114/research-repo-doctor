@@ -156,7 +156,12 @@ def test_data_md_includes_local_repository_hints(tmp_path) -> None:
         encoding="utf-8",
     )
     (tmp_path / "README.md").write_text(
-        "# Demo\n\nDownload the dataset from Zenodo before preprocessing.\n",
+        "# Demo\n\n"
+        "Download the dataset from https://zenodo.org/records/12345 "
+        "or DOI 10.5281/zenodo.12345 before preprocessing.\n\n"
+        "```bash\n"
+        "python scripts/download_data.py --out data/raw\n"
+        "```\n",
         encoding="utf-8",
     )
     (tmp_path / "data").mkdir()
@@ -172,6 +177,12 @@ def test_data_md_includes_local_repository_hints(tmp_path) -> None:
     assert "Local data-related directory: `data/`" in text
     assert "Possible data retrieval/preprocessing script: `scripts/download_data.py`" in text
     assert "README mentions data" in text
+    assert "README candidate data reference: `https://zenodo.org/records/12345`" in text
+    assert "README candidate data reference: `10.5281/zenodo.12345`" in text
+    assert "README candidate data command: `python scripts/download_data.py --out data/raw`" in text
+    assert "Candidate from README: `https://zenodo.org/records/12345`" in text
+    assert "Candidate from README: `python scripts/download_data.py --out data/raw`" in text
+    assert "Candidate local script: `scripts/download_data.py`" in text
 
 
 def test_data_dir_readme_lists_existing_contents(tmp_path) -> None:
