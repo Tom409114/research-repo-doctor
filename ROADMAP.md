@@ -46,8 +46,9 @@
 ## Good first issues
 
 - Add MATLAB runtime environment detection.
-- Add JavaScript/Node research environment detection.
+- Add JavaScript/Node research environment refinements.
 - Add a fixer for a minimal CI workflow.
-- Improve notebook path detection.
-- Add Zenodo/DOI detection.
+- Improve notebook path detection fixtures.
+- Improve Zenodo, DOI, and arXiv metadata detection.
+- Add support for another workflow marker such as CWL or DVC.
 - Add a docs website deployment.

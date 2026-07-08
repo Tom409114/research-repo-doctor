@@ -8,6 +8,8 @@
   for secret-masking, report-generation, and dynamic-verification concerns.
 - Replaced the placeholder CODEOWNERS entry and tightened the pull request
   checklist around tests, type checks, self-scan, and trusted dynamic verification.
+- Refreshed good-first-contribution guidance so it points to current starter
+  work instead of rule families that are already implemented.
 
 ## v0.2.14 - 2026-07-06
 

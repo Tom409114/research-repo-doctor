@@ -13,12 +13,19 @@ ruff format --check .
 
 ## Good first contributions
 
-- Add R language environment detection.
-- Add Julia environment detection.
-- Improve notebook path detection.
-- Add Zenodo/DOI detection.
-- Add Snakemake/Nextflow workflow detection.
+Good first contributions should be deterministic, local-first, and small enough
+to cover with fixtures. Current starter-sized areas:
+
+- Add MATLAB runtime environment detection.
+- Add JavaScript/Node research environment refinements.
+- Improve notebook path detection fixtures.
+- Improve Zenodo, DOI, and arXiv metadata detection.
+- Add a fixer for a minimal CI workflow.
 - Add docs website deployment.
+- Add support for another workflow marker such as CWL or DVC.
+
+If no public issue exists yet, open a rule request or feature request first so
+the expected evidence, severity, and false-positive cases are clear.
 
 ## Rule contribution contract
 
