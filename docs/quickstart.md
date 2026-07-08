@@ -90,8 +90,9 @@ pip install 'rrdoctor[mcp]'
 rrdoctor mcp        # exposes scan/verify/appendix as MCP tools over stdio
 ```
 
-For stdio client configuration, smoke tests, and safety notes, see
-[MCP integration](mcp.md).
+The MCP `verify` tool accepts `command` and `timeout` arguments, so a coding
+agent can use the same trusted run-path gate as the CLI. For stdio client
+configuration, smoke tests, and safety notes, see [MCP integration](mcp.md).
 
 ## Add the GitHub Action
 

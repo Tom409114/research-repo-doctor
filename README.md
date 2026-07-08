@@ -172,7 +172,7 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   reviewer-ready packet.
 - **Pinned run-path verification**: `verify --command "..."`, the Action
   `verify-command` input, and the MCP `verify` tool let maintainers pin the
-  official quickstart command as the L3 gate.
+  official quickstart command and timeout as the L3 gate.
 - **Lower first-run noise**: MAE-style root `main_*.py` scripts, AlphaFold-style
   `random_seed=` plumbing, test-file randomness, and placeholder absolute paths
   are handled more conservatively.

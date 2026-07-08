@@ -84,7 +84,7 @@ If you installed rrdoctor into the environment already, use:
 | Tool | Purpose |
 | --- | --- |
 | `scan(path=".", profile="standard")` | Return the Markdown reproducibility audit. |
-| `verify(path=".", profile="standard", run=false, command=null)` | Return the L1/L2/L3 verification ladder. |
+| `verify(path=".", profile="standard", run=false, command=null, timeout=300)` | Return the L1/L2/L3 verification ladder. |
 | `appendix(path=".", profile="acm")` | Return the ACM-style Artifact Appendix plus checklist mapping. |
 
 ## Safety
@@ -92,11 +92,11 @@ If you installed rrdoctor into the environment already, use:
 `scan` and static `verify` are deterministic local analysis. They do not require
 an API key and do not install or execute the target repository.
 
-`verify(run=true)` resolves dependencies and runs the detected entrypoint under
-the normal rrdoctor timeout. Pass `command="python train.py config/default.py"`
-to pin the artifact's official quickstart command as the L3 gate. Use dynamic
-verification only on repositories you trust, just like `rrdoctor verify --run`
-on the command line.
+`verify(run=true, timeout=600)` resolves dependencies and runs the detected
+entrypoint under an explicit timeout. Pass
+`command="python train.py config/default.py"` to pin the artifact's official
+quickstart command as the L3 gate. Use dynamic verification only on repositories
+you trust, just like `rrdoctor verify --run` on the command line.
 
 ## Agent prompt
 
@@ -107,5 +107,7 @@ coding agent:
 Use the rrdoctor MCP server as the deterministic grader for this repository.
 First call scan(path=".", profile="standard") and summarize the highest-impact
 findings. Make changes without weakening rrdoctor checks. Then call scan again
-and stop only when no new error-level findings remain.
+and stop only when no new error-level findings remain. If this repository is
+trusted, call verify(path=".", profile="standard", run=true, timeout=600) as the
+final run-path gate.
 ```

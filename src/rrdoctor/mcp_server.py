@@ -17,7 +17,7 @@ from rrdoctor.models import ScanReport
 from rrdoctor.reporting.appendix import render_appendix, render_checklist
 from rrdoctor.reporting.markdown import render_markdown
 from rrdoctor.scanner import Scanner
-from rrdoctor.verification import render_verification
+from rrdoctor.verification import DEFAULT_TIMEOUT, render_verification
 
 
 def _scan(path: str, profile: str) -> ScanReport:
@@ -50,11 +50,18 @@ def build_server() -> Any:
         profile: str = "standard",
         run: bool = False,
         command: str | None = None,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> str:
         """Run the L1/L2/L3 reproducibility verification ladder."""
 
         report = _scan(path, profile)
-        return render_verification(report, Path(path).resolve(), run, command=command)
+        return render_verification(
+            report,
+            Path(path).resolve(),
+            run,
+            timeout=timeout,
+            command=command,
+        )
 
     @server.tool()
     def appendix(path: str = ".", profile: str = "acm") -> str:
