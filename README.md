@@ -162,6 +162,21 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.15
+
+- **Clearer verification evidence**: `rrdoctor verify` reports now lead with
+  the gate outcome, failure threshold, timeout, trust boundary, rerun command,
+  and the source of any L3 dynamic command.
+- **Stronger Artifact Appendix scaffolding**: `rrdoctor appendix` now pre-fills
+  local README/project metadata, dependency manifests, data/results docs,
+  config files, and detected entrypoint commands where available.
+- **More useful generated data notes**: `rrdoctor fix --write` carries over
+  candidate dataset URLs, DOIs, README data commands, and local data scripts
+  when scaffolding `DATA.md`.
+- **Maintainer launch gates**: `python scripts/check.py` and
+  `python scripts/check_public_readiness.py` provide cross-platform local checks
+  for release, JOSS, Artifact Evaluation, and public outreach readiness.
+
 ## What's new in 0.2.14
 
 - **One-command AE evidence packet**: `rrdoctor prepare` writes the static
@@ -380,7 +395,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.14
+      - uses: Tom409114/research-repo-doctor@v0.2.15
         with:
           profile: standard
           fail-on: none
@@ -495,7 +510,7 @@ only verified external-use claims.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.14},
+  version = {0.2.15},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

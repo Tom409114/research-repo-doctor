@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.15 - 2026-07-09
+
 - Added an explicit `timeout` parameter to the MCP `verify` tool so coding
   agents can run the same bounded L1/L2/L3 verification gate as the CLI.
 - Enabled GitHub private vulnerability reporting and updated security guidance
