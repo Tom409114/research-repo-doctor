@@ -1,0 +1,15 @@
+version: 1
+repository: t5x
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README documents python3 ${T5X_DIR}/t5x/train.py commands, docs document python -m t5x.train_unfragmented / eval / infer commands, and the repository contains package-level t5x/train.py and t5x/eval.py entrypoints.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a large JAX research framework. This review checked whether
+  experiment-entrypoint detection handles package-level binaries and Python 3
+  documented commands with environment-variable path prefixes. It is not a full
+  repository audit.

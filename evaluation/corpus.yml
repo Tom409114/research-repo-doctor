@@ -131,6 +131,7 @@ repositories:
     url: https://github.com/google-research/t5x
     ecosystem: python-ml
     reason: Large ML research framework with training configs and complex dependency metadata.
+    expected_absent: [RRD050]
     review_focus: [large-repo-scan, dependency-docs, configs]
   - name: long-range-arena
     url: https://github.com/google-research/long-range-arena

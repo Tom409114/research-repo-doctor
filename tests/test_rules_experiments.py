@@ -64,6 +64,17 @@ def test_tools_train_py_counts_as_experiment_entrypoint(tmp_path) -> None:
     assert not report.findings
 
 
+def test_package_train_py_counts_as_experiment_entrypoint(tmp_path) -> None:
+    package = tmp_path / "demo_pkg"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "train.py").write_text("print('train')\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_readme_tools_train_command_counts_as_experiment_entrypoint(tmp_path) -> None:
     tools = tmp_path / "tools"
     tools.mkdir()
@@ -110,6 +121,20 @@ def test_documented_pyproject_console_script_counts_as_experiment_entrypoint(tmp
 def test_documented_python_module_command_counts_as_experiment_entrypoint(tmp_path) -> None:
     (tmp_path / "README.md").write_text(
         "# Demo\n\nRun `python -m demo.train --config configs/default.yaml` to reproduce.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_documented_python3_package_script_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n"
+        "```bash\n"
+        "python3 ${PROJECT_DIR}/demo_pkg/train.py --config=configs/default.gin\n"
+        "```\n",
         encoding="utf-8",
     )
 
