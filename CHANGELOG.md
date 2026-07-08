@@ -6,6 +6,8 @@
   agents can run the same bounded L1/L2/L3 verification gate as the CLI.
 - Enabled GitHub private vulnerability reporting and updated security guidance
   for secret-masking, report-generation, and dynamic-verification concerns.
+- Replaced the placeholder CODEOWNERS entry and tightened the pull request
+  checklist around tests, type checks, self-scan, and trusted dynamic verification.
 
 ## v0.2.14 - 2026-07-06
 
