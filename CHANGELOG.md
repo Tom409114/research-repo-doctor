@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.18 - 2026-07-09
+
 - Changed `RRD034` dependency-gap detection to parse Python AST import
   statements instead of regex-matching source text, reducing false positives
   from comments, docstrings, prose examples, tests, docs, benchmarks, and

@@ -97,7 +97,7 @@ configuration, smoke tests, and safety notes, see [MCP integration](mcp.md).
 ## Add the GitHub Action
 
 ```yaml
-      - uses: Tom409114/research-repo-doctor@v0.2.17
+      - uses: Tom409114/research-repo-doctor@v0.2.18
   with:
     profile: standard
     fail-on: warning
