@@ -80,7 +80,7 @@ python scripts/scan_corpus.py --limit 1 --output evaluation/reports/corpus-scan.
 Run the current maintainer gate:
 
 ```bash
-python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --fail-on-expected-absent
+python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
 ```
 
 The generated reports are written under `evaluation/reports/`, which is ignored

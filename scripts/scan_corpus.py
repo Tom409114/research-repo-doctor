@@ -375,6 +375,7 @@ def scan_entries(
     timeout: int,
     max_bytes: int,
     cache_dir: Path | None,
+    progress: bool = False,
 ) -> list[dict[str, Any]]:
     """Clone and scan corpus entries."""
 
@@ -392,17 +393,40 @@ def scan_entries(
         cleanup = True
 
     try:
-        for entry in entries:
+        total = len(entries)
+        for index, entry in enumerate(entries, start=1):
+            if progress:
+                print(f"[{index}/{total}] scanning {entry.name}", file=sys.stderr, flush=True)
             try:
                 repo_path = clone_repo(entry, work_root, timeout, max_bytes)
-                summaries.append(summarize_report(entry, scanner.scan(repo_path)))
+                summary = summarize_report(entry, scanner.scan(repo_path))
             except Exception as exc:
-                summaries.append(error_summary(entry, str(exc)))
+                summary = error_summary(entry, str(exc))
+            summaries.append(summary)
+            if progress:
+                print(_progress_result_line(index, total, summary), file=sys.stderr, flush=True)
     finally:
         if cleanup:
             tempdir.cleanup()
 
     return summaries
+
+
+def _progress_result_line(index: int, total: int, summary: dict[str, Any]) -> str:
+    name = str(summary.get("name", "repository"))
+    prefix = f"[{index}/{total}]"
+    if summary.get("status") != "scanned":
+        return f"{prefix} error {name}: {summary.get('error', 'scan failed')}"
+
+    readiness = summary.get("readiness", {})
+    level = readiness.get("level", "unknown") if isinstance(readiness, dict) else "unknown"
+    scan_summary = summary.get("summary", {})
+    errors = scan_summary.get("error", 0) if isinstance(scan_summary, dict) else 0
+    warnings = scan_summary.get("warning", 0) if isinstance(scan_summary, dict) else 0
+    return (
+        f"{prefix} scanned {name}: {level} {summary.get('score', '-')}/100 "
+        f"({errors} error, {warnings} warning)"
+    )
 
 
 def attach_review_notes(
@@ -761,6 +785,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--max-mb", type=int, default=DEFAULT_MAX_BYTES // (1024 * 1024))
     parser.add_argument(
+        "--progress",
+        action="store_true",
+        help="Print per-repository scan progress to stderr for long corpus runs.",
+    )
+    parser.add_argument(
         "--fail-on-expected-absent",
         action="store_true",
         help=(
@@ -787,6 +816,7 @@ def main(argv: list[str] | None = None) -> int:
         timeout=args.timeout,
         max_bytes=max_bytes,
         cache_dir=args.cache_dir,
+        progress=args.progress,
     )
     summaries = attach_review_notes(summaries, load_review_notes(args.review_notes))
 

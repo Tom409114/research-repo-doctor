@@ -35,10 +35,13 @@ reviewed-repository, false-positive, and false-negative counts to the aggregate.
 The runner never installs target dependencies, imports target modules, builds
 the target project, or executes target repository scripts.
 
+For longer local runs, add `--progress` to print one line per repository to
+stderr while preserving the JSON and Markdown report formats.
+
 To create YAML starters for manual review, add a stub directory:
 
 ```bash
-python scripts/scan_corpus.py --limit 10 --review-stub-dir evaluation/reviews/todo
+python scripts/scan_corpus.py --limit 10 --progress --review-stub-dir evaluation/reviews/todo
 ```
 
 Review stubs are marked `needs-review`, so they do not count as manually

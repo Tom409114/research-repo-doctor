@@ -140,6 +140,38 @@ def test_clone_repo_uses_archive_fallback_on_git_timeout(tmp_path, monkeypatch) 
     }
 
 
+def test_scan_entries_progress_reports_to_stderr(tmp_path, monkeypatch, capsys) -> None:
+    runner = _load_runner()
+    entry = runner.CorpusEntry(
+        name="demo",
+        url="https://example.invalid/demo",
+        ecosystem="fixture",
+        reason="test",
+        expected_absent=(),
+        review_focus=(),
+    )
+
+    def fake_clone_repo(entry_arg, root, timeout, max_bytes):
+        return Path("tests/fixtures/healthy-research-repo")
+
+    monkeypatch.setattr(runner, "clone_repo", fake_clone_repo)
+
+    summaries = runner.scan_entries(
+        [entry],
+        profile="standard",
+        timeout=1,
+        max_bytes=1024,
+        cache_dir=tmp_path,
+        progress=True,
+    )
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "[1/1] scanning demo" in captured.err
+    assert "[1/1] scanned demo:" in captured.err
+    assert summaries[0]["status"] == "scanned"
+
+
 def test_markdown_summary_mentions_manual_review() -> None:
     runner = _load_runner()
     rendered = runner.render_markdown(

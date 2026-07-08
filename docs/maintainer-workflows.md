@@ -30,7 +30,7 @@ small fixtures. Use the evaluation corpus workflow before changing broad
 heuristics such as entrypoint, data, notebook, or secret detection:
 
 ```bash
-python scripts/scan_corpus.py --limit 3
+python scripts/scan_corpus.py --limit 3 --progress
 ```
 
 Review `evaluation/reports/corpus-summary.md` manually. Treat expected-absent
