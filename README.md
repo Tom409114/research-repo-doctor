@@ -162,6 +162,17 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.19
+
+- **Lower-noise experiment entrypoint detection**: `RRD050` now recognizes
+  package-level research binaries such as `t5x/train.py`, documented
+  `python3 ${T5X_DIR}/t5x/train.py` commands, and notebook-first artifacts with
+  clearly named demo/example/reproduce notebooks such as `graphcast_demo.ipynb`.
+- **More first-run corpus evidence**: focused review notes now cover 32/60 seed
+  corpus repositories. The latest 60-repository static corpus scan has 0
+  expected-absent regressions and keeps t5x and GraphCast as entrypoint
+  regression gates.
+
 ## What's new in 0.2.18
 
 - **Lower-noise dependency checks**: `RRD034` now parses Python AST imports
@@ -409,7 +420,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.18
+      - uses: Tom409114/research-repo-doctor@v0.2.19
         with:
           profile: standard
           fail-on: none
@@ -524,7 +535,7 @@ only verified external-use claims.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.18},
+  version = {0.2.19},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

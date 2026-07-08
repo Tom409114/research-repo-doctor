@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## v0.2.19 - 2026-07-09
+
+- Reduced `RRD050` first-run entrypoint false positives for large research
+  frameworks by recognizing package-level research binaries such as
+  `t5x/train.py` and README commands that invoke `python3` with environment
+  variable path prefixes.
+- Reduced `RRD050` notebook-first false positives by recognizing clearly named
+  demo/example/reproduce notebooks such as `graphcast_demo.ipynb` as experiment
+  entrypoints.
+- Added focused corpus review notes and `expected_absent` regression gates for
+  t5x and GraphCast; the 60-repository corpus scan remains at 0 expected-absent
+  regressions with 32 focused review notes loaded.
+
 ## v0.2.18 - 2026-07-09
 
 - Changed `RRD034` dependency-gap detection to parse Python AST import
