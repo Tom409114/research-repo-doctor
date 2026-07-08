@@ -54,6 +54,16 @@ def test_workflow_files_count_as_experiment_entrypoint(tmp_path) -> None:
     assert not report.findings
 
 
+def test_demo_notebook_counts_as_experiment_entrypoint(tmp_path) -> None:
+    notebook_path = tmp_path / "graphcast_demo.ipynb"
+    notebook = nbformat.v4.new_notebook(cells=[nbformat.v4.new_code_cell("print('run demo')")])
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_tools_train_py_counts_as_experiment_entrypoint(tmp_path) -> None:
     tools = tmp_path / "tools"
     tools.mkdir()

@@ -147,6 +147,7 @@ repositories:
     url: https://github.com/google-deepmind/graphcast
     ecosystem: python-geoscience-ml
     reason: Weather-model artifact with data access, model checkpoints, and notebook examples.
+    expected_absent: [RRD050]
     review_focus: [data-provenance, model-artifacts, notebooks]
   - name: open-spiel
     url: https://github.com/google-deepmind/open_spiel

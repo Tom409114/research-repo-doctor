@@ -1,0 +1,15 @@
+version: 1
+repository: graphcast
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README says the best starting points are Colab notebooks, and the repository contains graphcast_demo.ipynb, gencast_mini_demo.ipynb, and gencast_demo_cloud_vm.ipynb as concrete notebook entrypoints for loading data, generating predictions, computing loss, and computing gradients.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a notebook-first weather-model artifact. This review checked
+  whether RRD050 treats clearly named demo notebooks as reproducibility
+  entrypoints. It does not attempt to validate the external data or hardware
+  requirements.
