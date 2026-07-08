@@ -71,6 +71,19 @@ def test_parse_github_url_rejects_non_github_url() -> None:
         app.parse_github_url("https://example.com/not/a-repo")
 
 
+def test_sample_repository_urls_are_valid_github_targets() -> None:
+    app = _load_demo_app()
+
+    sample_urls = app.sample_repository_urls()
+
+    assert "https://github.com/Tom409114/research-repo-doctor" in sample_urls
+    assert sample_urls
+    for url in sample_urls:
+        target = app.parse_github_url(url)
+        assert target.owner
+        assert target.repo
+
+
 def test_prioritize_findings_puts_unseeded_randomness_first() -> None:
     app = _load_demo_app()
     findings = [

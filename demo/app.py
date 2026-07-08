@@ -19,6 +19,10 @@ CLONE_TIMEOUT_SECONDS = 60
 SCAN_TIMEOUT_SECONDS = 60
 MAX_CLONE_BYTES = 200 * 1024 * 1024
 GITHUB_REPO = "https://github.com/Tom409114/research-repo-doctor"
+SAMPLE_REPOSITORIES: tuple[tuple[str, str], ...] = (
+    ("Scan rrdoctor", GITHUB_REPO),
+    ("Scan nanoGPT", "https://github.com/karpathy/nanoGPT"),
+)
 SAFE_SCAN_NOTE = (
     "Safety note: this demo only runs the static `rrdoctor scan` command on cloned files. "
     "It never installs dependencies, imports target code, builds the project, or runs repo scripts."
@@ -214,6 +218,10 @@ def rrdoctor_version_label() -> str:
     return str(getattr(rrdoctor_module, "__version__", "unknown"))
 
 
+def sample_repository_urls() -> tuple[str, ...]:
+    return tuple(url for _label, url in SAMPLE_REPOSITORIES)
+
+
 def main() -> None:
     st = importlib.import_module("streamlit")
     rrdoctor_version = rrdoctor_version_label()
@@ -224,12 +232,25 @@ def main() -> None:
     st.caption(f"Powered by rrdoctor {rrdoctor_version}. Static, key-free scan.")
     st.info(SAFE_SCAN_NOTE)
 
+    st.session_state.setdefault("repo_url", "")
+    sample_url = ""
+    sample_columns = st.columns(len(SAMPLE_REPOSITORIES))
+    for column, (label, url) in zip(sample_columns, SAMPLE_REPOSITORIES, strict=True):
+        if column.button(label, use_container_width=True):
+            st.session_state["repo_url"] = url
+            sample_url = url
+
     with st.form("scan-form"):
         repo_url = st.text_input(
             "Public GitHub repository URL",
             placeholder="https://github.com/owner/repo",
+            key="repo_url",
         )
         submitted = st.form_submit_button("Scan repository")
+
+    if sample_url:
+        repo_url = sample_url
+        submitted = True
 
     if not submitted:
         st.markdown(f"Run locally any time: `uvx rrdoctor scan .`  \n[GitHub repo]({GITHUB_REPO})")
