@@ -6,9 +6,18 @@ Thanks for helping improve Research Repo Doctor. The project is early, so small,
 
 ```bash
 python -m pip install -e ".[dev]"
-pytest
-ruff check .
+python scripts/check.py
+```
+
+`make check` is also available on systems with `make`; it delegates to the same
+script. If you need to run the gates manually:
+
+```bash
 ruff format --check .
+ruff check .
+python -m mypy
+python -m pytest -q
+python -m rrdoctor scan . --profile standard --fail-on none
 ```
 
 ## Good first contributions
@@ -46,7 +55,7 @@ command, and a sanitized minimal repository shape. See
 3. Add rule metadata and implementation in `src/rrdoctor/rules/`.
 4. Add a focused fixture or unit test.
 5. Update `docs/checks.md` and `docs/rule-authoring.md` when behavior changes.
-6. Run `pytest`, `ruff check .`, and `ruff format --check .`.
+6. Run `python scripts/check.py` or the equivalent direct commands from the setup section.
 
 Every new rule should include rule metadata, tests, docs, and remediation text that a researcher can act on.
 

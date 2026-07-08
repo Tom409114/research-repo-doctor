@@ -61,6 +61,7 @@ Documentation = "https://github.com/Tom409114/research-repo-doctor/tree/main/doc
 Repository = "https://github.com/Tom409114/research-repo-doctor"
 Issues = "https://github.com/Tom409114/research-repo-doctor/issues"
 Changelog = "https://github.com/Tom409114/research-repo-doctor/blob/main/CHANGELOG.md"
+"Live Demo" = "https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/rrdoctor"]
