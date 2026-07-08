@@ -17,6 +17,9 @@
   evidence, corpus evidence, and internal-material hygiene.
 - Improved the `DATA.md` auto-fix scaffold so it carries over candidate dataset
   URLs, DOIs, README data commands, and local data scripts for maintainer review.
+- Pre-filled the Artifact Appendix with local README/project metadata,
+  dependency manifests, data/results docs, config files, and detected entrypoint
+  commands where available.
 
 ## v0.2.14 - 2026-07-06
 

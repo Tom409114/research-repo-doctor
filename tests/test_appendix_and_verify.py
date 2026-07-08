@@ -39,6 +39,13 @@ def test_appendix_has_required_sections() -> None:
 
     for heading in ("# Artifact Appendix", "## Artifact check-list", "## Installation"):
         assert heading in rendered
+    assert "This artifact package contains `ml-project-repo`" in rendered
+    assert "ML fixture" in rendered
+    assert "`pyproject.toml`" in rendered
+    assert "`data/README.md`" in rendered
+    assert "`results/README.md`" in rendered
+    assert "`configs/default.yaml`" in rendered
+    assert "python scripts/train.py --config configs/default.yaml" in rendered
 
 
 def test_badge_status_blocks_on_missing_basics() -> None:

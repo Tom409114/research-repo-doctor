@@ -102,8 +102,11 @@ artifact appendix and ACM/NeurIPS checklist mapping:
 ```
 
 The appendix is uploaded as an artifact and included in the job summary when
-`step-summary` is enabled. Treat it as a scaffold: fill in venue-specific
-hardware, runtime, data access, and expected-results details before submission.
+`step-summary` is enabled. It is pre-filled from local README text, project
+metadata, dependency manifests, data/results docs, config files, and detected
+entrypoint commands when those exist. Treat it as a scaffold: fill in
+venue-specific hardware, runtime, data access, and expected-results details
+before submission.
 
 ## Artifact Evaluation Prep Packet
 

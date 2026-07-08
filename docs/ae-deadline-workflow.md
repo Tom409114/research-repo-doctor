@@ -82,8 +82,10 @@ rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
 
 The appendix output is a scaffold for the submission package. It maps findings
 to ACM Artifact Evaluation badge tiers and the NeurIPS-style reproducibility
-checklist. Fill in the human parts that rrdoctor cannot know, such as hardware
-expectations, expected runtime, dataset access restrictions, and result
+checklist. rrdoctor pre-fills what it can from local README text, project
+metadata, dependency manifests, data/results docs, config files, and detected
+entrypoint commands. Fill in the human parts that rrdoctor cannot know, such as
+hardware expectations, expected runtime, dataset access restrictions, and result
 interpretation.
 
 For another venue, switch profiles:
