@@ -255,8 +255,8 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
 - **More reliable corpus scans**: the evaluation runner now falls back to
   GitHub archive downloads when `git clone` transport is flaky, without
   installing or executing target repositories.
-- **More manual calibration evidence**: the 2026-07-04 public corpus snapshot
-  covers 60/60 successful static scans, 17 focused review notes loaded in that
+- **More manual calibration evidence**: the current public corpus snapshot
+  covers 60/60 successful static scans, 22 focused review notes loaded in that
   snapshot, and 0 expected-absent regressions.
 
 ## What's new in 0.2.5

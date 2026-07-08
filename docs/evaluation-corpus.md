@@ -61,26 +61,26 @@ where a single noisy finding can undermine confidence in a first scan.
 
 ## Current Maintainer Snapshot
 
-Latest local maintainer smoke run, generated on 2026-07-04:
+Latest local maintainer smoke run, generated on 2026-07-09:
 
 ```bash
-python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --fail-on-expected-absent
+python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
 ```
 
 - Repositories listed: 60
 - Scanned successfully: 60
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Focused manual review notes: 17
-- Not yet manually reviewed: 43
-- Average score across scanned repositories: 57.9
+- Focused manual review notes: 22
+- Not yet manually reviewed: 38
+- Average score across scanned repositories: 60.8
 
 Readiness distribution:
 
 | Readiness | Repositories |
 | --- | ---: |
-| Available | 40 |
-| Functional | 10 |
+| Available | 39 |
+| Functional | 11 |
 | Needs preparation | 10 |
 
 Top actionable rule frequencies:
@@ -88,15 +88,15 @@ Top actionable rule frequencies:
 | Rule | Error/warning findings |
 | --- | ---: |
 | RRD040 | 41 |
-| RRD002 | 39 |
 | RRD071 | 38 |
 | RRD004 | 37 |
-| RRD003 | 34 |
-| RRD043 | 28 |
-| RRD091 | 28 |
+| RRD002 | 30 |
+| RRD043 | 27 |
+| RRD091 | 26 |
 | RRD070 | 25 |
 | RRD034 | 24 |
 | RRD030 | 23 |
+| RRD081 | 22 |
 
 This snapshot is calibration evidence, not a benchmark or ranking of the scanned
 projects. The scanner does not install dependencies, import target modules,
@@ -110,10 +110,9 @@ Manual review flags captured in this snapshot:
 | --- | --- | ---: |
 | False positive | RRD090 | 4 |
 
-Additional focused reviews added on 2026-07-05 and 2026-07-06 cover BERT,
-CLIP, improved-diffusion, MAE, and AlphaFold. The repository now contains 22
-reviewed notes and 38 repositories still awaiting focused manual review. Those
-additions confirm that BERT local RNG seeding via
+Focused reviews currently cover BERT, CLIP, improved-diffusion, MAE, and
+AlphaFold. The repository contains 22 reviewed notes and 38 repositories still
+awaiting focused manual review. Those additions confirm that BERT local RNG seeding via
 `random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
 `nn.Parameter(torch.randn(...))`, MAE-style root `main_*.py` entrypoints, and
 AlphaFold `random_seed=` plumbing no longer trigger noisy findings.

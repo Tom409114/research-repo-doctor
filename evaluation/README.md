@@ -14,30 +14,30 @@ or release-preparation workflows.
 
 Latest local maintainer smoke run:
 
-- Date: 2026-07-04
-- Command: `python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --fail-on-expected-absent`
+- Date: 2026-07-09
+- Command: `python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent`
 - Corpus slice: all 60 public repositories currently listed in `evaluation/corpus.yml`
 - Scanned successfully: 60 of 60
 - Clone or scan errors: 0
-- Average score across scanned repositories: 57.9
+- Average score across scanned repositories: 60.8
 - Expected-absent regressions: 0
-- Focused manual review notes: 17
-- Not yet manually reviewed: 43
+- Focused manual review notes: 22
+- Not yet manually reviewed: 38
 
 Top actionable rule frequencies in that snapshot:
 
 | Rule | Error/warning findings |
 | --- | ---: |
 | RRD040 | 41 |
-| RRD002 | 39 |
 | RRD071 | 38 |
 | RRD004 | 37 |
-| RRD003 | 34 |
-| RRD043 | 28 |
-| RRD091 | 28 |
+| RRD002 | 30 |
+| RRD043 | 27 |
+| RRD091 | 26 |
 | RRD070 | 25 |
 | RRD034 | 24 |
 | RRD030 | 23 |
+| RRD081 | 22 |
 
 This is not a benchmark and should not be read as a ranking of projects. The
 snapshot is a maintainer calibration tool: high-frequency rules are candidates
@@ -52,11 +52,11 @@ Manual review flags captured in this snapshot:
 | --- | --- | ---: |
 | False positive | RRD090 | 4 |
 
-Coverage update added on 2026-07-05 and 2026-07-06:
+Focused review coverage in the current snapshot:
 
-- Focused manual review notes now committed: 22
+- Focused manual review notes loaded: 22
 - Repositories still awaiting focused manual review: 38
-- Added BERT, CLIP, improved-diffusion, MAE, and AlphaFold reviews for README
+- Includes BERT, CLIP, improved-diffusion, MAE, and AlphaFold reviews for README
   evidence, experiment-entrypoint recognition, path-noise handling, and
   randomness-seed signal quality.
 - Confirmed that BERT's local `random.Random(seed)` usage, CLIP model parameter
