@@ -134,6 +134,21 @@ def test_undeclared_import_reads_poetry_dependencies(tmp_path) -> None:
     assert not report.findings
 
 
+def test_undeclared_import_reads_build_system_requires(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        '[build-system]\nrequires = ["setuptools-scm>=8", "extension-helpers"]\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "setup_package.py").write_text(
+        "import setuptools_scm\nimport extension_helpers\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_undeclared_import_skipped_without_manifest(tmp_path) -> None:
     (tmp_path / "main.py").write_text("import requests\n", encoding="utf-8")
 
@@ -169,3 +184,48 @@ def test_undeclared_import_skips_unparseable_python_files(tmp_path) -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
 
     assert not report.findings
+
+
+def test_undeclared_import_ignores_non_runtime_paths(tmp_path) -> None:
+    (tmp_path / "requirements.txt").write_text("numpy\n", encoding="utf-8")
+    for rel in (
+        "tests/test_optional.py",
+        "pkg/conftest.py",
+        "docs/conf.py",
+        "benchmarks/bench_demo.py",
+        ".spin/cmds.py",
+        "build_tools/get_comment.py",
+        "maint_tools/update_tracking_issue.py",
+    ):
+        path = tmp_path / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("import optional_test_dependency\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_undeclared_import_ignores_local_sibling_modules(tmp_path) -> None:
+    (tmp_path / "requirements.txt").write_text("numpy\n", encoding="utf-8")
+    package = tmp_path / "src" / "pkg"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "helpers.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (package / "runner.py").write_text("import helpers\nimport numpy\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_undeclared_import_checks_tools_entrypoints(tmp_path) -> None:
+    (tmp_path / "requirements.txt").write_text("numpy\n", encoding="utf-8")
+    tools = tmp_path / "tools"
+    tools.mkdir()
+    (tools / "train.py").write_text("import missing_runtime_dependency\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+    assert "missing_runtime_dependency" in report.findings[0].message

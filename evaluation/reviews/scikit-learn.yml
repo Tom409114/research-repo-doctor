@@ -10,6 +10,7 @@ notes: >
   Focused RRD034 review for a mature scientific Python package. The dependency
   cross-check now uses Python AST imports instead of regex text matching, so
   comments, docstrings, numeric fragments, and ordinary prose are not reported
-  as undeclared packages. Remaining RRD034 names in this case are real import
-  identifiers from optional, documentation, or test paths and need separate
+  as undeclared packages. The scan also skips docs, tests, benchmarks, and
+  maintenance tooling. Remaining RRD034 names in this case are real runtime-like
+  import identifiers for optional estimator backends and need separate
   dependency-policy review before being classified as false positives.

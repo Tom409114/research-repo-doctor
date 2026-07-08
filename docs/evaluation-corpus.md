@@ -119,7 +119,9 @@ BERT local RNG seeding via
 `nn.Parameter(torch.randn(...))`, MAE-style root `main_*.py` entrypoints,
 AlphaFold `random_seed=` plumbing, Julia `test/runtests.jl` test evidence,
 Julia CI runners, regex-escaped warning filters, and comments/docstrings that
-look like import statements no longer trigger noisy findings.
+look like import statements no longer trigger noisy findings. The dependency
+gap check also focuses on runtime-like Python files instead of docs, tests,
+benchmarks, vendored code, or maintainer tooling.
 
 The v0.2.17 PyPI package was also spot-checked against nanoGPT, the original
 first-run trust regression case. The static scan reported `Functional`, 76/100,

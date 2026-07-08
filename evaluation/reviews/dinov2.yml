@@ -9,6 +9,7 @@ false_negatives: []
 notes: >
   Focused RRD034 review for a modern ML artifact with optional vision and
   accelerator dependencies. The dependency cross-check now ignores comments and
-  docstrings and reports only AST import identifiers. The remaining RRD034 names
-  are real import roots such as optional detection, segmentation, and CUDA
-  packages; this pass does not classify them as false positives.
+  docstrings, skips non-runtime paths, and reports only AST import identifiers.
+  The remaining RRD034 names are real import roots such as optional detection,
+  segmentation, data, and CUDA packages; this pass does not classify them as
+  false positives.

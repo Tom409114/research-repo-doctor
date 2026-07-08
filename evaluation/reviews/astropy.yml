@@ -9,7 +9,8 @@ false_negatives: []
 notes: >
   Focused RRD034 review for a mature astronomy package. The scan no longer
   reports ordinary words from comments or docstrings as undeclared imports after
-  the AST-only import parser change. Remaining dependency-gap names are real
-  import identifiers from optional, extension, documentation, or test paths and
-  should be reviewed against Astropy's dependency policy before being marked as
-  false positives.
+  the AST-only import parser change, and conventional docs, tests, benchmark,
+  vendored, and tooling paths are skipped. Remaining dependency-gap names are
+  real runtime-like import identifiers from optional visualization, compression,
+  graph, or data-access paths and should be reviewed against Astropy's
+  dependency policy before being marked as false positives.

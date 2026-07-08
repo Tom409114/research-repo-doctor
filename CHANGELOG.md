@@ -4,7 +4,10 @@
 
 - Changed `RRD034` dependency-gap detection to parse Python AST import
   statements instead of regex-matching source text, reducing false positives
-  from comments, docstrings, and prose examples in real corpus repositories.
+  from comments, docstrings, prose examples, tests, docs, benchmarks, and
+  vendored/tooling paths in real corpus repositories; local sibling modules and
+  test configuration files are no longer treated as undeclared third-party
+  packages.
 
 ## v0.2.17 - 2026-07-09
 

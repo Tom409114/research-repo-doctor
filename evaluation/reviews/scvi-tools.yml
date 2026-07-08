@@ -8,7 +8,8 @@ false_positives: []
 false_negatives: []
 notes: >
   Focused RRD034 review for a bioinformatics ML package. The AST-based import
-  parser keeps the remaining dependency-gap evidence to syntactic imports such
-  as optional accelerator, storage, and biology packages, rather than prose
-  fragments. This note records tokenization noise reduction only; remaining
-  optional-dependency findings need package-specific review.
+  parser and runtime-path filter keep the remaining dependency-gap evidence to
+  syntactic imports such as optional storage, hub, and probabilistic-modeling
+  packages, rather than prose fragments or non-runtime helper paths. This note
+  records dependency-signal noise reduction only; remaining optional-dependency
+  findings need package-specific review.

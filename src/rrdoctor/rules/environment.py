@@ -218,10 +218,14 @@ IMPORT_TO_DISTRIBUTION = {
     "bs4": "beautifulsoup4",
     "dateutil": "python-dateutil",
     "dotenv": "python-dotenv",
+    "erfa": "pyerfa",
+    "github": "pygithub",
     "torch": "torch",
     "tensorflow": "tensorflow",
     "google": "protobuf",
+    "mpl_toolkits": "matplotlib",
     "openssl": "pyopenssl",
+    "setuptools_scm": "setuptools-scm",
 }
 
 _REQ_NAME_RE = re.compile(r"^[A-Za-z0-9_.\-]+")
@@ -278,6 +282,9 @@ def _declared_from_pyproject_toml(text: str) -> set[str]:
     declared: set[str] = set()
     project = _as_mapping(data.get("project"))
     _add_requirement_specs(declared, project.get("dependencies"))
+
+    build_system = _as_mapping(data.get("build-system"))
+    _add_requirement_specs(declared, build_system.get("requires"))
 
     optional = _as_mapping(project.get("optional-dependencies"))
     for specs in optional.values():
@@ -338,11 +345,18 @@ def _local_modules(context: ScanContext) -> set[str]:
         parts = context.rel(path).split("/")
         if not parts:
             continue
+        stem = path.stem
+        if stem != "__init__":
+            local.add(_normalize(stem))
         first = parts[0]
         if first == "src" and len(parts) > 1:
             local.add(_normalize(parts[1].removesuffix(".py")))
+            if len(parts) > 2 and parts[-1] == "__init__.py":
+                local.add(_normalize(parts[-2]))
         else:
             local.add(_normalize(first.removesuffix(".py")))
+            if len(parts) > 1 and parts[-1] == "__init__.py":
+                local.add(_normalize(parts[-2]))
     return local
 
 
@@ -371,6 +385,49 @@ def _python_import_roots(text: str) -> set[str]:
     return roots
 
 
+_IMPORT_SCAN_EXCLUDED_PARTS = {
+    ".eggs",
+    ".git",
+    ".github",
+    ".hg",
+    ".nox",
+    ".pyinstaller",
+    ".spin",
+    ".tox",
+    "bench",
+    "benchmark",
+    "benchmarks",
+    "build",
+    "build_tools",
+    "ci",
+    "doc",
+    "docs",
+    "example",
+    "examples",
+    "extern",
+    "external",
+    "externals",
+    "maint_tools",
+    "site",
+    "test",
+    "tests",
+    "third_party",
+    "thirdparty",
+    "vendor",
+    "vendored",
+}
+
+
+def _is_runtime_import_file(context: ScanContext, path: Any) -> bool:
+    """Return true for Python files likely to represent runtime code."""
+
+    rel = context.rel(path)
+    if rel.rsplit("/", 1)[-1].lower() == "conftest.py":
+        return False
+    parts = [part.lower() for part in rel.split("/")[:-1]]
+    return not any(part in _IMPORT_SCAN_EXCLUDED_PARTS for part in parts)
+
+
 class UndeclaredImportRule(Rule):
     definition = definition(
         "RRD034",
@@ -396,6 +453,8 @@ class UndeclaredImportRule(Rule):
         seen: dict[str, str] = {}
         for path in context.files:
             if path.suffix.lower() not in {".py"}:
+                continue
+            if not _is_runtime_import_file(context, path):
                 continue
             text = read_text(path)
             for top in _python_import_roots(text):

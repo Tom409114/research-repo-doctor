@@ -75,8 +75,11 @@ downgraded to a warning rather than an error.
 
 `RRD034` uses Python AST import statements rather than regex text matching, so
 comments, docstrings, notebooks, and prose examples are not treated as imports.
-It is still a conservative static dependency-gap check: optional, test-only, or
-documentation-only imports may need maintainer review before being considered
+It focuses on runtime-like source paths and skips conventional docs, tests,
+benchmarks, test configuration, vendored code, and build/tooling folders. Local
+sibling modules and package modules are treated as repository code, not missing
+third-party distributions. It is still a conservative static dependency-gap
+check: optional imports may need maintainer review before being considered
 actionable for a specific project.
 
 `RRD040` accepts dedicated data docs and README-based evidence, including common
