@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## v0.2.16 - 2026-07-09
+
+- Published a small post-cleanup alignment release so the GitHub tag, source
+  tree, and PyPI package all point at the same cleaned public state.
+- Recognized Julia `test/runtests.jl`, Julia `Project.toml` test targets, and
+  `julia-actions/julia-runtest` as valid testing and CI evidence.
+- Tightened Windows absolute-path detection so regex-escaped warning filters do
+  not look like local machine paths.
+- Kept the public-hygiene guard while removing sensitive guard terms from public
+  source text.
+
 ## v0.2.15 - 2026-07-09
 
 - Added an explicit `timeout` parameter to the MCP `verify` tool so coding

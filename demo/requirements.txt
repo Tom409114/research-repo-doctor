@@ -1,2 +1,2 @@
-rrdoctor==0.2.15
+rrdoctor==0.2.16
 streamlit==1.58.0

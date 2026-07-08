@@ -162,6 +162,18 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.16
+
+- **Clean release alignment**: GitHub source, the latest tag, and the PyPI
+  package are aligned after public-ref cleanup.
+- **Better Julia signal**: Julia `test/runtests.jl`, `Project.toml` test
+  targets, and `julia-actions/julia-runtest` count as real test/CI evidence.
+- **Less path noise**: regex-escaped warning filters no longer look like
+  Windows local absolute paths.
+- **Cleaner public hygiene checks**: the guard still prevents private planning
+  files and local paths from re-entering the repo without carrying those terms
+  as public prose.
+
 ## What's new in 0.2.15
 
 - **Clearer verification evidence**: `rrdoctor verify` reports now lead with
@@ -395,7 +407,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.15
+      - uses: Tom409114/research-repo-doctor@v0.2.16
         with:
           profile: standard
           fail-on: none
@@ -510,7 +522,7 @@ only verified external-use claims.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.15},
+  version = {0.2.16},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}
