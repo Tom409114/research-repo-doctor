@@ -140,3 +140,32 @@ def test_undeclared_import_skipped_without_manifest(tmp_path) -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
 
     assert not report.findings
+
+
+def test_undeclared_import_ignores_comments_and_docstrings(tmp_path) -> None:
+    (tmp_path / "requirements.txt").write_text("numpy\n", encoding="utf-8")
+    (tmp_path / "main.py").write_text(
+        '"""Example text:\n'
+        "import requests\n"
+        "from 10000 samples are drawn\n"
+        '"""\n'
+        "# from missing_package import demo\n"
+        "import numpy as np\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_undeclared_import_skips_unparseable_python_files(tmp_path) -> None:
+    (tmp_path / "requirements.txt").write_text("numpy\n", encoding="utf-8")
+    (tmp_path / "generated.py").write_text(
+        'def broken(:\n    """from missing_package import demo"""\n',
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings

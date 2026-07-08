@@ -73,6 +73,12 @@ such as `python train.py ...`.
 manifest exists but the README contains concrete install commands, the finding is
 downgraded to a warning rather than an error.
 
+`RRD034` uses Python AST import statements rather than regex text matching, so
+comments, docstrings, notebooks, and prose examples are not treated as imports.
+It is still a conservative static dependency-gap check: optional, test-only, or
+documentation-only imports may need maintainer review before being considered
+actionable for a specific project.
+
 `RRD040` accepts dedicated data docs and README-based evidence, including common
 dataset sections and documented `python data/.../prepare.py` style preparation
 commands.

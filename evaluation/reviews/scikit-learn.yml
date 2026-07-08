@@ -1,0 +1,15 @@
+version: 1
+repository: scikit-learn
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent: []
+false_positives: []
+false_negatives: []
+notes: >
+  Focused RRD034 review for a mature scientific Python package. The dependency
+  cross-check now uses Python AST imports instead of regex text matching, so
+  comments, docstrings, numeric fragments, and ordinary prose are not reported
+  as undeclared packages. Remaining RRD034 names in this case are real import
+  identifiers from optional, documentation, or test paths and need separate
+  dependency-policy review before being classified as false positives.

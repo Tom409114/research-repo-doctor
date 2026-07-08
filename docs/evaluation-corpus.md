@@ -71,8 +71,8 @@ python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress -
 - Scanned successfully: 60
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Focused manual review notes: 26
-- Not yet manually reviewed: 34
+- Focused manual review notes: 30
+- Not yet manually reviewed: 30
 - Average score across scanned repositories: 62.1
 
 Readiness distribution:
@@ -111,14 +111,15 @@ Manual review flags captured in this snapshot:
 | False positive | RRD090 | 4 |
 
 Focused reviews currently cover BERT, CLIP, improved-diffusion, MAE,
-AlphaFold, DETR, YOLOv5, DynamicalSystems.jl, and Scanpy. The repository
-contains 26 reviewed notes and 34 repositories still awaiting focused manual
-review. Those additions confirm that BERT local RNG seeding via
+AlphaFold, DETR, YOLOv5, DynamicalSystems.jl, Scanpy, scikit-learn, Astropy,
+scvi-tools, and DINOv2. The repository contains 30 reviewed notes and 30
+repositories still awaiting focused manual review. Those additions confirm that
+BERT local RNG seeding via
 `random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
 `nn.Parameter(torch.randn(...))`, MAE-style root `main_*.py` entrypoints,
 AlphaFold `random_seed=` plumbing, Julia `test/runtests.jl` test evidence,
-Julia CI runners, and regex-escaped warning filters no longer trigger noisy
-findings.
+Julia CI runners, regex-escaped warning filters, and comments/docstrings that
+look like import statements no longer trigger noisy findings.
 
 The v0.2.17 PyPI package was also spot-checked against nanoGPT, the original
 first-run trust regression case. The static scan reported `Functional`, 76/100,

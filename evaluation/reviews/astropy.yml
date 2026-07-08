@@ -1,0 +1,15 @@
+version: 1
+repository: astropy
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent: []
+false_positives: []
+false_negatives: []
+notes: >
+  Focused RRD034 review for a mature astronomy package. The scan no longer
+  reports ordinary words from comments or docstrings as undeclared imports after
+  the AST-only import parser change. Remaining dependency-gap names are real
+  import identifiers from optional, extension, documentation, or test paths and
+  should be reviewed against Astropy's dependency policy before being marked as
+  false positives.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import re
 import sys
 from collections.abc import Iterable
@@ -223,7 +224,6 @@ IMPORT_TO_DISTRIBUTION = {
     "openssl": "pyopenssl",
 }
 
-_IMPORT_RE = re.compile(r"^\s*(?:import|from)\s+([A-Za-z0-9_.]+)", re.MULTILINE)
 _REQ_NAME_RE = re.compile(r"^[A-Za-z0-9_.\-]+")
 
 
@@ -346,6 +346,31 @@ def _local_modules(context: ScanContext) -> set[str]:
     return local
 
 
+def _python_import_roots(text: str) -> set[str]:
+    """Return top-level modules imported by real Python import statements."""
+
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        # Be conservative for generated or version-specific files: a regex
+        # fallback is too noisy because it also scans comments and docstrings.
+        return set()
+
+    roots: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                top = alias.name.split(".", 1)[0]
+                if top:
+                    roots.add(top)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level:
+                continue
+            if node.module:
+                roots.add(node.module.split(".", 1)[0])
+    return roots
+
+
 class UndeclaredImportRule(Rule):
     definition = definition(
         "RRD034",
@@ -373,8 +398,7 @@ class UndeclaredImportRule(Rule):
             if path.suffix.lower() not in {".py"}:
                 continue
             text = read_text(path)
-            for raw in _IMPORT_RE.findall(text):
-                top = raw.split(".")[0]
+            for top in _python_import_roots(text):
                 if not top or top.startswith("_"):
                     continue
                 if top in stdlib:

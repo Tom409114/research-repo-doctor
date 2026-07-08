@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Changed `RRD034` dependency-gap detection to parse Python AST import
+  statements instead of regex-matching source text, reducing false positives
+  from comments, docstrings, and prose examples in real corpus repositories.
+
 ## v0.2.17 - 2026-07-09
 
 - Refined public release notes and README wording so the latest package metadata
