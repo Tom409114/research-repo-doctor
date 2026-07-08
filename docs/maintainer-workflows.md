@@ -47,10 +47,24 @@ Before a release, maintainers run tests, linting, self-scan, changelog review, a
 
 Release checklist:
 
-- `pytest`
-- `ruff check .`
-- `ruff format --check .`
-- `rrdoctor scan . --profile standard --format markdown --output examples/reports/self-scan-report.md --fail-on none`
+- `python scripts/check.py`
 - GitHub Action smoke test
 - Changelog entry and tag notes
 - Security policy and issue templates still current
+
+## Public readiness gate
+
+Before a launch post, JOSS submission, or outreach to Artifact Evaluation chairs,
+run:
+
+```bash
+python scripts/check_public_readiness.py
+```
+
+This local gate checks the first-time evaluator signals that are easy to
+regress: the README live demo and GIF, package metadata URLs, issue templates,
+self-scan badge/report consistency, corpus scan evidence, and absence of
+internal launch/application materials or local workspace paths. It does not
+call external services; maintainers still need to manually confirm that GitHub
+issues are enabled, the Streamlit demo is awake, and any external post drafts
+match the current release.

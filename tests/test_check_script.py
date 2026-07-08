@@ -25,3 +25,4 @@ def test_check_script_runs_project_quality_gates() -> None:
     assert any(" -m mypy" in command for command in commands)
     assert any(" -m pytest -q" in command for command in commands)
     assert any(" -m rrdoctor scan . --profile standard" in command for command in commands)
+    assert any("scripts/check_public_readiness.py" in command for command in commands)

@@ -31,6 +31,7 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
         "--output",
         "examples/reports/self-scan-report.md",
     ),
+    (sys.executable, "scripts/check_public_readiness.py"),
 )
 
 

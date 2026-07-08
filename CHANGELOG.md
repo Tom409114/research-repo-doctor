@@ -12,6 +12,9 @@
   work instead of rule families that are already implemented.
 - Added a cross-platform `python scripts/check.py` maintainer gate, wired
   `make check` to it, and exposed the live demo in package metadata.
+- Added a public-readiness gate for launch/JOSS/Artifact Evaluation outreach
+  checks covering demo assets, package metadata, issue templates, self-scan
+  evidence, corpus evidence, and internal-material hygiene.
 
 ## v0.2.14 - 2026-07-06
 
