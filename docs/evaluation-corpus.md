@@ -123,6 +123,8 @@ findings.
 The v0.2.17 PyPI package was also spot-checked against nanoGPT, the original
 first-run trust regression case. The static scan reported `Functional`, 76/100,
 0 errors, 6 warnings, and 2 info findings; `RRD050` and `RRD063` were absent.
+See the [nanoGPT first-run case study](case-studies/nanogpt.md) for the exact
+command, target commit, and interpretation.
 
 ## Manual Review
 

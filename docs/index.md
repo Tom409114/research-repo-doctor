@@ -19,6 +19,7 @@ Start with the quickstart, then read the checks and configuration reference.
 - [Report formats](report-format.md)
 - [Rule authoring](rule-authoring.md)
 - [Evaluation corpus](evaluation-corpus.md)
+- [Case study: nanoGPT first-run regression](case-studies/nanogpt.md)
 - [Feedback and calibration](feedback.md)
 - [Research reproducibility](research-reproducibility.md)
 - [Maintainer workflows](maintainer-workflows.md)
