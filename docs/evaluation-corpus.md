@@ -127,7 +127,7 @@ such as `graphcast_demo.ipynb` count as notebook-first experiment entrypoints.
 The dependency gap check also focuses on runtime-like Python files instead of
 docs, tests, benchmarks, vendored code, or maintainer tooling.
 
-The v0.2.18 PyPI package was also spot-checked against nanoGPT, the original
+The v0.2.19 PyPI package was also spot-checked against nanoGPT, the original
 first-run trust regression case. The static scan reported `Functional`, 76/100,
 0 errors, 6 warnings, and 2 info findings; `RRD050` and `RRD063` were absent.
 See the [nanoGPT first-run case study](case-studies/nanogpt.md) for the exact

@@ -19,10 +19,10 @@ Latest local maintainer smoke run:
 - Corpus slice: all 60 public repositories currently listed in `evaluation/corpus.yml`
 - Scanned successfully: 60 of 60
 - Clone or scan errors: 0
-- Average score across scanned repositories: 62.1
+- Average score across scanned repositories: 63.5
 - Expected-absent regressions: 0
-- Focused manual review notes: 26
-- Not yet manually reviewed: 34
+- Focused manual review notes: 32
+- Not yet manually reviewed: 28
 
 Top actionable rule frequencies in that snapshot:
 
@@ -54,12 +54,13 @@ Manual review flags captured in this snapshot:
 
 Focused review coverage in the current snapshot:
 
-- Focused manual review notes loaded: 26
-- Repositories still awaiting focused manual review: 34
+- Focused manual review notes loaded: 32
+- Repositories still awaiting focused manual review: 28
 - Includes BERT, CLIP, improved-diffusion, MAE, AlphaFold, DETR, YOLOv5,
-  DynamicalSystems.jl, and Scanpy reviews for README evidence,
-  experiment-entrypoint recognition, path-noise handling, Julia test/CI
-  recognition, and randomness-seed signal quality.
+  DynamicalSystems.jl, Scanpy, scikit-learn, Astropy, scvi-tools, DINOv2,
+  t5x, and GraphCast reviews for README evidence, experiment-entrypoint
+  recognition, path-noise handling, Julia test/CI recognition, dependency
+  signal quality, notebook-first artifacts, and randomness-seed signal quality.
 - Confirmed that BERT's local `random.Random(seed)` usage, CLIP model parameter
   initialization, MAE-style root `main_*.py` scripts, and AlphaFold
   `random_seed=` plumbing are not reported as noisy findings.
@@ -67,10 +68,14 @@ Focused review coverage in the current snapshot:
   recognized as test evidence, `julia-actions/julia-runtest` is recognized as a
   CI test runner, and regex-escaped warning filters do not look like Windows
   absolute paths.
+- Confirmed that package-level research binaries such as `t5x/train.py`,
+  documented `python3 ${T5X_DIR}/t5x/train.py` commands, and clearly named
+  demo notebooks such as `graphcast_demo.ipynb` count as experiment entrypoint
+  evidence.
 
-First-run trust spot check added on 2026-07-06:
+First-run trust spot check refreshed on 2026-07-09:
 
-- Command: `uvx --refresh --from rrdoctor==0.2.14 rrdoctor scan <nanoGPT> --profile standard --format json --fail-on none`
+- Command: `uvx --refresh --from rrdoctor==0.2.19 rrdoctor scan <nanoGPT> --profile standard --format json --fail-on none`
 - Result: `Functional`, 76/100, 0 errors, 6 warnings, 2 info
 - Regression checks: `RRD050` and `RRD063` were absent
 

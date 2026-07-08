@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Refreshed the nanoGPT first-run case study and corpus review notes against
+  PyPI `rrdoctor==0.2.19`, confirming that `RRD050` and `RRD063` remain absent.
+
 ## v0.2.19 - 2026-07-09
 
 - Reduced `RRD050` first-run entrypoint false positives for large research
