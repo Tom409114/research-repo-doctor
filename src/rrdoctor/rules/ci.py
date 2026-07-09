@@ -68,6 +68,13 @@ class CiNoTestsRule(Rule):
                 "bazelisk test",
                 "run_tests.sh",
                 "run_github_tests.sh",
+                "testthat",
+                "r cmd check",
+                "rcmdcheck",
+                "bioccheck",
+                "devtools::test",
+                "r-lib/actions/check-r-package",
+                "grouped-tests.yml",
             )
         ):
             return [

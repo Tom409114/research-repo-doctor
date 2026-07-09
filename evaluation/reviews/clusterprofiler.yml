@@ -1,0 +1,18 @@
+version: 1
+repository: clusterprofiler
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: clusterProfiler is an R/Bioconductor package with DESCRIPTION, R sources, vignettes, and package tests rather than a paper-specific experiment entrypoint.
+  - rule_id: RRD071
+    evidence: DESCRIPTION suggests testthat and tests/testthat.R calls test_check("clusterProfiler"), which is recognized as R test runner evidence.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of an R/Bioconductor enrichment-analysis package. This checked
+  R package/testthat detection. RRD081 remains actionable because the observed
+  GitHub workflow updates package data rather than clearly running package
+  tests. License, citation, data, data/README, README, changelog, and version
+  findings remain visible.

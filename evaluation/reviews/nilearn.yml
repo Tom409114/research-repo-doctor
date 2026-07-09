@@ -1,0 +1,17 @@
+version: 1
+repository: nilearn
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD043
+    evidence: Maintainer tooling paths under maint_tools/ are excluded from data-path findings.
+  - rule_id: RRD050
+    evidence: Nilearn is a neuroimaging library with package metadata, examples, datasets, docs, and tests; it is not a paper-entrypoint artifact.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a neuroimaging Python library. This checked maintainer-tool
+  path filtering and mature-library RRD050 behavior. Remaining findings about
+  data availability, optional/import metadata, notebook/docs topics, changelog,
+  and dynamic version metadata remain visible for triage.

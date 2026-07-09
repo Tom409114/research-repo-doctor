@@ -32,6 +32,12 @@ TEST_RUNNER_TERMS = (
     "bazelisk test",
     "run_tests.sh",
     "run_github_tests.sh",
+    "testthat",
+    "test_check(",
+    "r cmd check",
+    "rcmdcheck",
+    "bioccheck",
+    "devtools::test",
 )
 
 BAZEL_TEST_TARGET_RE = re.compile(
@@ -92,7 +98,15 @@ class TestRunnerMissingRule(Rule):
 
     def check(self, context: ScanContext) -> list[Finding]:
         markers = []
-        for name in ("pyproject.toml", "tox.ini", "noxfile.py", "package.json", "Project.toml"):
+        for name in (
+            "pyproject.toml",
+            "tox.ini",
+            "noxfile.py",
+            "package.json",
+            "Project.toml",
+            "DESCRIPTION",
+            "tests/testthat.R",
+        ):
             path = context.root / name
             if path.exists():
                 markers.append(read_text(path).lower())

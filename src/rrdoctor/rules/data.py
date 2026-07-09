@@ -33,11 +33,13 @@ VENDORED_PATH_PREFIXES = (
     "dependencies/",
     "deps/",
     "external/",
+    "extern/",
     "externals/",
     "third_party/",
     "vendor/",
     "vendored/",
 )
+NON_RUNTIME_PATH_PREFIXES = ("docker/", "maint_tools/")
 
 
 class DataDocsMissingRule(Rule):
@@ -151,6 +153,7 @@ class LocalAbsoluteDataPathRule(Rule):
                 or _is_ci_config_path(rel)
                 or _is_test_or_fixture_path(rel)
                 or _is_vendored_dependency_path(rel)
+                or _is_non_runtime_path(rel)
             ):
                 continue
             text = read_text(path)
@@ -189,7 +192,26 @@ def _is_test_or_fixture_path(rel_path: str) -> bool:
 
 def _is_vendored_dependency_path(rel_path: str) -> bool:
     normalized = rel_path.replace("\\", "/").lower()
-    return normalized.startswith(VENDORED_PATH_PREFIXES)
+    parts = set(normalized.split("/"))
+    return normalized.startswith(VENDORED_PATH_PREFIXES) or bool(
+        parts.intersection(
+            {
+                "dependencies",
+                "deps",
+                "external",
+                "extern",
+                "externals",
+                "third_party",
+                "vendor",
+                "vendored",
+            }
+        )
+    )
+
+
+def _is_non_runtime_path(rel_path: str) -> bool:
+    normalized = rel_path.replace("\\", "/").lower()
+    return normalized.startswith(NON_RUNTIME_PATH_PREFIXES)
 
 
 RULES = [

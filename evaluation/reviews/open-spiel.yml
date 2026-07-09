@@ -1,0 +1,17 @@
+version: 1
+repository: open-spiel
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD043
+    evidence: Windows setup docs and AlphaZero example output paths use placeholder user/home directories and are filtered as documentation examples.
+  - rule_id: RRD050
+    evidence: OpenSpiel is a multi-language research framework with documented build/test/example entrypoints, not a single paper artifact.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a C++/Python/RL research framework. This checked Windows
+  and Unix placeholder-path filtering plus library/framework RRD050 behavior.
+  Remaining findings around README headings, data availability, dependency gaps,
+  changelog, and topic metadata are left as normal scan output.

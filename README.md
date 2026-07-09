@@ -186,10 +186,10 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   torchvision, MDAnalysis, QuTiP, ESM, stable-diffusion, detectron2,
   DINO, StyleGAN2-ADA PyTorch, instant-ngp, Big Vision, latent-diffusion,
   taming-transformers, generative-models, pytorch-image-models, Brax, ArviZ,
-  PyMC, Pyro, TensorFlow Probability, statsmodels, and Optax add first-run trust
-  gates or focused review evidence. The latest 80-repository corpus gate has 0
-  expected-absent regressions, 67 reviewed notes, and 13 repositories still
-  awaiting focused review.
+  PyMC, Pyro, TensorFlow Probability, statsmodels, Optax, and the remaining
+  corpus entries now add first-run trust gates or focused review evidence. The
+  latest 80-repository corpus gate has 0 expected-absent regressions, 80
+  reviewed notes, and 0 repositories still awaiting focused review.
 - **Less template-like auto-fix output**: `rrdoctor fix --write` can now read
   simple literal `setup.py` metadata statically, without executing repository
   code, when generating citation and provenance scaffolds.

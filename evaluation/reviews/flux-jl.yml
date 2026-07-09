@@ -1,0 +1,19 @@
+version: 1
+repository: flux-jl
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Flux.jl is a Julia ML library with package/test structure and examples, not a paper-specific experiment entrypoint.
+  - rule_id: RRD070
+    evidence: Julia package tests are present.
+  - rule_id: RRD071
+    evidence: Julia test runner evidence is recognized.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a Julia machine-learning library. This checked library
+  entrypoint behavior plus Julia test evidence. Remaining README, data
+  availability, .gitignore, changelog, version, and topic findings remain
+  visible for maintainers.

@@ -98,8 +98,13 @@ def is_placeholder_absolute_path(value: str) -> bool:
     return (
         normalized.startswith("/home/user/")
         or normalized.startswith("/home/joe/")
+        or normalized.startswith("/home/me/")
+        or normalized.startswith("/home/docs/")
+        or normalized.startswith("/home/xyz/")
         or normalized.startswith("/users/user/")
         or normalized.startswith("/users/me/")
+        or normalized == "c:/users/myuser"
+        or normalized.startswith("c:/users/myuser/")
         or normalized.startswith("c:/program files/")
         or normalized.startswith("c:/program files (x86)/")
         or normalized.startswith("c:/folder")
@@ -108,6 +113,7 @@ def is_placeholder_absolute_path(value: str) -> bool:
         or normalized.startswith("/users/...")
         or "/<user>/" in normalized
         or "/<your_user>/" in normalized
+        or "/<username>" in normalized
         or "\\<user>\\" in value.lower()
         or "/absolute_path" in normalized
         or "/path_to_" in normalized

@@ -1,0 +1,16 @@
+version: 1
+repository: nipype
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Nipype is a neuroimaging workflow library with package/workflow interfaces rather than a single train/eval experiment entrypoint.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a neuroimaging workflow project. This checked that workflow
+  libraries are not treated as paper artifacts missing a single experiment
+  entrypoint. The remaining RRD043 and RRD052 findings are intentionally left
+  actionable pending deeper maintainer review because they appear in source
+  workflow/algorithm code rather than only docs or tests.

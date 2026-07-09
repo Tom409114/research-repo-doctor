@@ -142,6 +142,7 @@ repositories:
     url: https://github.com/google-research/long-range-arena
     ecosystem: python-ml-legacy
     reason: Archived benchmark artifact with multiple model and task entrypoints.
+    expected_absent: [RRD050]
     review_focus: [legacy-artifact, benchmark-docs, entrypoints]
   - name: big-vision
     url: https://github.com/google-research/big_vision
@@ -159,6 +160,7 @@ repositories:
     url: https://github.com/google-deepmind/open_spiel
     ecosystem: python-cpp-rl
     reason: Multi-language research framework for game-theoretic reinforcement learning.
+    expected_absent: [RRD043, RRD050]
     review_focus: [multi-language, build-docs, tests]
   - name: stylegan2-ada-pytorch
     url: https://github.com/NVlabs/stylegan2-ada-pytorch
@@ -221,26 +223,31 @@ repositories:
     url: https://github.com/yt-project/yt
     ecosystem: python-astronomy
     reason: Scientific analysis toolkit with datasets, docs, and testing practices.
+    expected_absent: [RRD050]
     review_focus: [data-docs, package-metadata, testing]
   - name: sunpy
     url: https://github.com/sunpy/sunpy
     ecosystem: python-astronomy
     reason: Scientific Python project with domain data access and citation expectations.
+    expected_absent: [RRD043, RRD050, RRD052]
     review_focus: [data-docs, citation, package-metadata]
   - name: nilearn
     url: https://github.com/nilearn/nilearn
     ecosystem: python-neuroimaging
     reason: Neuroimaging research software with examples, datasets, and docs.
+    expected_absent: [RRD043, RRD050]
     review_focus: [data-docs, notebooks, testing]
   - name: mne-python
     url: https://github.com/mne-tools/mne-python
     ecosystem: python-neuroimaging
     reason: Neuroscience research software with datasets, examples, and citation metadata.
+    expected_absent: [RRD043, RRD050]
     review_focus: [data-docs, citation, examples]
   - name: nipype
     url: https://github.com/nipy/nipype
     ecosystem: python-neuroimaging-workflow
     reason: Neuroimaging workflow project with multi-tool execution assumptions.
+    expected_absent: [RRD050]
     review_focus: [workflow-docs, dependency-docs, entrypoints]
   - name: monocle3
     url: https://github.com/cole-trapnell-lab/monocle3
@@ -256,6 +263,7 @@ repositories:
     url: https://github.com/YuLab-SMU/clusterProfiler
     ecosystem: r-bioinformatics
     reason: R enrichment-analysis package with docs, citation, and release metadata.
+    expected_absent: [RRD050, RRD071]
     review_focus: [r-environment, citation, docs]
   - name: archr
     url: https://github.com/GreenleafLab/ArchR
@@ -308,26 +316,31 @@ repositories:
     url: https://github.com/SciML/DifferentialEquations.jl
     ecosystem: julia-science
     reason: Julia scientific computing package with reproducible examples and docs.
+    expected_absent: [RRD050, RRD070, RRD071, RRD081]
     review_focus: [julia-environment, package-metadata, docs]
   - name: turing-jl
     url: https://github.com/TuringLang/Turing.jl
     ecosystem: julia-statistics
     reason: Julia probabilistic programming project with examples and package metadata.
+    expected_absent: [RRD050, RRD070, RRD071, RRD081]
     review_focus: [julia-environment, examples, testing]
   - name: flux-jl
     url: https://github.com/FluxML/Flux.jl
     ecosystem: julia-ml
     reason: Julia machine learning package with docs, examples, and model code.
+    expected_absent: [RRD050, RRD070, RRD071]
     review_focus: [julia-environment, examples, testing]
   - name: distributions-jl
     url: https://github.com/JuliaStats/Distributions.jl
     ecosystem: julia-statistics
     reason: Julia statistics package useful as a mature package baseline.
+    expected_absent: [RRD050, RRD070, RRD071]
     review_focus: [julia-environment, package-metadata, testing]
   - name: images-jl
     url: https://github.com/JuliaImages/Images.jl
     ecosystem: julia-science
     reason: Julia scientific image-processing package with docs and examples.
+    expected_absent: [RRD050, RRD070, RRD071]
     review_focus: [julia-environment, docs, package-metadata]
   - name: arviz
     url: https://github.com/arviz-devs/arviz

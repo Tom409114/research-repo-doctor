@@ -352,6 +352,19 @@ def test_randomness_in_test_file_does_not_flag_unseeded_experiment(tmp_path) -> 
     assert not report.findings
 
 
+def test_randomness_in_test_directory_does_not_flag_unseeded_experiment(tmp_path) -> None:
+    test_dir = tmp_path / "demo" / "data" / "test"
+    test_dir.mkdir(parents=True)
+    (test_dir / "__init__.py").write_text(
+        "import numpy as np\n\nsample = np.random.rand(10, 3)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_sklearn_randomness_without_random_state_flagged(tmp_path) -> None:
     (tmp_path / "train.py").write_text(
         "from sklearn.model_selection import train_test_split\n"

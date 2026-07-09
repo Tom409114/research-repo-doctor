@@ -21,8 +21,8 @@ Latest local maintainer smoke run:
 - Clone or scan errors: 0
 - Average score across scanned repositories: 67.5
 - Expected-absent regressions: 0
-- Focused manual review notes: 67
-- Not yet manually reviewed: 13
+- Focused manual review notes: 80
+- Not yet manually reviewed: 0
 
 Top actionable rule frequencies in that snapshot:
 
@@ -54,8 +54,8 @@ Manual review flags captured in this snapshot:
 
 Focused review coverage in the current snapshot:
 
-- Focused manual review notes loaded: 67
-- Repositories still awaiting focused manual review: 13
+- Focused manual review notes loaded: 80
+- Repositories still awaiting focused manual review: 0
 - Includes BERT, CLIP, guided-diffusion, improved-diffusion,
   vision-transformer, MAE, AlphaFold, DETR, YOLOv5, DynamicalSystems.jl,
   Scanpy, scikit-learn, Astropy, scvi-tools, DINO, DINOv2, t5x, GraphCast,
@@ -64,14 +64,16 @@ Focused review coverage in the current snapshot:
   stable-diffusion, nerfstudio, FAISS, detectron2, StyleGAN2-ADA PyTorch, and
   instant-ngp, Big Vision, latent-diffusion, taming-transformers,
   generative-models, pytorch-image-models, Brax, ArviZ, PyMC, Pyro,
-  TensorFlow Probability, statsmodels, and Optax reviews for
+  TensorFlow Probability, statsmodels, Optax, long-range-arena, OpenSpiel, yt,
+  SunPy, Nilearn, MNE-Python, Nipype, clusterProfiler, DifferentialEquations.jl,
+  Turing.jl, Flux.jl, Distributions.jl, and Images.jl reviews for
   README evidence, experiment-entrypoint recognition, path-noise handling,
   secret-heuristic noise, library-shaped package handling, Julia test/CI
   recognition, dependency signal quality, Conda `.yaml` manifest handling,
   editable pip dependency parsing, notebook-first artifacts, and
   randomness-seed signal quality.
-- The 80-repository manifest now has focused review notes for all repositories
-  added in the latest expansion except the remaining older unreviewed entries.
+- The 80-repository manifest now has focused review notes for every repository
+  in the corpus.
 - Confirmed that BERT's local `random.Random(seed)` usage, CLIP model parameter
   initialization, MAE-style root `main_*.py` scripts, and AlphaFold
   `random_seed=` plumbing are not reported as noisy findings.
@@ -99,6 +101,11 @@ Focused review coverage in the current snapshot:
   Probability's legacy `setup.py`, Bazel tests, CI test script, and notebook URL
   links no longer produce noisy `RRD030`, `RRD031`, `RRD062`, `RRD071`, or
   `RRD081` findings.
+- Confirmed that long-range-arena, OpenSpiel, yt, SunPy, Nilearn, MNE-Python,
+  Nipype, clusterProfiler, DifferentialEquations.jl, Turing.jl, Flux.jl,
+  Distributions.jl, and Images.jl complete the current corpus review set,
+  including R/testthat evidence, SciML grouped-test CI, vendored/example path
+  filtering, and test-data randomness filtering.
 - Confirmed that SciPy's `LICENSE.txt`, CI/devcontainer environment paths, and
   placeholder examples such as `/home/...` and Windows `<user>` cache paths do
   not trigger noisy `RRD010` or `RRD043` findings.

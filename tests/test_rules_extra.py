@@ -172,6 +172,40 @@ def test_local_absolute_path_rule_ignores_ellipsis_user_placeholder(tmp_path) ->
     assert not report.findings
 
 
+def test_local_absolute_path_rule_ignores_docs_and_tooling_noise(tmp_path) -> None:
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docker").mkdir()
+    (tmp_path / "pkg" / "extern").mkdir(parents=True)
+    (tmp_path / "maint_tools").mkdir()
+    (tmp_path / "docs" / "conf.py").write_text(
+        "html_theme_path = '/home/docs/theme'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "docker" / "generate.sh").write_text(
+        "export HOME=/home/neuro\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "pkg" / "extern" / "appdirs.py").write_text(
+        r'example = "C:\Documents and Settings\<username>\Application Data"',
+        encoding="utf-8",
+    )
+    (tmp_path / "maint_tools" / "check_tokens.py").write_text(
+        "token_path = '/home/alice/Documents/tokens/gh_user.txt'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "On Windows clone into C:\\Users\\MyUser\\project.\n"
+        "Legacy docs may say C:\\Documents and Settings\\<username>\\Application Data.\n"
+        "Example training output can go under /home/me/az_example/.\n"
+        "Synthetic docs may use /home/xyz/me2/ as an example.\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
 def test_local_absolute_path_rule_flags_real_windows_path(tmp_path) -> None:
     path_hint = "C:" + "\\Users\\alice\\private-datasets\\demo"
     (tmp_path / "README.md").write_text(
@@ -315,6 +349,49 @@ def test_bazel_test_targets_and_ci_script_are_detected(tmp_path) -> None:
         "    runs-on: ubuntu-latest\n"
         "    steps:\n"
         "      - run: ./testing/run_github_tests.sh\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071", "RRD081"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_r_testthat_runner_is_detected(tmp_path) -> None:
+    tests_dir = tmp_path / "tests"
+    workflow_dir = tmp_path / ".github" / "workflows"
+    tests_dir.mkdir()
+    workflow_dir.mkdir(parents=True)
+    (tmp_path / "DESCRIPTION").write_text(
+        "Package: demo\nSuggests: testthat\nDepends: R (>= 4.2)\n",
+        encoding="utf-8",
+    )
+    (tests_dir / "testthat.R").write_text(
+        'library(testthat)\ntest_check("demo")\n',
+        encoding="utf-8",
+    )
+    (workflow_dir / "ci.yml").write_text(
+        "name: CI\njobs:\n  check:\n    steps:\n      - uses: r-lib/actions/check-r-package@v2\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071", "RRD081"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_sciml_reusable_grouped_tests_workflow_is_detected(tmp_path) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    test_dir = tmp_path / "test"
+    workflow_dir.mkdir(parents=True)
+    test_dir.mkdir()
+    (tmp_path / "Project.toml").write_text(
+        '[extras]\nTest = "8dfed614-e22c-5e08-85e1-65c5234f0b40"\n\n[targets]\ntest = ["Test"]\n',
+        encoding="utf-8",
+    )
+    (test_dir / "runtests.jl").write_text("using Test\n@test true\n", encoding="utf-8")
+    (workflow_dir / "Tests.yml").write_text(
+        'jobs:\n  tests:\n    uses: "SciML/.github/.github/workflows/grouped-tests.yml@v1"\n',
         encoding="utf-8",
     )
 

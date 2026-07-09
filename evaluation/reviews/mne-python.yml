@@ -1,0 +1,17 @@
+version: 1
+repository: mne-python
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD043
+    evidence: Common placeholder home-directory paths are filtered as examples.
+  - rule_id: RRD050
+    evidence: MNE-Python is a mature neuroscience analysis library with docs, datasets, examples, package metadata, and tests.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a neuroscience research-software package. This checked
+  placeholder path filtering and library-shaped entrypoint behavior. Remaining
+  README, data availability, undeclared import, changelog, version, and
+  pyproject metadata findings remain unsuppressed.

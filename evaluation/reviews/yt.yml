@@ -1,0 +1,16 @@
+version: 1
+repository: yt
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: yt is a mature scientific analysis library with package metadata, tests, docs, and examples; a paper-specific train/eval entrypoint is not required.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of an astronomy/scientific analysis toolkit. This checked that
+  mature library-shaped repositories stay outside the RRD050 paper-artifact
+  requirement. The remaining local-path finding is left unsuppressed pending
+  maintainer review because it is a concrete user-looking example path in
+  source documentation.

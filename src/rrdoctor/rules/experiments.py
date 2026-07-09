@@ -594,6 +594,8 @@ def _is_test_python_path(rel: str) -> bool:
     return (
         normalized.startswith("tests/")
         or "/tests/" in normalized
+        or normalized.startswith("test/")
+        or "/test/" in normalized
         or name.startswith("test_")
         or name.endswith("_test.py")
     )

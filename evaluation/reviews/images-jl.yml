@@ -1,0 +1,19 @@
+version: 1
+repository: images-jl
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Images.jl is a Julia image-processing package, not a paper-specific experiment artifact.
+  - rule_id: RRD070
+    evidence: Julia tests are present.
+  - rule_id: RRD071
+    evidence: Julia test runner evidence is recognized.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a Julia scientific image-processing package. This checked
+  library-shaped RRD050 behavior and Julia test evidence. Remaining citation,
+  README, data availability, .gitignore, changelog, version, and topic findings
+  remain unsuppressed.

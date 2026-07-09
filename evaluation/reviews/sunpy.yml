@@ -1,0 +1,20 @@
+version: 1
+repository: sunpy
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD043
+    evidence: docs/conf.py readthedocs paths and vendored appdirs platform examples are filtered as documentation/vendored path noise.
+  - rule_id: RRD050
+    evidence: SunPy is a mature domain library with package metadata, docs, examples, and tests rather than a single experiment artifact.
+  - rule_id: RRD052
+    evidence: Randomness in sunpy/data/test/__init__.py is treated as test data generation, not unseeded experiment code.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a solar-physics Python package. This checked docs/vendored
+  path filtering, test-directory randomness filtering, and library-shaped
+  RRD050 behavior. Remaining findings about README headings, data availability,
+  undeclared imports, changelog, version metadata, and pyproject completeness
+  remain normal findings.

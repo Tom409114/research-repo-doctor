@@ -1,0 +1,18 @@
+version: 1
+repository: distributions-jl
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Distributions.jl is a Julia statistics package rather than a single experiment artifact.
+  - rule_id: RRD070
+    evidence: Julia tests are present.
+  - rule_id: RRD071
+    evidence: Julia test runner evidence is recognized.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a mature Julia statistics package. This checked package
+  shape and Julia test evidence. Remaining README, data availability,
+  .gitignore, changelog, and version metadata findings remain normal findings.

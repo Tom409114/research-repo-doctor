@@ -1,0 +1,15 @@
+version: 1
+repository: long-range-arena
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: The benchmark repository exposes multiple task/model entrypoints and README-level run guidance rather than a single train.py script.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of an archived benchmark artifact. RRD050 remains quiet for
+  benchmark-style repositories with multiple task entrypoints. Remaining
+  findings about dependency version hints, undeclared imports, test/CI evidence,
+  .gitignore, changelog, and version metadata remain visible.

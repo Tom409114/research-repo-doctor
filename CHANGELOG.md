@@ -17,8 +17,10 @@
   detectron2, DINO, StyleGAN2-ADA PyTorch, instant-ngp, Big Vision,
   latent-diffusion, taming-transformers, generative-models,
   pytorch-image-models, Brax, ArviZ, PyMC, Pyro, TensorFlow Probability,
-  statsmodels, and Optax. The reviewed corpus coverage is now 67 focused notes
-  with 13 repositories still awaiting focused manual review.
+  statsmodels, Optax, long-range-arena, OpenSpiel, yt, SunPy, Nilearn,
+  MNE-Python, Nipype, clusterProfiler, DifferentialEquations.jl, Turing.jl,
+  Flux.jl, Distributions.jl, and Images.jl. The 80-repository corpus now has 80
+  focused review notes and 0 repositories still awaiting focused manual review.
 
 ## v0.2.20 - 2026-07-09
 

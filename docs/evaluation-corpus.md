@@ -71,8 +71,8 @@ python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress -
 - Scanned successfully: 80
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Focused manual review notes: 67
-- Not yet manually reviewed: 13
+- Focused manual review notes: 80
+- Not yet manually reviewed: 0
 - Average score across scanned repositories: 67.5
 
 Readiness distribution:
@@ -118,9 +118,11 @@ Transformers, PyTorch Lightning, Biopython, torchvision, xarray, MDAnalysis,
 QuTiP, ESM, stable-diffusion, nerfstudio, FAISS, detectron2,
 StyleGAN2-ADA PyTorch, instant-ngp, Big Vision, latent-diffusion,
 taming-transformers, generative-models, pytorch-image-models, Brax, ArviZ,
-PyMC, Pyro, TensorFlow Probability, statsmodels, and Optax. The repository
-contains 67 reviewed notes and 13 repositories still awaiting focused manual
-review.
+PyMC, Pyro, TensorFlow Probability, statsmodels, Optax, long-range-arena,
+OpenSpiel, yt, SunPy, Nilearn, MNE-Python, Nipype, clusterProfiler,
+DifferentialEquations.jl, Turing.jl, Flux.jl, Distributions.jl, and Images.jl.
+The repository contains 80 reviewed notes and 0 repositories still awaiting
+focused manual review.
 Those additions
 confirm that BERT local RNG seeding via
 `random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
@@ -161,6 +163,13 @@ treated as missing paper entrypoints. The TensorFlow Probability review also
 confirms legacy `setup.py` metadata, Bazel test targets, CI test scripts, and
 notebook URL path segments do not create noisy `RRD030`, `RRD031`, `RRD062`,
 `RRD071`, or `RRD081` findings.
+The final long-range-arena, OpenSpiel, yt, SunPy, Nilearn, MNE-Python, Nipype,
+clusterProfiler, and Julia package reviews confirm multi-entry benchmark
+layouts, multi-language research frameworks, mature scientific libraries,
+testthat R package tests, SciML grouped CI workflows, vendored appdirs paths,
+and test-data randomness do not create noisy first-run findings. Concrete
+source-code paths and unseeded algorithm randomness remain unsuppressed where
+the review could not safely classify them as documentation noise.
 The ESM and nerfstudio reviews confirm that notebook output tracebacks and
 installation-doc placeholder paths are filtered without suppressing notebook
 source-cell checks or concrete hardcoded source-code paths.
@@ -175,7 +184,7 @@ entrypoints.
 The dependency gap check also focuses on runtime-like Python files instead of
 docs, tests, benchmarks, vendored code, or maintainer tooling.
 
-The 80-repository manifest currently has 67 focused manual review notes and 13
+The 80-repository manifest currently has 80 focused manual review notes and 0
 repositories still awaiting focused review.
 
 The v0.2.19 PyPI package was also spot-checked against nanoGPT, the original
