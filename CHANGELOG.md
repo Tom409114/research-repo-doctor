@@ -13,6 +13,8 @@
 - Added a low-friction 10-minute trial issue form that separates useful findings,
   false-positive or false-negative feedback, and real deadline fit; the web demo
   now links to that form after each completed scan.
+- Added versioned official MCP Registry metadata and the PyPI ownership marker,
+  while keeping the MCP SDK outside the core scanner dependency set.
 
 ## v0.2.22 - 2026-07-10
 

@@ -29,6 +29,7 @@ LIVE_DEMO_URL = "https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.a
 MIN_DEMO_GIF_BYTES = 100_000
 MIN_CORPUS_REPOSITORIES = 50
 MIN_REVIEWED_CORPUS_REPOSITORIES = 20
+MCP_REGISTRY_NAME = "io.github.Tom409114/rrdoctor"
 
 REQUIRED_ISSUE_TEMPLATES = {
     "bug_report.yml",
@@ -96,6 +97,7 @@ def check_public_readiness(root: Path = ROOT) -> list[str]:
     _check_internal_materials(root, tracked_files, failures)
     _check_readme_and_demo(root, tracked_files, failures)
     _check_package_metadata(root, failures)
+    _check_mcp_registry_metadata(root, failures)
     _check_action_references(root, tracked_files, failures)
     _check_git_history_internal_materials(root, failures)
     _check_release_metadata(root, failures)
@@ -288,6 +290,56 @@ def _check_release_metadata(root: Path, failures: list[str]) -> None:
     for required in ("LICENSE", "CITATION.cff", "CHANGELOG.md", "SECURITY.md"):
         if not (root / required).exists():
             failures.append(f"{required} is missing.")
+
+
+def _check_mcp_registry_metadata(root: Path, failures: list[str]) -> None:
+    manifest_path = root / "server.json"
+    if not manifest_path.exists():
+        failures.append("server.json is missing.")
+        return
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        failures.append(f"server.json is invalid: {exc}")
+        return
+    if not isinstance(manifest, dict):
+        failures.append("server.json is not a JSON object.")
+        return
+
+    pyproject = _load_toml(root / "pyproject.toml", failures)
+    project = pyproject.get("project", {}) if pyproject else {}
+    version = project.get("version")
+    name = manifest.get("name")
+    if name != MCP_REGISTRY_NAME:
+        failures.append(f"server.json name {name!r} does not match {MCP_REGISTRY_NAME!r}.")
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    if f"<!-- mcp-name: {MCP_REGISTRY_NAME} -->" not in readme:
+        failures.append("README.md is missing the PyPI MCP Registry ownership marker.")
+    if manifest.get("version") != version:
+        failures.append("server.json version does not match pyproject.toml.")
+
+    packages = manifest.get("packages")
+    if not isinstance(packages, list) or len(packages) != 1 or not isinstance(packages[0], dict):
+        failures.append("server.json must define exactly one package mapping.")
+        return
+    package = packages[0]
+    if package.get("identifier") != project.get("name"):
+        failures.append("server.json PyPI identifier does not match the project name.")
+    if package.get("version") != version:
+        failures.append("server.json package version does not match pyproject.toml.")
+    runtime_args = [
+        argument.get("value")
+        for argument in package.get("runtimeArguments", [])
+        if isinstance(argument, dict)
+    ]
+    package_args = [
+        argument.get("value")
+        for argument in package.get("packageArguments", [])
+        if isinstance(argument, dict)
+    ]
+    expected_args = ["--from", f"rrdoctor[mcp]=={version}", "rrdoctor", "mcp"]
+    if runtime_args + package_args != expected_args:
+        failures.append("server.json does not reconstruct the pinned rrdoctor MCP uvx command.")
 
 
 def _check_issue_templates(root: Path, failures: list[str]) -> None:

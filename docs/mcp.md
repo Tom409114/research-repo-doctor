@@ -20,6 +20,18 @@ and arguments:
 uvx --from "rrdoctor[mcp]" rrdoctor mcp
 ```
 
+## Registry metadata
+
+The repository versions its official MCP Registry metadata in
+[`server.json`](../server.json). The PyPI package remains lightweight by keeping
+the MCP SDK in the `mcp` extra; the registry launch metadata therefore resolves
+to the same explicit command shown above instead of adding the SDK to every CLI
+installation.
+
+The official MCP Registry is currently a preview service. A checked-in manifest
+does not by itself mean the server is listed or endorsed. Until a public listing
+can be verified, use the direct client configuration below.
+
 ## Smoke test
 
 Check that the optional dependency is visible:

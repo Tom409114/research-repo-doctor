@@ -1,5 +1,7 @@
 # Research Repo Doctor
 
+<!-- mcp-name: io.github.Tom409114/rrdoctor -->
+
 Get your research artifact ready for Artifact Evaluation before the deadline:
 scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
