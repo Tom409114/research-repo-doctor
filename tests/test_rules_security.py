@@ -25,6 +25,11 @@ def test_uuid_token_value_is_not_a_secret() -> None:
     assert not has_secret_like_value("secret = 10be3573-1514-4c36-9d1c-5a225cd40393")
 
 
+def test_low_entropy_token_value_is_not_a_secret() -> None:
+    assert not has_secret_like_value("token = abcabcabcabcabcabcabcabc123456")
+    assert not has_secret_like_value("api_key = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa11")
+
+
 def test_url_query_token_is_not_a_secret() -> None:
     signed_asset_url = (
         "url = 'https://example-cdn.invalid/image.jpg?token="
@@ -89,6 +94,17 @@ def test_generic_api_key_still_flags(tmp_path) -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD090"}).scan(tmp_path)
 
     assert report.findings
+
+
+def test_low_entropy_api_key_file_does_not_flag(tmp_path) -> None:
+    (tmp_path / "config.yml").write_text(
+        "api_key: abcabcabcabcabcabcabcabc123456\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD090"}).scan(tmp_path)
+
+    assert not report.findings
 
 
 def test_gitignore_rule() -> None:

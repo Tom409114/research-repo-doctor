@@ -105,9 +105,11 @@ personal home-directory paths in source or docs.
 
 `RRD063` and `RRD090` are intentionally conservative. Generic `token`,
 `api_key`, `secret`, or `password` text must be paired with a credential-like
-random value before it is reported; canonical UUID values are treated as public
-identifiers, public URL query `token=` values, local function-call or method-call
-token variables, and generic fake tokens in test/fixture paths are ignored.
+random value with enough character diversity and entropy before it is reported;
+canonical UUID values are treated as public identifiers, public URL query
+`token=` values, low-entropy placeholder strings, local function-call or
+method-call token variables, and generic fake tokens in test/fixture paths are
+ignored.
 Provider-like keys still need a token boundary, so an `AKIA...` substring inside
 a longer biological/test sequence is not treated as a standalone AWS key, while
 known standalone provider key prefixes are still flagged.

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Reduced `RRD063` and `RRD090` secret false positives by adding a conservative
+  entropy threshold for generic `api_key`/`token`/`secret`/`password`
+  assignments, while keeping provider-shaped keys such as standalone AWS access
+  key IDs blocking.
 - Reduced `RRD050` first-run noise for model-release repositories by treating
   root, `scripts/`, and `tools/` `demo.py`, `inference.py`, `predict.py`,
   `sample.py`, and `generate.py` files plus README-documented commands as

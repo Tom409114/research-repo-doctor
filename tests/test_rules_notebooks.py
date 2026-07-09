@@ -105,6 +105,29 @@ def test_notebook_secret_output_flags_high_confidence_secret(tmp_path) -> None:
     assert report.findings[0].rule_id == "RRD063"
 
 
+def test_notebook_secret_output_ignores_low_entropy_placeholder(tmp_path) -> None:
+    notebook_path = tmp_path / "analysis.ipynb"
+    notebook = nbformat.v4.new_notebook(
+        cells=[
+            nbformat.v4.new_code_cell(
+                "print('placeholder token')",
+                outputs=[
+                    nbformat.v4.new_output(
+                        "stream",
+                        name="stdout",
+                        text="api_key: abcabcabcabcabcabcabcabc123456\n",
+                    )
+                ],
+            )
+        ]
+    )
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD063"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_notebook_secret_output_ignores_generic_fixture_token(tmp_path) -> None:
     fixture_dir = tmp_path / "tests" / "fixtures"
     fixture_dir.mkdir(parents=True)

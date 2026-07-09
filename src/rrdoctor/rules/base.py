@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from math import log2
 from pathlib import Path
 
 from rrdoctor.models import Category, Evidence, Finding, RuleDefinition, ScanContext, Severity
@@ -12,6 +13,7 @@ GENERIC_SECRET_ASSIGNMENT_RE = re.compile(
 )
 UUID_RE = re.compile(r"(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 PYTHON_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+MIN_GENERIC_SECRET_ENTROPY = 3.0
 PROVIDER_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"sk-[A-Za-z0-9]{20,}"),
     re.compile(r"ghp_[A-Za-z0-9]{20,}"),
@@ -37,7 +39,20 @@ def _looks_like_random_secret(value: str) -> bool:
             any(char in "_-+/=" for char in stripped),
         )
     )
-    return classes >= 2 and len(set(stripped)) >= 8
+    return (
+        classes >= 2
+        and len(set(stripped)) >= 8
+        and _shannon_entropy_per_char(stripped) >= MIN_GENERIC_SECRET_ENTROPY
+    )
+
+
+def _shannon_entropy_per_char(value: str) -> float:
+    if not value:
+        return 0.0
+    length = len(value)
+    return -sum(
+        (value.count(char) / length) * log2(value.count(char) / length) for char in set(value)
+    )
 
 
 def iter_secret_matches(value: str) -> list[re.Match[str]]:
