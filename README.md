@@ -176,6 +176,20 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.22
+
+- **Real Python environment verification**: `rrdoctor verify --run` now creates
+  a temporary isolated venv, installs the repository's declared dependencies,
+  and runs L3 with that interpreter and PATH instead of stopping at a resolver
+  dry run.
+- **Honest execution boundaries**: verification reports disclose dependency
+  build-hook risk, redact machine-specific temporary paths, and remove the
+  temporary environment after the run. Other ecosystems retain an explicit
+  resolver preflight.
+- **Stronger isolation checks**: inherited `PYTHONHOME` and `PYTHONPATH` values
+  are removed, and versioned launchers such as `python3.10` are redirected to
+  the temporary environment.
+
 ## What's new in 0.2.21
 
 - **More honest corpus evidence**: the public 80-repository calibration corpus
@@ -489,7 +503,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.21
+      - uses: Tom409114/research-repo-doctor@v0.2.22
         with:
           profile: standard
           fail-on: none
@@ -593,10 +607,9 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 
 ## Citation
 
-Use the included [CITATION.cff](CITATION.cff) or cite the archived `v0.2.21`
-release DOI: [10.5281/zenodo.21282779](https://doi.org/10.5281/zenodo.21282779).
-For the complete version lineage, use the
-[concept DOI 10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161).
+Use the included [CITATION.cff](CITATION.cff) or cite the stable concept DOI:
+[10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161). It resolves
+to the latest archived release and preserves the complete version lineage.
 
 A JOSS-style draft manuscript is available in [paper/](paper/) for review. It is
 not a submitted manuscript and intentionally avoids unverified adoption claims;
@@ -606,9 +619,9 @@ formal submission metadata will be updated only when it is true.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.21},
+  version = {0.2.22},
   year = {2026},
-  doi = {10.5281/zenodo.21282779},
+  doi = {10.5281/zenodo.21045161},
   url = {https://github.com/Tom409114/research-repo-doctor}
 }
 ```
