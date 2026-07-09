@@ -90,6 +90,62 @@ def test_readme_action_adoption_requires_early_copyable_workflow() -> None:
     assert failures == ["README.md does not show a copyable GitHub Action before the feature list."]
 
 
+def test_issue_template_check_rejects_invalid_yaml(tmp_path) -> None:
+    script = _load_public_readiness_script()
+    template_dir = tmp_path / ".github" / "ISSUE_TEMPLATE"
+    template_dir.mkdir(parents=True)
+    valid_template = (
+        "name: Test form\n"
+        "description: Test form\n"
+        "body:\n"
+        "  - type: markdown\n"
+        "    attributes:\n"
+        "      value: Test\n"
+    )
+    for name in script.REQUIRED_ISSUE_TEMPLATES:
+        (template_dir / name).write_text(valid_template, encoding="utf-8")
+    (template_dir / "trial_report.yml").write_text("body: [\n", encoding="utf-8")
+    (template_dir / "config.yml").write_text("blank_issues_enabled: true\n", encoding="utf-8")
+    failures: list[str] = []
+
+    script._check_issue_templates(tmp_path, failures)
+
+    assert any("trial_report.yml is invalid YAML" in failure for failure in failures)
+
+
+def test_issue_template_check_rejects_boolean_dropdown_options(tmp_path) -> None:
+    script = _load_public_readiness_script()
+    template_dir = tmp_path / ".github" / "ISSUE_TEMPLATE"
+    template_dir.mkdir(parents=True)
+    valid_template = (
+        "name: Test form\n"
+        "description: Test form\n"
+        "body:\n"
+        "  - type: markdown\n"
+        "    attributes:\n"
+        "      value: Test\n"
+    )
+    for name in script.REQUIRED_ISSUE_TEMPLATES:
+        (template_dir / name).write_text(valid_template, encoding="utf-8")
+    (template_dir / "trial_report.yml").write_text(
+        "name: Trial\n"
+        "description: Trial\n"
+        "body:\n"
+        "  - type: dropdown\n"
+        "    attributes:\n"
+        "      options:\n"
+        "        - Yes\n"
+        "        - No\n",
+        encoding="utf-8",
+    )
+    (template_dir / "config.yml").write_text("blank_issues_enabled: true\n", encoding="utf-8")
+    failures: list[str] = []
+
+    script._check_issue_templates(tmp_path, failures)
+
+    assert any("must use string options" in failure for failure in failures)
+
+
 def test_corpus_evidence_ignores_focused_local_reports(tmp_path) -> None:
     script = _load_public_readiness_script()
     docs = tmp_path / "docs"

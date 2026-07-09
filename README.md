@@ -174,7 +174,10 @@ coding agents, AGENTS.md, GitHub Action, notebooks, data availability, citation 
 ## Help calibrate the rules
 
 The fastest way to improve rrdoctor is real scan feedback from real research
-repositories. If a finding looks wrong, missing, or too severe, please open a
+repositories. After one scan, the low-friction
+[10-minute trial report](https://github.com/Tom409114/research-repo-doctor/issues/new?template=trial_report.yml)
+asks only what was useful, wrong or missing, and whether the tool fits a real
+deadline. For a focused rule report, please open a
 [false-positive](https://github.com/Tom409114/research-repo-doctor/issues/new?template=false_positive.yml),
 [false-negative](https://github.com/Tom409114/research-repo-doctor/issues/new?template=false_negative.yml),
 [scan-case](https://github.com/Tom409114/research-repo-doctor/issues/new?template=scan_case.yml),

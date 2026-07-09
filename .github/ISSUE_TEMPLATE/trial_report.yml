@@ -1,0 +1,71 @@
+name: 10-minute trial report
+description: Tell us what felt useful, wrong, or missing after one static scan.
+title: "[Trial]: "
+labels: ["scan-case", "research-repo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for trying rrdoctor. A short, candid observation is more useful than praise. Do not share private repository content, unpublished results, data, paths, or credentials.
+  - type: dropdown
+    id: repository-context
+    attributes:
+      label: Repository context
+      options:
+        - Public research repository
+        - Private repository (no URL shared)
+        - Sanitized or synthetic fixture
+    validations:
+      required: true
+  - type: input
+    id: public-link
+    attributes:
+      label: Public repository link
+      description: Optional. Leave this blank for private repositories.
+      placeholder: https://github.com/owner/repository
+  - type: input
+    id: command-version
+    attributes:
+      label: Command and rrdoctor version
+      placeholder: uvx rrdoctor scan . --fail-on none; include rrdoctor --version output
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Scan result
+      description: Share the readiness level, score, and relevant rule IDs. A full report is not required.
+      placeholder: Functional, 76/100; RRD050 and RRD052 stood out.
+    validations:
+      required: true
+  - type: textarea
+    id: useful
+    attributes:
+      label: First useful or surprising finding
+      description: Write "none" if nothing was useful.
+    validations:
+      required: true
+  - type: textarea
+    id: wrong-or-missing
+    attributes:
+      label: First wrong, confusing, or missing finding
+      description: Include one false positive, false negative, severity concern, or unclear remediation. Write "none" if the scan matched your expectations.
+    validations:
+      required: true
+  - type: dropdown
+    id: deadline-fit
+    attributes:
+      label: Would you use this before an Artifact Evaluation or release deadline?
+      options:
+        - "Yes"
+        - "Maybe"
+        - "No"
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets, private data, unpublished results, and confidential repository content.
+          required: true

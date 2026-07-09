@@ -10,6 +10,8 @@
 - Moved a minimal copyable GitHub Action workflow near the top of the README and
   added a public-readiness regression check so the main adoption path stays
   visible to first-time and Marketplace visitors.
+- Added a low-friction 10-minute trial issue form that separates useful findings,
+  false-positive or false-negative feedback, and real deadline fit.
 
 ## v0.2.22 - 2026-07-10
 

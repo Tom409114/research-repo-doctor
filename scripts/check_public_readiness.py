@@ -36,6 +36,7 @@ REQUIRED_ISSUE_TEMPLATES = {
     "false_positive.yml",
     "rule_request.yml",
     "scan_case.yml",
+    "trial_report.yml",
 }
 REQUIRED_PROJECT_URLS = {"Homepage", "Repository", "Issues", "Changelog", "Live Demo"}
 REQUIRED_DOC_INDEX_LINKS = {
@@ -299,6 +300,45 @@ def _check_issue_templates(root: Path, failures: list[str]) -> None:
     missing = sorted(REQUIRED_ISSUE_TEMPLATES - present)
     if missing:
         failures.append("required issue templates are missing: " + ", ".join(missing))
+
+    for template_path in sorted(template_dir.glob("*.yml")):
+        try:
+            template = yaml.safe_load(template_path.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            problem = getattr(exc, "problem", None) or str(exc)
+            failures.append(f"{template_path.relative_to(root)} is invalid YAML: {problem}")
+            continue
+        if template_path.name == "config.yml":
+            continue
+        if not isinstance(template, dict):
+            failures.append(f"{template_path.relative_to(root)} is not a YAML mapping.")
+            continue
+        missing_fields = [
+            field for field in ("name", "description", "body") if not template.get(field)
+        ]
+        if missing_fields:
+            failures.append(
+                f"{template_path.relative_to(root)} is missing required issue-form fields: "
+                + ", ".join(missing_fields)
+            )
+            continue
+        for index, item in enumerate(template["body"]):
+            if not isinstance(item, dict):
+                failures.append(
+                    f"{template_path.relative_to(root)} body item {index} is not a mapping."
+                )
+                continue
+            if item.get("type") != "dropdown":
+                continue
+            attributes = item.get("attributes", {})
+            options = attributes.get("options") if isinstance(attributes, dict) else None
+            if not isinstance(options, list) or not all(
+                isinstance(option, str) for option in options
+            ):
+                failures.append(
+                    f"{template_path.relative_to(root)} dropdown body item {index} "
+                    "must use string options."
+                )
 
     config_path = template_dir / "config.yml"
     if not config_path.exists():

@@ -15,6 +15,9 @@ uvx rrdoctor scan . --output rrdoctor-report.md --fail-on none
 
 Then open the issue template that matches what you saw:
 
+- [10-minute trial report](https://github.com/Tom409114/research-repo-doctor/issues/new?template=trial_report.yml):
+  the shortest path for a first scan: what helped, what felt wrong or missing,
+  and whether the workflow fits a real deadline.
 - [False positive](https://github.com/Tom409114/research-repo-doctor/issues/new?template=false_positive.yml):
   a rule flagged acceptable repository content.
 - [False negative](https://github.com/Tom409114/research-repo-doctor/issues/new?template=false_negative.yml):
