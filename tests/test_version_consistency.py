@@ -21,6 +21,17 @@ def test_package_version_metadata_is_consistent() -> None:
     assert f"rrdoctor=={version}" in Path("demo/requirements.txt").read_text(encoding="utf-8")
 
 
+def test_readme_citation_matches_citation_cff() -> None:
+    citation = Path("CITATION.cff").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+    match = re.search(r'^doi:\s*"?([^"\s]+)"?\s*$', citation, re.MULTILINE)
+
+    assert match is not None
+    doi = match.group(1)
+    assert f"[{doi}](https://doi.org/{doi})" in readme
+    assert f"doi = {{{doi}}}" in readme
+
+
 def test_github_action_examples_use_current_release_tag() -> None:
     version = _project_version()
     expected = f"Tom409114/research-repo-doctor@v{version}"

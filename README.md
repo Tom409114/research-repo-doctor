@@ -591,8 +591,10 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 
 ## Citation
 
-Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
-[10.5281/zenodo.21045373](https://doi.org/10.5281/zenodo.21045373).
+Use the included [CITATION.cff](CITATION.cff) or cite the archived `v0.2.21`
+release DOI: [10.5281/zenodo.21282779](https://doi.org/10.5281/zenodo.21282779).
+For the complete version lineage, use the
+[concept DOI 10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161).
 
 A JOSS-style draft manuscript is available in [paper/](paper/) for review. It is
 not a submitted manuscript and intentionally avoids unverified adoption claims;
@@ -604,7 +606,7 @@ formal submission metadata will be updated only when it is true.
   author = {{Research Repo Doctor Maintainers}},
   version = {0.2.21},
   year = {2026},
-  doi = {10.5281/zenodo.21045373},
+  doi = {10.5281/zenodo.21282779},
   url = {https://github.com/Tom409114/research-repo-doctor}
 }
 ```

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Corrected the citation metadata to reference the archived `v0.2.21` Zenodo
+  release rather than the older `v0.2.3` record, documented the stable concept
+  DOI, and added an optional post-release Zenodo metadata check.
 - Refreshed the nanoGPT first-run case study and focused corpus review note
   against PyPI `rrdoctor==0.2.21`, confirming `Functional` readiness, 76/100,
   0 errors, and no `RRD050` or `RRD063` regression.

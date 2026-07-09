@@ -48,9 +48,15 @@ Before a release, maintainers run tests, linting, self-scan, changelog review, a
 Release checklist:
 
 - `python scripts/check.py`
+- `python scripts/check_zenodo_metadata.py` after the Zenodo archive is available
 - GitHub Action smoke test
 - Changelog entry and tag notes
 - Security policy and issue templates still current
+
+The Zenodo check is intentionally separate from the deterministic local/CI gate
+because it calls the public Zenodo API. It verifies that the version-specific DOI
+in `CITATION.cff` resolves to an archive whose version, GitHub tag, and filename
+match `pyproject.toml`. It also warns when creator metadata is still generic.
 
 ## Public readiness gate
 
