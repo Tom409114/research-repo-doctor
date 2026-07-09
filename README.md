@@ -180,13 +180,15 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   tokens, local function-call or method-call token variables, generic fake
   tokens in test helpers, and provider-looking substrings embedded inside
   longer biological/test sequences.
-- **More reviewed corpus evidence**: SciPy is now a focused review case and an
+- **More reviewed corpus evidence**: SciPy is a focused review case and an
   expected-absent regression gate for `RRD010` and `RRD043`; scikit-image,
   JAX, NetworkX, Keras, Transformers, PyTorch Lightning, Biopython,
-  torchvision, MDAnalysis, QuTiP, ESM, and stable-diffusion add first-run trust
-  gates or focused review evidence. The latest 80-repository corpus gate has 0
-  expected-absent regressions, 48 reviewed notes, and 32 repositories still
-  awaiting focused review.
+  torchvision, MDAnalysis, QuTiP, ESM, stable-diffusion, detectron2,
+  DINO, StyleGAN2-ADA PyTorch, instant-ngp, Big Vision, latent-diffusion,
+  taming-transformers, generative-models, pytorch-image-models, and Brax add
+  first-run trust gates or focused review evidence. The latest 80-repository
+  corpus gate has 0 expected-absent regressions, 61 reviewed notes, and 19
+  repositories still awaiting focused review.
 - **Less template-like auto-fix output**: `rrdoctor fix --write` can now read
   simple literal `setup.py` metadata statically, without executing repository
   code, when generating citation and provenance scaffolds.

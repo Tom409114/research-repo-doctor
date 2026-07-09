@@ -1,0 +1,17 @@
+version: 1
+repository: brax
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README links Brax Training notebooks, documents a "To train a model" section, and the repository contains brax/training/learner.py plus agent train modules under brax/training/agents.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a JAX-based reinforcement-learning simulator and training
+  library. This checked that entrypoint detection accepts documented training
+  notebooks and package-local training modules. JAX PRNG analysis is intentionally
+  not marked as covered by RRD052 in this review. Remaining findings about
+  results reproduction prose, undeclared imports, data availability, notebook
+  output size, and changelog evidence were left as normal scan findings.

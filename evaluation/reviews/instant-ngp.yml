@@ -1,0 +1,19 @@
+version: 1
+repository: instant-ngp
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD043
+    evidence: A previous scan flagged a Windows path under dependencies/tinyexr; RRD043 now ignores vendored dependency trees while still reporting project-owned local data paths.
+  - rule_id: RRD050
+    evidence: README documents the ./instant-ngp executable, python scripts/run.py, cmake build commands, Docker commands, notebooks, and example data invocations such as data/nerf/fox.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a native C++/CUDA research artifact with Python bindings.
+  This pass improved RRD043 after the scan exposed vendored TinyEXR Windows test
+  paths as local-path noise. The remaining findings are useful first-run signals:
+  unpinned Python dependencies, undeclared imports, data/README absence, large
+  notebook output, limited test evidence, and RRD052 for randomness without an
+  obvious deterministic seed application.

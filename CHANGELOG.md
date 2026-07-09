@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Reduced `RRD043` local-path noise for vendored dependency trees such as
+  `dependencies/`, `third_party/`, and `vendor/`, after the instant-ngp corpus
+  review exposed a vendored TinyEXR Windows test path as non-actionable noise.
+- Reduced `RRD052` seed-rule noise by recognizing
+  `pytorch_lightning.seed_everything(...)` and
+  `lightning.pytorch.seed_everything(...)` as valid seed applications.
+- Added focused corpus review notes and `expected_absent` regression gates for
+  detectron2, DINO, StyleGAN2-ADA PyTorch, instant-ngp, Big Vision,
+  latent-diffusion, taming-transformers, generative-models,
+  pytorch-image-models, and Brax. The reviewed corpus coverage is now 61
+  focused notes with 19 repositories still awaiting focused manual review.
+
 ## v0.2.20 - 2026-07-09
 
 - Refreshed the nanoGPT first-run case study and corpus review notes against

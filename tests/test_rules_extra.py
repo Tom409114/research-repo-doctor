@@ -240,6 +240,19 @@ def test_local_absolute_path_rule_ignores_test_fixtures(tmp_path) -> None:
     assert not report.findings
 
 
+def test_local_absolute_path_rule_ignores_vendored_dependency_paths(tmp_path) -> None:
+    vendor_dir = tmp_path / "dependencies" / "tinyexr"
+    vendor_dir.mkdir(parents=True)
+    (vendor_dir / "build-notes.txt").write_text(
+        "fixture path: C:\\projects\\tinyexr\\test\\build\\tinyexr.sln\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
 def test_notebook_checkpoints_rule(tmp_path) -> None:
     checkpoint_dir = tmp_path / "notebooks" / ".ipynb_checkpoints"
     checkpoint_dir.mkdir(parents=True)

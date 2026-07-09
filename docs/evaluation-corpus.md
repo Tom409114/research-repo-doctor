@@ -71,8 +71,8 @@ python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress -
 - Scanned successfully: 80
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Focused manual review notes: 51
-- Not yet manually reviewed: 29
+- Focused manual review notes: 61
+- Not yet manually reviewed: 19
 - Average score across scanned repositories: 67.5
 
 Readiness distribution:
@@ -112,11 +112,14 @@ Manual review flags captured in this snapshot:
 
 Focused reviews currently cover BERT, CLIP, guided-diffusion,
 improved-diffusion, vision-transformer, MAE, AlphaFold, DETR, YOLOv5,
-DynamicalSystems.jl, Scanpy, scikit-learn, Astropy, scvi-tools, DINOv2, t5x,
-GraphCast, SciPy, scikit-image, JAX, NetworkX, Keras, openai-baselines,
+DynamicalSystems.jl, Scanpy, scikit-learn, Astropy, scvi-tools, DINO, DINOv2,
+t5x, GraphCast, SciPy, scikit-image, JAX, NetworkX, Keras, openai-baselines,
 Transformers, PyTorch Lightning, Biopython, torchvision, xarray, MDAnalysis,
-QuTiP, ESM, stable-diffusion, nerfstudio, and FAISS. The repository contains
-51 reviewed notes and 29 repositories still awaiting focused manual review.
+QuTiP, ESM, stable-diffusion, nerfstudio, FAISS, detectron2,
+StyleGAN2-ADA PyTorch, instant-ngp, Big Vision, latent-diffusion,
+taming-transformers, generative-models, pytorch-image-models, and Brax. The
+repository contains 61 reviewed notes and 19 repositories still awaiting focused
+manual review.
 Those additions
 confirm that BERT local RNG seeding via
 `random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
@@ -141,6 +144,16 @@ The guided-diffusion, vision-transformer, and openai-baselines reviews confirm
 that README-documented script, module, and config-driven training commands are
 recognized as experiment entrypoint evidence rather than noisy `RRD050`
 findings.
+The detectron2, DINO, StyleGAN2-ADA PyTorch, and instant-ngp reviews confirm
+that framework training tools, root-level paper scripts, dataset-preparation
+commands, C++/CUDA build/run paths, and vendored dependency trees do not create
+noisy `RRD050` or `RRD043` findings.
+The Big Vision, latent-diffusion, taming-transformers, generative-models,
+pytorch-image-models, and Brax reviews confirm that package-module trainers,
+config-driven commands, root training/evaluation scripts, sampling demos, and
+JAX training-library layouts do not create noisy `RRD050` findings. The
+diffusion and PyTorch vision reviews also confirm that Lightning/PyTorch seed
+plumbing does not create noisy `RRD052` findings.
 The ESM and nerfstudio reviews confirm that notebook output tracebacks and
 installation-doc placeholder paths are filtered without suppressing notebook
 source-cell checks or concrete hardcoded source-code paths.
@@ -155,7 +168,7 @@ entrypoints.
 The dependency gap check also focuses on runtime-like Python files instead of
 docs, tests, benchmarks, vendored code, or maintainer tooling.
 
-The 80-repository manifest currently has 51 focused manual review notes and 29
+The 80-repository manifest currently has 61 focused manual review notes and 19
 repositories still awaiting focused review.
 
 The v0.2.19 PyPI package was also spot-checked against nanoGPT, the original

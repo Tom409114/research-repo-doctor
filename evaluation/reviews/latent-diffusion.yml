@@ -1,0 +1,18 @@
+version: 1
+repository: latent-diffusion
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README documents inference scripts such as scripts/knn2img.py, scripts/txt2img.py, scripts/inpaint.py, scripts/sample_diffusion.py, scripts/train_searcher.py, and training via python main.py --base configs/... -t --gpus 0,.
+  - rule_id: RRD052
+    evidence: main.py declares --seed and applies opt.seed with pytorch_lightning.seed_everything(...); worker seeding also calls np.random.seed(...).
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a widely cited diffusion-model artifact. This checked
+  script/config entrypoints and Lightning seed plumbing. Remaining findings
+  around reproduction prose, undeclared imports, data/README, notebook outputs,
+  tests, CI, .gitignore, and release metadata remain normal scan output rather
+  than confirmed false positives.

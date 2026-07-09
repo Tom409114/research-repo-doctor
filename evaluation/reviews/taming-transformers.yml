@@ -1,0 +1,18 @@
+version: 1
+repository: taming-transformers
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README documents streamlit sampling commands, python scripts/sample_fast.py commands, python scripts/make_samples.py, and training via python main.py --base configs/... -t True --gpus 0,.
+  - rule_id: RRD052
+    evidence: main.py declares --seed and applies opt.seed via pytorch_lightning.seed_everything(...); scripts/make_scene_samples.py also applies a fixed seed through seed_everything(...).
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of an older generative-model research release. This checked
+  training/sampling entrypoints and fixed a regression where Lightning's
+  seed_everything(...) was not treated as a valid seed application. Remaining
+  findings about undeclared imports, data documentation, notebook state, tests,
+  CI, .gitignore, and metadata were preserved.

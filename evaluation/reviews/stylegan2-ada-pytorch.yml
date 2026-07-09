@@ -1,0 +1,16 @@
+version: 1
+repository: stylegan2-ada-pytorch
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README documents python generate.py, python dataset_tool.py, python train.py, python calc_metrics.py, and Docker invocation examples; root-level train.py and dataset_tool.py are present.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a GAN paper artifact with concrete training, generation,
+  dataset-preparation, and metric commands. The scan correctly avoids a missing
+  entrypoint finding even though the repository has no formal test/CI evidence.
+  Remaining findings concern setup-heading wording, dependency-manifest shape,
+  test/CI evidence, .gitignore coverage, and release metadata.

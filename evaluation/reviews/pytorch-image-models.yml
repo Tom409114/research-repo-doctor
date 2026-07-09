@@ -1,0 +1,18 @@
+version: 1
+repository: pytorch-image-models
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Repository includes train.py, validate.py, inference.py, and README command examples such as python validate.py /imagenet --amp -j 8 --model ....
+  - rule_id: RRD052
+    evidence: train.py and validate.py declare --seed and pass args.seed to utils.random_seed(...), while the seed helper applies deterministic random-state setup.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a model-zoo and training-code repository used by many
+  computer-vision projects. This checked root training/evaluation entrypoints
+  and seed plumbing. Remaining findings about README install headings,
+  dependency pins, undeclared imports, data availability, changelog, and package
+  version metadata remain normal findings.

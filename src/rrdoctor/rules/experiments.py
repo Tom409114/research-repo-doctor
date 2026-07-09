@@ -437,6 +437,8 @@ class _RandomnessVisitor(ast.NodeVisitor):
         if full_name in {
             "random.seed",
             "numpy.random.seed",
+            "pytorch_lightning.seed_everything",
+            "lightning.pytorch.seed_everything",
             "torch.manual_seed",
             "torch.cuda.manual_seed",
             "torch.cuda.manual_seed_all",

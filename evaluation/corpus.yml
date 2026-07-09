@@ -85,6 +85,7 @@ repositories:
     url: https://github.com/facebookresearch/detectron2
     ecosystem: python-ml
     reason: Computer vision research platform with configs, training scripts, and model zoo docs.
+    expected_absent: [RRD050]
     review_focus: [large-repo-scan, config-detection, model-artifacts]
   - name: detr
     url: https://github.com/facebookresearch/detr
@@ -102,6 +103,7 @@ repositories:
     url: https://github.com/facebookresearch/dino
     ecosystem: python-ml-legacy
     reason: Archived self-supervised learning release with scripts and model download instructions.
+    expected_absent: [RRD050]
     review_focus: [legacy-artifact, entrypoints, data-docs]
   - name: dinov2
     url: https://github.com/facebookresearch/dinov2
@@ -145,6 +147,7 @@ repositories:
     url: https://github.com/google-research/big_vision
     ecosystem: python-ml
     reason: Research training codebase with many configs and data pipeline assumptions.
+    expected_absent: [RRD050]
     review_focus: [configs, data-docs, hardware-requirements]
   - name: graphcast
     url: https://github.com/google-deepmind/graphcast
@@ -161,31 +164,37 @@ repositories:
     url: https://github.com/NVlabs/stylegan2-ada-pytorch
     ecosystem: python-ml
     reason: GAN research artifact with training scripts, datasets, and hardware assumptions.
+    expected_absent: [RRD050]
     review_focus: [entrypoints, data-docs, hardware-requirements]
   - name: instant-ngp
     url: https://github.com/NVlabs/instant-ngp
     ecosystem: cpp-python-ml
     reason: Graphics/ML artifact with native build requirements, data examples, and scripts.
+    expected_absent: [RRD043, RRD050]
     review_focus: [native-build, hardware-requirements, data-docs]
   - name: latent-diffusion
     url: https://github.com/CompVis/latent-diffusion
     ecosystem: python-ml
     reason: Diffusion artifact with configs, weights, and train/sample scripts.
+    expected_absent: [RRD050, RRD052]
     review_focus: [configs, checkpoint-docs, entrypoints]
   - name: taming-transformers
     url: https://github.com/CompVis/taming-transformers
     ecosystem: python-ml
     reason: Generative-model artifact with configs, pretrained weights, and scripts.
+    expected_absent: [RRD050, RRD052]
     review_focus: [configs, checkpoint-docs, dependency-docs]
   - name: generative-models
     url: https://github.com/Stability-AI/generative-models
     ecosystem: python-ml
     reason: Generative-model research release with configs, checkpoints, and example scripts.
+    expected_absent: [RRD050, RRD052]
     review_focus: [configs, checkpoint-docs, large-repo-scan]
   - name: pytorch-image-models
     url: https://github.com/huggingface/pytorch-image-models
     ecosystem: python-ml
     reason: Model zoo and training code used across many vision research repos.
+    expected_absent: [RRD050, RRD052]
     review_focus: [package-metadata, entrypoints, model-artifacts]
   - name: scvi-tools
     url: https://github.com/scverse/scvi-tools
@@ -378,6 +387,7 @@ repositories:
     url: https://github.com/google/brax
     ecosystem: python-rl
     reason: JAX-based reinforcement-learning simulator with examples and training scripts.
+    expected_absent: [RRD050]
     review_focus: [entrypoints, examples, dependency-docs]
   - name: openai-baselines
     url: https://github.com/openai/baselines

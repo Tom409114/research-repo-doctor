@@ -263,6 +263,25 @@ def test_seeded_numpy_randomness_passes(tmp_path) -> None:
     assert not report.findings
 
 
+def test_pytorch_lightning_seed_everything_passes(tmp_path) -> None:
+    (tmp_path / "main.py").write_text(
+        "import argparse\n"
+        "import torch\n"
+        "from pytorch_lightning import seed_everything\n"
+        "\n"
+        "parser = argparse.ArgumentParser()\n"
+        "parser.add_argument('--seed', type=int, default=23)\n"
+        "opt = parser.parse_args([])\n"
+        "seed_everything(opt.seed)\n"
+        "batch = torch.randn(10, 32)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD052"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_random_seed_keyword_application_passes(tmp_path) -> None:
     (tmp_path / "run_model.py").write_text(
         "import random\n"

@@ -29,6 +29,15 @@ CI_CONFIG_FILENAMES = {
 }
 TEST_PATH_PREFIXES = ("test/", "tests/")
 TEST_FILENAME_MARKERS = ("test_", "_test.")
+VENDORED_PATH_PREFIXES = (
+    "dependencies/",
+    "deps/",
+    "external/",
+    "externals/",
+    "third_party/",
+    "vendor/",
+    "vendored/",
+)
 
 
 class DataDocsMissingRule(Rule):
@@ -141,6 +150,7 @@ class LocalAbsoluteDataPathRule(Rule):
                 path.suffix.lower() == ".ipynb"
                 or _is_ci_config_path(rel)
                 or _is_test_or_fixture_path(rel)
+                or _is_vendored_dependency_path(rel)
             ):
                 continue
             text = read_text(path)
@@ -175,6 +185,11 @@ def _is_test_or_fixture_path(rel_path: str) -> bool:
         or name == "conftest.py"
         or any(marker in name for marker in TEST_FILENAME_MARKERS)
     )
+
+
+def _is_vendored_dependency_path(rel_path: str) -> bool:
+    normalized = rel_path.replace("\\", "/").lower()
+    return normalized.startswith(VENDORED_PATH_PREFIXES)
 
 
 RULES = [

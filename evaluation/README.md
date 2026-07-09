@@ -21,8 +21,8 @@ Latest local maintainer smoke run:
 - Clone or scan errors: 0
 - Average score across scanned repositories: 67.5
 - Expected-absent regressions: 0
-- Focused manual review notes: 51
-- Not yet manually reviewed: 29
+- Focused manual review notes: 61
+- Not yet manually reviewed: 19
 
 Top actionable rule frequencies in that snapshot:
 
@@ -54,14 +54,16 @@ Manual review flags captured in this snapshot:
 
 Focused review coverage in the current snapshot:
 
-- Focused manual review notes loaded: 51
-- Repositories still awaiting focused manual review: 29
+- Focused manual review notes loaded: 61
+- Repositories still awaiting focused manual review: 19
 - Includes BERT, CLIP, guided-diffusion, improved-diffusion,
   vision-transformer, MAE, AlphaFold, DETR, YOLOv5, DynamicalSystems.jl,
-  Scanpy, scikit-learn, Astropy, scvi-tools, DINOv2, t5x, GraphCast, SciPy,
-  scikit-image, JAX, NetworkX, Keras, openai-baselines, Transformers, PyTorch
-  Lightning, Biopython, torchvision, xarray, MDAnalysis, QuTiP, ESM,
-  stable-diffusion, nerfstudio, and FAISS reviews for
+  Scanpy, scikit-learn, Astropy, scvi-tools, DINO, DINOv2, t5x, GraphCast,
+  SciPy, scikit-image, JAX, NetworkX, Keras, openai-baselines, Transformers,
+  PyTorch Lightning, Biopython, torchvision, xarray, MDAnalysis, QuTiP, ESM,
+  stable-diffusion, nerfstudio, FAISS, detectron2, StyleGAN2-ADA PyTorch, and
+  instant-ngp, Big Vision, latent-diffusion, taming-transformers,
+  generative-models, pytorch-image-models, and Brax reviews for
   README evidence, experiment-entrypoint recognition, path-noise handling,
   secret-heuristic noise, library-shaped package handling, Julia test/CI
   recognition, dependency signal quality, Conda `.yaml` manifest handling,
@@ -83,6 +85,14 @@ Focused review coverage in the current snapshot:
 - Confirmed that README-documented script, module, and config-driven training
   commands in guided-diffusion, vision-transformer, and openai-baselines count
   as experiment entrypoint evidence.
+- Confirmed that detectron2, DINO, StyleGAN2-ADA PyTorch, and instant-ngp do
+  not produce noisy `RRD050` entrypoint findings, and that vendored dependency
+  trees no longer produce noisy `RRD043` local-path findings.
+- Confirmed that Big Vision, latent-diffusion, taming-transformers,
+  generative-models, pytorch-image-models, and Brax do not produce noisy
+  `RRD050` entrypoint findings, and that Lightning/PyTorch seed plumbing in the
+  diffusion and PyTorch vision reviews does not produce noisy `RRD052`
+  findings.
 - Confirmed that SciPy's `LICENSE.txt`, CI/devcontainer environment paths, and
   placeholder examples such as `/home/...` and Windows `<user>` cache paths do
   not trigger noisy `RRD010` or `RRD043` findings.

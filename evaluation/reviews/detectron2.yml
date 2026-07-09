@@ -1,0 +1,18 @@
+version: 1
+repository: detectron2
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: GETTING_STARTED.md documents tools/train_net.py and tools/plain_train_net.py, MODEL_ZOO.md says configs can be reproduced with tools/train_net.py or tools/lazyconfig_train_net.py, and project READMEs contain train_net.py commands.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a framework-shaped computer-vision research repository.
+  This checked that RRD050 does not require a root-level train.py when the repo
+  documents tools/train_net.py, tools/lazyconfig_train_net.py, project-local
+  train_net.py scripts, config files, datasets/README.md, and model-zoo
+  checkpoint/metrics links. Remaining findings such as dependency-manifest and
+  data-availability policy need separate review before being classified as
+  false positives.

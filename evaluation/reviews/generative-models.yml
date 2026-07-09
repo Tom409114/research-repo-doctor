@@ -1,0 +1,18 @@
+version: 1
+repository: generative-models
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README documents standalone inference scripts under scripts/sampling, Streamlit demos under scripts/demo, object detection demo scripts, and training via python main.py --base configs/....
+  - rule_id: RRD052
+    evidence: main.py declares --seed and calls seed_everything(opt.seed, workers=True); sampling and demo scripts also use torch.manual_seed(...) or seed_everything(seed).
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of Stability AI's generative-model release. This checked
+  script/config entrypoints and seed plumbing across main.py, sampling scripts,
+  and demo code. Remaining findings such as missing root LICENSE in the scanned
+  archive, citation guidance, dependency gaps, data/README, and package metadata
+  remain unsuppressed.

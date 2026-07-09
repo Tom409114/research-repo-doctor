@@ -1,0 +1,17 @@
+version: 1
+repository: dino
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README documents python main_dino.py --help, torch.distributed.launch main_dino.py training commands, run_with_submitit.py multi-node commands, and eval_knn.py / eval_linear.py evaluation commands.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for an archived self-supervised vision artifact. This checked
+  root-level script entrypoint recognition for main_dino.py, run_with_submitit.py,
+  and evaluation scripts, plus README evidence for pretrained checkpoints,
+  ImageNet data paths, expected metrics, and training logs. Remaining findings
+  about setup, dependency manifests, data documentation, tests, CI, and release
+  metadata are intentionally left for separate policy review.

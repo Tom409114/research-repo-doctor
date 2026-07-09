@@ -1,0 +1,16 @@
+version: 1
+repository: big-vision
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README documents the canonical train.py entrypoint, python3 -m big_vision.train commands, TPU run_tpu.sh commands, and config-level COMMAND snippets with --config and --workdir arguments.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a large JAX/Flax vision research codebase. This checked that
+  entrypoint detection does not require a root-level script name when README and
+  config files document python -m big_vision.train and trainer-module commands.
+  Remaining findings such as dependency manifest absence, notebook output state,
+  CI evidence, and release metadata were left as normal scan findings.
