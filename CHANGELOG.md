@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added an 80-repository calibration data brief that turns the reviewed corpus
+  snapshot into a public, caveated launch artifact with reproducible commands
+  and copy-ready framing for community posts.
 - Reduced `RRD063` and `RRD090` secret false positives by adding a conservative
   entropy threshold for generic `api_key`/`token`/`secret`/`password`
   assignments, while keeping provider-shaped keys such as standalone AWS access

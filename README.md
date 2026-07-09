@@ -53,6 +53,10 @@ Artifact Evaluation chairs and lab maintainers can use the
 [AE chair guide](docs/ae-chair-guide.md) for optional pre-submission wording and
 CI examples.
 
+For public calibration evidence, see the
+[80-repository data brief](docs/corpus-data-brief.md) and the
+[nanoGPT first-run regression case study](docs/case-studies/nanogpt.md).
+
 ## What it catches
 
 - **"Your `--seed` flag does nothing."** `RRD052` spots code that declares a seed option but
