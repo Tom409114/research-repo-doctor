@@ -17,7 +17,7 @@ from rrdoctor.rules.base import (
     iter_secret_matches,
     mask_secret,
 )
-from rrdoctor.rules.paths import ABSOLUTE_PATH_RE, find_files, is_placeholder_absolute_path
+from rrdoctor.rules.paths import find_files, first_absolute_path
 
 
 def notebooks(context: ScanContext) -> list[Path]:
@@ -127,8 +127,9 @@ class NotebookAbsolutePathRule(Rule):
                 continue
             for index, cell in enumerate(nb.cells, start=1):
                 source = str(cell.get("source", ""))
-                match = ABSOLUTE_PATH_RE.search(source)
-                if match and not is_placeholder_absolute_path(match.group(0)):
+                result = first_absolute_path(source)
+                if result:
+                    value, _line = result
                     rel = context.rel(path)
                     return [
                         self.finding(
@@ -139,7 +140,7 @@ class NotebookAbsolutePathRule(Rule):
                                     "Potential absolute path in notebook cell.",
                                     rel,
                                     index,
-                                    mask_secret(match.group(0)),
+                                    mask_secret(value),
                                 )
                             ],
                             file=rel,

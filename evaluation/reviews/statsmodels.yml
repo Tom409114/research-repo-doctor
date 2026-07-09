@@ -1,0 +1,15 @@
+version: 1
+repository: statsmodels
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: statsmodels is a mature statistical modeling library with package metadata, examples, datasets, and tests; it should not be treated as a missing paper experiment entrypoint.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a mature statistical modeling library. This checked the
+  library-shaped RRD050 behavior. The concrete Windows path in
+  statsmodels/examples/ex_ordered_model.py is intentionally left as an
+  actionable RRD043 finding rather than suppressed as documentation noise.

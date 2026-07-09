@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition, read_text
 from rrdoctor.rules.paths import find_files
@@ -26,12 +28,33 @@ TEST_RUNNER_TERMS = (
     "julia-runtest",
     "pkg.test",
     "runtests.jl",
+    "bazel test",
+    "bazelisk test",
+    "run_tests.sh",
+    "run_github_tests.sh",
+)
+
+BAZEL_TEST_TARGET_RE = re.compile(
+    r"\b(?:py|sh|cc|java|go|multi_substrate_py)_test\s*\(|\btest_suite\s*\("
 )
 
 
 def _has_julia_test_target(text: str) -> bool:
     lowered = text.lower()
     return "[targets]" in lowered and "test" in lowered and "[extras]" in lowered
+
+
+def _has_bazel_test_target(context: ScanContext) -> bool:
+    has_bazel_workspace = any(
+        (context.root / name).exists()
+        for name in ("WORKSPACE", "WORKSPACE.bazel", "MODULE.bazel", "bazel.rc", ".bazelrc")
+    )
+    if not has_bazel_workspace:
+        return False
+    for path in find_files(context, ["BUILD", "**/BUILD", "BUILD.bazel", "**/BUILD.bazel"]):
+        if BAZEL_TEST_TARGET_RE.search(read_text(path)):
+            return True
+    return False
 
 
 class TestsMissingRule(Rule):
@@ -80,8 +103,10 @@ class TestRunnerMissingRule(Rule):
         ):
             markers.append(read_text(workflow).lower())
         combined = "\n".join(markers)
-        if not any(term in combined for term in TEST_RUNNER_TERMS) and not _has_julia_test_target(
-            combined
+        if (
+            not any(term in combined for term in TEST_RUNNER_TERMS)
+            and not _has_julia_test_target(combined)
+            and not _has_bazel_test_target(context)
         ):
             return [
                 self.finding(

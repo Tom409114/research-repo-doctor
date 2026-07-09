@@ -1,0 +1,15 @@
+version: 1
+repository: pyro
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Pyro is a probabilistic programming library with tutorials, package metadata, and test files; a single train.py-style research entrypoint is not required for this repository shape.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a probabilistic ML library and tutorial-heavy research
+  toolkit. This checked that RRD050 remains quiet for library-shaped projects
+  while notebook output/order, data availability, citation metadata, and
+  package metadata findings remain visible for maintainer triage.

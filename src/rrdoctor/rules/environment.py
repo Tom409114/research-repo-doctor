@@ -29,6 +29,8 @@ DEPENDENCY_FILES = [
     "Pipfile",
     "poetry.lock",
     "uv.lock",
+    "setup.py",
+    "setup.cfg",
     # JavaScript
     "package.json",
     # R
@@ -46,6 +48,7 @@ NESTED_MANIFEST_DIRS = ("package",)
 RUNTIME_VERSION_RE = re.compile(
     r"(?i)("
     r"requires-python"  # pyproject
+    r"|python_requires"  # setup.py / setup.cfg
     r"|python\s*[<>=~!]|python="  # requirements / conda
     r"|runtime"  # runtime.txt
     r"|node\s*[:=]"  # package.json engines
@@ -462,7 +465,8 @@ def _is_runtime_import_file(context: ScanContext, path: Any) -> bool:
     """Return true for Python files likely to represent runtime code."""
 
     rel = context.rel(path)
-    if rel.rsplit("/", 1)[-1].lower() == "conftest.py":
+    name = rel.rsplit("/", 1)[-1].lower()
+    if name == "conftest.py" or name.startswith("test_") or name.endswith("_test.py"):
         return False
     parts = [part.lower() for part in rel.split("/")[:-1]]
     return not any(part in _IMPORT_SCAN_EXCLUDED_PARTS for part in parts)

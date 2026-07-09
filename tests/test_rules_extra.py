@@ -295,3 +295,29 @@ def test_julia_test_directory_and_runner_are_detected(tmp_path) -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071", "RRD081"}).scan(tmp_path)
 
     assert not report.findings
+
+
+def test_bazel_test_targets_and_ci_script_are_detected(tmp_path) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    package = tmp_path / "pkg"
+    workflow_dir.mkdir(parents=True)
+    package.mkdir()
+    (tmp_path / "WORKSPACE").write_text("# bazel workspace\n", encoding="utf-8")
+    (package / "BUILD").write_text(
+        'py_test(name = "model_test", srcs = ["model_test.py"])\n',
+        encoding="utf-8",
+    )
+    (package / "model_test.py").write_text("def test_model():\n    assert True\n", encoding="utf-8")
+    (workflow_dir / "ci.yml").write_text(
+        "name: CI\n"
+        "jobs:\n"
+        "  test:\n"
+        "    runs-on: ubuntu-latest\n"
+        "    steps:\n"
+        "      - run: ./testing/run_github_tests.sh\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071", "RRD081"}).scan(tmp_path)
+
+    assert not report.findings

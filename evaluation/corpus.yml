@@ -333,21 +333,25 @@ repositories:
     url: https://github.com/arviz-devs/arviz
     ecosystem: python-statistics
     reason: Bayesian analysis and visualization package with examples and docs.
+    expected_absent: [RRD050]
     review_focus: [package-metadata, notebooks, citation]
   - name: pymc
     url: https://github.com/pymc-devs/pymc
     ecosystem: python-statistics
     reason: Probabilistic programming project with examples, docs, and tests.
+    expected_absent: [RRD050]
     review_focus: [package-metadata, examples, testing]
   - name: pyro
     url: https://github.com/pyro-ppl/pyro
     ecosystem: python-probabilistic-ml
     reason: Probabilistic programming research toolkit with examples, tutorials, and tests.
+    expected_absent: [RRD050]
     review_focus: [package-metadata, examples, dependency-docs]
   - name: tensorflow-probability
     url: https://github.com/tensorflow/probability
     ecosystem: python-probabilistic-ml
     reason: TensorFlow probabilistic programming project with examples and multi-package metadata.
+    expected_absent: [RRD030, RRD031, RRD050, RRD062, RRD071, RRD081]
     review_focus: [package-metadata, examples, dependency-docs]
   - name: scikit-image
     url: https://github.com/scikit-image/scikit-image
@@ -359,6 +363,7 @@ repositories:
     url: https://github.com/statsmodels/statsmodels
     ecosystem: python-statistics
     reason: Statistical modeling package with examples, docs, and release metadata.
+    expected_absent: [RRD050]
     review_focus: [package-metadata, examples, testing]
   - name: networkx
     url: https://github.com/networkx/networkx
@@ -382,6 +387,7 @@ repositories:
     url: https://github.com/google-deepmind/optax
     ecosystem: python-ml
     reason: JAX optimizer library used across research code with examples and package metadata.
+    expected_absent: [RRD050]
     review_focus: [package-metadata, examples, testing]
   - name: brax
     url: https://github.com/google/brax

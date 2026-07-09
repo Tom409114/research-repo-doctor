@@ -1,0 +1,27 @@
+version: 1
+repository: tensorflow-probability
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD030
+    evidence: Root setup.py declares package metadata, install_requires, and extras_require; legacy setup.py is recognized as a dependency manifest.
+  - rule_id: RRD031
+    evidence: setup.py declares python_requires='>=3.9', which is recognized as a runtime version hint.
+  - rule_id: RRD050
+    evidence: TensorFlow Probability is a mature probabilistic programming/statistics library with examples and notebooks, not a single paper reproduction artifact requiring a train/eval entrypoint.
+  - rule_id: RRD062
+    evidence: Notebook markdown link http://mc-stan.org/users/documentation/... is treated as a URL path segment rather than a local /Users path.
+  - rule_id: RRD071
+    evidence: WORKSPACE/BUILD files contain Bazel py_test and multi_substrate_py_test targets.
+  - rule_id: RRD081
+    evidence: .github/workflows/continuous-integration.yml runs ./testing/run_github_tests.sh.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a large TensorFlow ecosystem repository with Bazel tests,
+  legacy setup.py packaging, and many notebook examples. This review fixed
+  setup.py manifest recognition, notebook URL-path filtering, Bazel test-target
+  detection, and CI test-script detection. Remaining findings about data
+  availability, large/stale notebook outputs, changelog, and dynamic version
+  metadata remain unsuppressed.

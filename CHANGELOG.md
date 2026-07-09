@@ -8,11 +8,17 @@
 - Reduced `RRD052` seed-rule noise by recognizing
   `pytorch_lightning.seed_everything(...)` and
   `lightning.pytorch.seed_everything(...)` as valid seed applications.
+- Reduced first-run noise for legacy/Bazel scientific projects by recognizing
+  `setup.py`/`setup.cfg` as Python dependency manifests, `python_requires` as a
+  runtime version hint, Bazel `*_test(...)` targets as test runner evidence, CI
+  test scripts such as `run_github_tests.sh`, and URL path segments in notebook
+  markdown cells.
 - Added focused corpus review notes and `expected_absent` regression gates for
   detectron2, DINO, StyleGAN2-ADA PyTorch, instant-ngp, Big Vision,
   latent-diffusion, taming-transformers, generative-models,
-  pytorch-image-models, and Brax. The reviewed corpus coverage is now 61
-  focused notes with 19 repositories still awaiting focused manual review.
+  pytorch-image-models, Brax, ArviZ, PyMC, Pyro, TensorFlow Probability,
+  statsmodels, and Optax. The reviewed corpus coverage is now 67 focused notes
+  with 13 repositories still awaiting focused manual review.
 
 ## v0.2.20 - 2026-07-09
 

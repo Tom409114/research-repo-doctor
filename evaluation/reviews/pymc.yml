@@ -1,0 +1,17 @@
+version: 1
+repository: pymc
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: PyMC is a probabilistic programming library with package metadata, docs, examples, and tests; it is not expected to provide a single paper reproduction entrypoint.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a mature probabilistic programming project. This checked
+  that reusable library/framework repositories remain outside the RRD050 paper
+  entrypoint requirement. Existing findings for README install headings,
+  unpinned dependency lines, undeclared optional/runtime imports, data
+  availability, notebook outputs, and package metadata are left as normal scan
+  output rather than confirmed false positives.

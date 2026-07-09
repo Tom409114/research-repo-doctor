@@ -71,8 +71,8 @@ python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress -
 - Scanned successfully: 80
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Focused manual review notes: 61
-- Not yet manually reviewed: 19
+- Focused manual review notes: 67
+- Not yet manually reviewed: 13
 - Average score across scanned repositories: 67.5
 
 Readiness distribution:
@@ -117,9 +117,10 @@ t5x, GraphCast, SciPy, scikit-image, JAX, NetworkX, Keras, openai-baselines,
 Transformers, PyTorch Lightning, Biopython, torchvision, xarray, MDAnalysis,
 QuTiP, ESM, stable-diffusion, nerfstudio, FAISS, detectron2,
 StyleGAN2-ADA PyTorch, instant-ngp, Big Vision, latent-diffusion,
-taming-transformers, generative-models, pytorch-image-models, and Brax. The
-repository contains 61 reviewed notes and 19 repositories still awaiting focused
-manual review.
+taming-transformers, generative-models, pytorch-image-models, Brax, ArviZ,
+PyMC, Pyro, TensorFlow Probability, statsmodels, and Optax. The repository
+contains 67 reviewed notes and 13 repositories still awaiting focused manual
+review.
 Those additions
 confirm that BERT local RNG seeding via
 `random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
@@ -154,6 +155,12 @@ config-driven commands, root training/evaluation scripts, sampling demos, and
 JAX training-library layouts do not create noisy `RRD050` findings. The
 diffusion and PyTorch vision reviews also confirm that Lightning/PyTorch seed
 plumbing does not create noisy `RRD052` findings.
+The ArviZ, PyMC, Pyro, TensorFlow Probability, statsmodels, and Optax reviews
+confirm that mature statistics/probabilistic-programming libraries are not
+treated as missing paper entrypoints. The TensorFlow Probability review also
+confirms legacy `setup.py` metadata, Bazel test targets, CI test scripts, and
+notebook URL path segments do not create noisy `RRD030`, `RRD031`, `RRD062`,
+`RRD071`, or `RRD081` findings.
 The ESM and nerfstudio reviews confirm that notebook output tracebacks and
 installation-doc placeholder paths are filtered without suppressing notebook
 source-cell checks or concrete hardcoded source-code paths.
@@ -168,7 +175,7 @@ entrypoints.
 The dependency gap check also focuses on runtime-like Python files instead of
 docs, tests, benchmarks, vendored code, or maintainer tooling.
 
-The 80-repository manifest currently has 61 focused manual review notes and 19
+The 80-repository manifest currently has 67 focused manual review notes and 13
 repositories still awaiting focused review.
 
 The v0.2.19 PyPI package was also spot-checked against nanoGPT, the original

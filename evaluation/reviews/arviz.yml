@@ -1,0 +1,17 @@
+version: 1
+repository: arviz
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: ArviZ is a mature Bayesian analysis library with pyproject metadata, docs, tests, and package-oriented README language, not a paper artifact that should expose a train/eval entrypoint.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a scientific Python statistics library. This checked that
+  library-shaped packages are not penalized by the paper-artifact entrypoint
+  rule. Remaining findings around data availability, notebook output size,
+  dynamic metadata, and the xarray dependency relationship through
+  arviz_stats[xarray] remain unsuppressed pending separate dependency-parser
+  review.

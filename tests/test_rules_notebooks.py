@@ -35,6 +35,22 @@ def test_notebook_absolute_path_ignores_placeholder(tmp_path) -> None:
     assert not report.findings
 
 
+def test_notebook_absolute_path_ignores_url_path_segments(tmp_path) -> None:
+    notebook_path = tmp_path / "analysis.ipynb"
+    notebook = nbformat.v4.new_notebook(
+        cells=[
+            nbformat.v4.new_markdown_cell(
+                "See http://mc-stan.org/users/documentation/case-studies/example.html."
+            )
+        ]
+    )
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD062"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_notebook_out_of_order_detection() -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD061"}).scan("tests/fixtures/notebook-issues-repo")
 

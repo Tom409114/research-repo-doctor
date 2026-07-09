@@ -55,6 +55,18 @@ def test_nested_package_manifest_satisfies_environment_rules(tmp_path) -> None:
     assert not report.findings
 
 
+def test_setup_py_satisfies_legacy_python_manifest_and_version_hint(tmp_path) -> None:
+    (tmp_path / "setup.py").write_text(
+        "from setuptools import setup\n"
+        "setup(name='demo', install_requires=['numpy'], python_requires='>=3.11')\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_conda_yaml_manifest_satisfies_environment_rules(tmp_path) -> None:
     (tmp_path / "environment.yaml").write_text(
         "name: demo\ndependencies:\n  - python=3.11\n  - numpy=1.26\n",
@@ -249,6 +261,7 @@ def test_undeclared_import_ignores_non_runtime_paths(tmp_path) -> None:
     (tmp_path / "requirements.txt").write_text("numpy\n", encoding="utf-8")
     for rel in (
         "tests/test_optional.py",
+        "pkg/model_test.py",
         "pkg/conftest.py",
         "docs/conf.py",
         "benchmarks/bench_demo.py",

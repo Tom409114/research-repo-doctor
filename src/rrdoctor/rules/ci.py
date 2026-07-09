@@ -64,6 +64,10 @@ class CiNoTestsRule(Rule):
                 "julia-actions/julia-runtest",
                 "julia-runtest",
                 "pkg.test",
+                "bazel test",
+                "bazelisk test",
+                "run_tests.sh",
+                "run_github_tests.sh",
             )
         ):
             return [
@@ -73,7 +77,7 @@ class CiNoTestsRule(Rule):
                     evidence=[
                         Evidence(
                             "Workflow text lacks pytest, ruff, tox, nox, npm test, "
-                            "rrdoctor, or Julia test actions."
+                            "rrdoctor, Julia test actions, Bazel tests, or test scripts."
                         )
                     ],
                 )

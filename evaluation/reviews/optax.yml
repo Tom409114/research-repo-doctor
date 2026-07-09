@@ -1,0 +1,16 @@
+version: 1
+repository: optax
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Optax is a JAX optimizer library with docs and examples; a paper-specific train/eval entrypoint is not required for this repository shape.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a JAX optimizer library. This checked that RRD050 remains
+  quiet for reusable library packages. The RRD052 finding in docs/getting_started.ipynb
+  is intentionally retained because the notebook generates training data with
+  np.random.randint(...) without a NumPy seed, even though nearby JAX parameters
+  use explicit PRNGKey values.
