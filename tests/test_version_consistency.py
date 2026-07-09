@@ -18,7 +18,6 @@ def test_package_version_metadata_is_consistent() -> None:
 
     assert rrdoctor.__version__ == version
     assert f"version: {version}" in Path("CITATION.cff").read_text(encoding="utf-8")
-    assert f"rrdoctor=={version}" in Path("demo/requirements.txt").read_text(encoding="utf-8")
 
 
 def test_readme_citation_matches_citation_cff() -> None:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -30,14 +31,19 @@ def test_parse_github_url_accepts_common_repo_forms() -> None:
     assert target.clone_url == "https://github.com/Tom409114/research-repo-doctor.git"
 
 
-def test_demo_requirements_pin_current_rrdoctor_version() -> None:
+def test_demo_requirements_pin_does_not_exceed_project_version() -> None:
     pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
     requirements = Path("demo/requirements.txt").read_text(encoding="utf-8")
 
     version_line = next(line for line in pyproject.splitlines() if line.startswith("version = "))
     version = version_line.split('"', 2)[1]
 
-    assert f"rrdoctor=={version}" in requirements
+    match = re.search(r"(?m)^rrdoctor==(\d+\.\d+\.\d+)$", requirements)
+
+    assert match is not None
+    demo_version = tuple(int(part) for part in match.group(1).split("."))
+    project_version = tuple(int(part) for part in version.split("."))
+    assert demo_version <= project_version
 
 
 def test_demo_version_label_uses_installed_package_metadata(monkeypatch) -> None:

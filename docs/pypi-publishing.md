@@ -62,6 +62,12 @@ Confirm the version is consistent in:
 - [`CITATION.cff`](../CITATION.cff)
 - [`CHANGELOG.md`](../CHANGELOG.md)
 
+During release preparation, leave [`demo/requirements.txt`](../demo/requirements.txt)
+pinned to the latest version that is already available on PyPI. The demo pin may
+temporarily lag the source version, but it must never point to a future version.
+This keeps a push to `main` from breaking Streamlit while Trusted Publishing is
+still propagating the new package through PyPI.
+
 ## Publishing Flow
 
 1. Merge the release-preparation pull request.
@@ -76,8 +82,15 @@ python -m pip index versions rrdoctor
 uvx rrdoctor --help
 ```
 
-7. Redeploy or restart the hosted Streamlit demo after PyPI lists the new
-   version. The demo installs `rrdoctor` from `demo/requirements.txt`, so a
-   repository push can briefly point Streamlit at a package version that PyPI
-   does not expose yet. Treat the demo as launch-ready only after a browser
-   check shows the app body and `Powered by rrdoctor <version>`.
+7. After PyPI lists the new version, verify it from the public index:
+
+   ```bash
+   uvx --refresh --from rrdoctor==<version> rrdoctor --version
+   ```
+
+   Then update `demo/requirements.txt` to that exact version and push the
+   post-release metadata commit.
+
+8. Redeploy or restart the hosted Streamlit demo. Treat it as launch-ready only
+   after a browser check shows the app body, `Powered by rrdoctor <version>`, and
+   one completed sample scan.
