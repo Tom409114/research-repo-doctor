@@ -19,6 +19,7 @@ CLONE_TIMEOUT_SECONDS = 60
 SCAN_TIMEOUT_SECONDS = 60
 MAX_CLONE_BYTES = 200 * 1024 * 1024
 GITHUB_REPO = "https://github.com/Tom409114/research-repo-doctor"
+TRIAL_REPORT_URL = f"{GITHUB_REPO}/issues/new?template=trial_report.yml"
 SAMPLE_REPOSITORIES: tuple[tuple[str, str], ...] = (
     ("Scan rrdoctor", GITHUB_REPO),
     ("Scan nanoGPT", "https://github.com/karpathy/nanoGPT"),
@@ -308,6 +309,9 @@ def main() -> None:
 
     st.markdown(
         f"Run this on your own machine: `uvx rrdoctor scan .`  \n[GitHub repo]({GITHUB_REPO})"
+    )
+    st.markdown(
+        f"Found something wrong or missing? [Share a 10-minute trial report]({TRIAL_REPORT_URL})."
     )
     st.caption(f"This web demo is running rrdoctor {rrdoctor_version}.")
 

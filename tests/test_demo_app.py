@@ -141,3 +141,13 @@ def test_demo_avoids_streamlit_metric_frontend_component() -> None:
     source = Path("demo/app.py").read_text(encoding="utf-8")
 
     assert ".metric(" not in source
+
+
+def test_demo_links_scan_results_to_trial_report_form() -> None:
+    app = _load_demo_app()
+    source = Path("demo/app.py").read_text(encoding="utf-8")
+
+    assert app.TRIAL_REPORT_URL == (
+        "https://github.com/Tom409114/research-repo-doctor/issues/new?template=trial_report.yml"
+    )
+    assert "Share a 10-minute trial report" in source
