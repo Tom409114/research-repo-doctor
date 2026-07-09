@@ -75,6 +75,21 @@ def test_action_reference_check_ignores_historical_release_notes(tmp_path) -> No
     assert failures == []
 
 
+def test_readme_action_adoption_requires_early_copyable_workflow() -> None:
+    script = _load_public_readiness_script()
+    failures: list[str] = []
+    readme = (
+        "# Demo\n\n"
+        "## What it catches\n\n"
+        "- A finding.\n\n"
+        "- uses: Tom409114/research-repo-doctor@v0.2.22\n"
+    )
+
+    script._check_readme_action_adoption(readme, failures)
+
+    assert failures == ["README.md does not show a copyable GitHub Action before the feature list."]
+
+
 def test_corpus_evidence_ignores_focused_local_reports(tmp_path) -> None:
     script = _load_public_readiness_script()
     docs = tmp_path / "docs"

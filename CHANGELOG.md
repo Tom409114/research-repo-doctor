@@ -7,6 +7,9 @@
   avoiding a deployment race during Trusted Publishing propagation.
 - Added an offline integration test that installs a declared local wheel into
   the temporary verification environment and requires L3 to import it.
+- Moved a minimal copyable GitHub Action workflow near the top of the README and
+  added a public-readiness regression check so the main adoption path stays
+  visible to first-time and Marketplace visitors.
 
 ## v0.2.22 - 2026-07-10
 

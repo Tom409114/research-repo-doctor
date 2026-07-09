@@ -26,6 +26,36 @@ whether a repo is reviewable, citable, and close to runnable; scaffolds safe mec
 fixes; maps findings to an AE-style readiness level; and turns the rest into a checklist
 any coding agent or human can finish.
 
+## Make it a pull-request gate
+
+The GitHub Action is the main adoption path: run the CLI while preparing the
+artifact, then keep the same deterministic preflight on every pull request.
+
+```yaml
+name: Reproducibility preflight
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  rrdoctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: Tom409114/research-repo-doctor@v0.2.22
+        with:
+          profile: standard
+          fail-on: error
+```
+
+The full [GitHub Action guide](docs/github-action.md) covers sticky PR comments,
+new-finding baselines, agent plans, appendices, and complete AE prep packets.
+
 ## AE deadline loop
 
 ```bash

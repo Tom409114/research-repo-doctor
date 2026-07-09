@@ -196,6 +196,7 @@ def _check_readme_and_demo(root: Path, tracked_files: list[str], failures: list[
         failures.append("README.md does not embed docs/demo.gif.")
     if "docs/demo.gif" not in tracked_files:
         failures.append("docs/demo.gif is not tracked by git.")
+    _check_readme_action_adoption(readme, failures)
 
     demo = root / "docs" / "demo.gif"
     if not demo.exists():
@@ -205,6 +206,12 @@ def _check_readme_and_demo(root: Path, tracked_files: list[str], failures: list[
         failures.append(f"docs/demo.gif is smaller than {MIN_DEMO_GIF_BYTES} bytes.")
     if demo.read_bytes()[:6] not in {b"GIF87a", b"GIF89a"}:
         failures.append("docs/demo.gif is not a GIF file.")
+
+
+def _check_readme_action_adoption(readme: str, failures: list[str]) -> None:
+    top, separator, _ = readme.partition("## What it catches")
+    if not separator or ACTION_REFERENCE_RE.search(top) is None:
+        failures.append("README.md does not show a copyable GitHub Action before the feature list.")
 
 
 def _check_action_references(root: Path, tracked_files: list[str], failures: list[str]) -> None:
