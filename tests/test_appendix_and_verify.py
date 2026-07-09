@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from rrdoctor.config import DEFAULT_CONFIG, apply_cli_overrides
 from rrdoctor.models import ScanReport
@@ -28,6 +29,33 @@ from rrdoctor.verification import (
 def _report(fixture: str, profile: str = "standard"):
     config = apply_cli_overrides(DEFAULT_CONFIG, profile=profile)
     return Scanner(config).scan(fixture)
+
+
+def _write_local_test_wheel(root: Path) -> Path:
+    wheel_dir = root / "wheels"
+    wheel_dir.mkdir()
+    wheel = wheel_dir / "rrdoctor_verify_fixture-1.0.0-py3-none-any.whl"
+    package = "rrdoctor_verify_fixture/__init__.py"
+    dist_info = "rrdoctor_verify_fixture-1.0.0.dist-info"
+    members = {
+        package: 'MESSAGE = "dependency-ready"\n',
+        f"{dist_info}/METADATA": (
+            "Metadata-Version: 2.1\nName: rrdoctor-verify-fixture\nVersion: 1.0.0\n"
+        ),
+        f"{dist_info}/WHEEL": (
+            "Wheel-Version: 1.0\n"
+            "Generator: rrdoctor-tests\n"
+            "Root-Is-Purelib: true\n"
+            "Tag: py3-none-any\n"
+        ),
+    }
+    record = "".join(f"{name},,\n" for name in members)
+    record += f"{dist_info}/RECORD,,\n"
+    members[f"{dist_info}/RECORD"] = record
+    with ZipFile(wheel, "w", compression=ZIP_DEFLATED) as archive:
+        for name, content in members.items():
+            archive.writestr(name, content)
+    return wheel
 
 
 def test_checklist_lists_acm_badges() -> None:
@@ -345,6 +373,30 @@ def test_dynamic_python_verification_runs_l3_in_isolated_environment(tmp_path) -
     assert steps[2].status == "pass"
     assert "isolated Python environment" in steps[2].detail
     assert steps[2].log == "isolated"
+
+
+def test_dynamic_python_verification_installs_declared_local_wheel(tmp_path) -> None:
+    wheel = _write_local_test_wheel(tmp_path)
+    (tmp_path / "requirements.txt").write_text(
+        f"{wheel.relative_to(tmp_path).as_posix()}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Dependency install demo\n\n```bash\npython train.py\n```\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "train.py").write_text(
+        "from rrdoctor_verify_fixture import MESSAGE\n\nprint(MESSAGE)\n",
+        encoding="utf-8",
+    )
+    report = Scanner(DEFAULT_CONFIG).scan(tmp_path)
+
+    steps = build_steps(report, tmp_path, run=True, timeout=30)
+
+    assert steps[1].status == "pass"
+    assert "installed declared dependencies" in steps[1].detail
+    assert steps[2].status == "pass"
+    assert steps[2].log == "dependency-ready"
 
 
 def test_verification_detects_root_python_entrypoint(tmp_path) -> None:
