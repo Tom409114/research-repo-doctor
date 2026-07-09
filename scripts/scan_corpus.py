@@ -763,9 +763,9 @@ def _slug(value: str) -> str:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--aggregate-output", type=Path, default=DEFAULT_AGGREGATE_OUTPUT)
-    parser.add_argument("--markdown-output", type=Path, default=DEFAULT_MARKDOWN)
+    parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--aggregate-output", type=Path, default=None)
+    parser.add_argument("--markdown-output", type=Path, default=None)
     parser.add_argument(
         "--review-stub-dir",
         type=Path,
@@ -809,6 +809,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.limit is not None:
         entries = entries[: args.limit]
 
+    output, aggregate_output, markdown_output = resolve_output_paths(args)
     max_bytes = args.max_mb * 1024 * 1024
     summaries = scan_entries(
         entries,
@@ -820,16 +821,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     summaries = attach_review_notes(summaries, load_review_notes(args.review_notes))
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(summaries, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(summaries, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     aggregate = aggregate_summaries(summaries)
-    args.aggregate_output.parent.mkdir(parents=True, exist_ok=True)
-    args.aggregate_output.write_text(
+    aggregate_output.parent.mkdir(parents=True, exist_ok=True)
+    aggregate_output.write_text(
         json.dumps(aggregate, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-    args.markdown_output.write_text(render_markdown(summaries), encoding="utf-8")
-    message = f"Wrote {args.output}, {args.aggregate_output}, and {args.markdown_output}"
+    markdown_output.parent.mkdir(parents=True, exist_ok=True)
+    markdown_output.write_text(render_markdown(summaries), encoding="utf-8")
+    message = f"Wrote {output}, {aggregate_output}, and {markdown_output}"
     if args.review_stub_dir is not None:
         stubs = write_review_stubs(summaries, args.review_stub_dir)
         message += f"; wrote {len(stubs)} review stub(s) to {args.review_stub_dir}"
@@ -840,6 +841,32 @@ def main(argv: list[str] | None = None) -> int:
             print(failure, file=sys.stderr)
             return 1
     return 0
+
+
+def resolve_output_paths(args: argparse.Namespace) -> tuple[Path, Path, Path]:
+    """Choose output files without letting focused runs overwrite full reports."""
+
+    if args.only or args.limit is not None:
+        stem = _focused_report_stem(args.only, args.limit)
+        default_output = Path(f"evaluation/reports/{stem}.json")
+        default_aggregate = Path(f"evaluation/reports/{stem}-aggregate.json")
+        default_markdown = Path(f"evaluation/reports/{stem}.md")
+    else:
+        default_output = DEFAULT_OUTPUT
+        default_aggregate = DEFAULT_AGGREGATE_OUTPUT
+        default_markdown = DEFAULT_MARKDOWN
+    return (
+        args.output or default_output,
+        args.aggregate_output or default_aggregate,
+        args.markdown_output or default_markdown,
+    )
+
+
+def _focused_report_stem(only: list[str], limit: int | None) -> str:
+    if only:
+        names = "-".join(_slug(name) for name in only)
+        return f"focused-{names}"
+    return f"sample-limit-{limit}"
 
 
 if __name__ == "__main__":

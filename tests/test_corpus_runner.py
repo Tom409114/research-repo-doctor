@@ -172,6 +172,28 @@ def test_scan_entries_progress_reports_to_stderr(tmp_path, monkeypatch, capsys) 
     assert summaries[0]["status"] == "scanned"
 
 
+def test_focused_runs_use_named_outputs_by_default() -> None:
+    runner = _load_runner()
+    args = runner.parse_args(["--only", "nanoGPT", "--fail-on-expected-absent"])
+
+    output, aggregate, markdown = runner.resolve_output_paths(args)
+
+    assert output == Path("evaluation/reports/focused-nanogpt.json")
+    assert aggregate == Path("evaluation/reports/focused-nanogpt-aggregate.json")
+    assert markdown == Path("evaluation/reports/focused-nanogpt.md")
+
+
+def test_full_runs_keep_public_report_outputs_by_default() -> None:
+    runner = _load_runner()
+    args = runner.parse_args([])
+
+    output, aggregate, markdown = runner.resolve_output_paths(args)
+
+    assert output == runner.DEFAULT_OUTPUT
+    assert aggregate == runner.DEFAULT_AGGREGATE_OUTPUT
+    assert markdown == runner.DEFAULT_MARKDOWN
+
+
 def test_markdown_summary_mentions_manual_review() -> None:
     runner = _load_runner()
     rendered = runner.render_markdown(

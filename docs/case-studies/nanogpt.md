@@ -10,8 +10,8 @@ research repository.
 
 - Target repository: `https://github.com/karpathy/nanoGPT`
 - Target commit scanned: `3adf61e154c3fe3fca428ad6bc3818b27a3b8291`
-- rrdoctor package: PyPI `rrdoctor==0.2.19`
-- Scan date: 2026-07-09
+- rrdoctor package: PyPI `rrdoctor==0.2.21`
+- Scan date: 2026-07-10
 - Mode: static scan only; no dependency installation and no target code
   execution
 
@@ -19,7 +19,7 @@ Reproduction command:
 
 ```bash
 git clone --depth 1 https://github.com/karpathy/nanoGPT.git
-uvx --from rrdoctor==0.2.19 rrdoctor scan nanoGPT \
+uvx --from rrdoctor==0.2.21 rrdoctor scan nanoGPT \
   --profile standard \
   --format json \
   --output nanogpt-rrdoctor.json \
@@ -51,7 +51,7 @@ Observed rule IDs:
 
 ## Regression Points
 
-Two original first-run trust failures are absent in the v0.2.19 scan:
+Two original first-run trust failures are absent in the v0.2.21 scan:
 
 | Rule | Current result | Why it matters |
 | --- | --- | --- |

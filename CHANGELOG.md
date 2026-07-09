@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Refreshed the nanoGPT first-run case study and focused corpus review note
+  against PyPI `rrdoctor==0.2.21`, confirming `Functional` readiness, 76/100,
+  0 errors, and no `RRD050` or `RRD063` regression.
+
 ## v0.2.21 - 2026-07-09
 
 - Strengthened the JOSS draft manuscript with an explicit evaluation and

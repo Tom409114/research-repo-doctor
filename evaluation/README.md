@@ -124,18 +124,19 @@ Focused review coverage in the current snapshot:
   `RRD062`, and large/stale notebook outputs remain covered by `RRD060` and
   `RRD061`.
 
-First-run trust spot check refreshed on 2026-07-09:
+First-run trust spot check refreshed on 2026-07-10:
 
-- Command: `uvx --refresh --from rrdoctor==0.2.19 rrdoctor scan <nanoGPT> --profile standard --format json --fail-on none`
+- Command: `uvx --refresh --from rrdoctor==0.2.21 rrdoctor scan <nanoGPT> --profile standard --format json --fail-on none`
 - Result: `Functional`, 76/100, 0 errors, 6 warnings, 2 info
 - Regression checks: `RRD050` and `RRD063` were absent
 
 ## Reproduce The Smoke Scan
 
-Run a small smoke scan:
+Run a focused smoke scan. Focused runs write named reports such as
+`focused-nanogpt.json` so they do not overwrite the full public corpus report:
 
 ```bash
-python scripts/scan_corpus.py --limit 1 --output evaluation/reports/corpus-scan.json
+python scripts/scan_corpus.py --only nanoGPT --fail-on-expected-absent
 ```
 
 Run the current maintainer gate:

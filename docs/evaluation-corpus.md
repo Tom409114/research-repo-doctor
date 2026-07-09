@@ -187,7 +187,7 @@ docs, tests, benchmarks, vendored code, or maintainer tooling.
 The 80-repository manifest currently has 80 focused manual review notes and 0
 repositories still awaiting focused review.
 
-The v0.2.19 PyPI package was also spot-checked against nanoGPT, the original
+The v0.2.21 PyPI package was also spot-checked against nanoGPT, the original
 first-run trust regression case. The static scan reported `Functional`, 76/100,
 0 errors, 6 warnings, and 2 info findings; `RRD050` and `RRD063` were absent.
 See the [nanoGPT first-run case study](case-studies/nanogpt.md) for the exact

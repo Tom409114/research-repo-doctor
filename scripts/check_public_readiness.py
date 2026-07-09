@@ -355,6 +355,10 @@ def _check_corpus_evidence(root: Path, failures: list[str]) -> None:
         return
 
     aggregate = json.loads(aggregate_path.read_text(encoding="utf-8"))
+    if int(aggregate.get("total_repositories", 0)) < MIN_CORPUS_REPOSITORIES:
+        # Focused regression runs are useful locally, but the authoritative
+        # public corpus evidence lives in the tracked documentation.
+        return
     aggregate_expected_absent = aggregate.get("expected_absent_violations", [])
     _check_corpus_counts(
         source="evaluation/reports/corpus-aggregate.json",

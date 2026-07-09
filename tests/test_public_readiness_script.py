@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 from base64 import b64decode
@@ -70,6 +71,39 @@ def test_action_reference_check_ignores_historical_release_notes(tmp_path) -> No
     failures: list[str] = []
 
     script._check_action_references(tmp_path, ["RELEASE_NOTES_v0.1.0.md"], failures)
+
+    assert failures == []
+
+
+def test_corpus_evidence_ignores_focused_local_reports(tmp_path) -> None:
+    script = _load_public_readiness_script()
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "evaluation-corpus.md").write_text(
+        "- Repositories listed: 80\n"
+        "- Scanned successfully: 80\n"
+        "- Clone or scan errors: 0\n"
+        "- Expected-absent regressions: 0\n"
+        "- Focused manual review notes: 80\n",
+        encoding="utf-8",
+    )
+    reports = tmp_path / "evaluation" / "reports"
+    reports.mkdir(parents=True)
+    (reports / "corpus-aggregate.json").write_text(
+        json.dumps(
+            {
+                "total_repositories": 1,
+                "scanned_repositories": 1,
+                "reviewed_repositories": 1,
+                "error_repositories": 0,
+                "expected_absent_violations": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    failures: list[str] = []
+
+    script._check_corpus_evidence(tmp_path, failures)
 
     assert failures == []
 
