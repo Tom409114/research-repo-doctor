@@ -22,3 +22,16 @@ docker run --rm ^
 ```
 
 On Linux or macOS, replace `%cd%` with `$(pwd)`.
+
+Before submission, run the public readiness gate from the repository root and
+preview the paper PDF:
+
+```bash
+python scripts/check.py
+docker run --rm --volume "${PWD}/paper:/data" --env JOURNAL=joss openjournals/inara
+```
+
+Keep the manuscript claims aligned with current evidence: no adoption claims
+without external use, no corpus counts without a fresh reviewed scan, and no
+dynamic reproducibility claims unless `rrdoctor verify --run` was exercised on a
+trusted target.

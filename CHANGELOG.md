@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Strengthened the JOSS draft manuscript with an explicit evaluation and
+  calibration section covering the reviewed 80-repository static corpus,
+  expected-absent regression gate, and limits of the evidence.
 - Added a copyable GitHub Copilot instructions template so the rrdoctor
   baseline -> plan -> verify loop can be installed in target research
   repositories alongside the existing Agent Skill and Cursor templates.

@@ -89,8 +89,11 @@ artifact preparation.
 Reports can be emitted as Markdown, JSON, SARIF-like JSON, a Shields.io badge
 endpoint, or an agent-oriented plan. The same findings feed the command line,
 GitHub Action summaries, sticky pull request comments, the artifact appendix,
-and MCP tooling for coding agents. This design keeps the scanner deterministic
-while allowing different consumers to use the same evidence.
+copyable coding-agent templates, and MCP tooling for coding agents. This design
+keeps the scanner deterministic while allowing different consumers to use the
+same evidence. In agent workflows, rrdoctor is deliberately the grader rather
+than the editor: the agent can change files, but the final state is checked by a
+local, key-free baseline gate.
 
 Autofixes follow a non-destructive contract. They may create missing starter
 files, but they do not overwrite existing files. Generated content is explicitly
@@ -100,6 +103,28 @@ scanning. `rrdoctor verify` can summarize the L1/L2/L3 ladder without execution,
 while `rrdoctor verify --run` is reserved for trusted repositories because it
 resolves dependencies and runs target code.
 
+# Evaluation and calibration
+
+The project includes a public calibration workflow for real repositories. The
+manifest stores repository URLs and review focus areas, while manual notes record
+whether focused findings are actionable, expected absent, false positive, or
+false negative. The corpus does not vendor third-party code.
+
+The 2026-07-09 maintainer snapshot scanned 80 public research and scientific
+software repositories with the static scanner, loaded 80 focused manual review
+notes, and reported 0 clone or scan errors and 0 expected-absent regressions.
+The expected-absent checks cover first-run trust cases such as root-level
+research entrypoints, README-documented commands, notebook secret-output noise,
+library-shaped package layouts, local-path examples, and seeded-randomness
+plumbing. The same snapshot is summarized in a public data brief in the
+repository documentation.
+
+This corpus is a calibration set rather than a benchmark. It is used to make
+rule changes evidence-driven, to avoid overfitting to toy fixtures, and to keep
+high-severity findings conservative. It cannot prove that a project reproduces a
+paper; it can show whether rrdoctor's static release-readiness signals remain
+stable across diverse repository shapes.
+
 # Research impact statement
 
 `rrdoctor` is designed to improve the handoff quality of research code before
@@ -107,10 +132,10 @@ artifact review, public archival, or lab-to-lab reuse. The current release
 provides a tested Python package, a GitHub Action, rule documentation, example
 reports, an evaluation corpus workflow for public repositories, agent-integration
 templates for deterministic coding-agent review loops, and a Zenodo archive DOI.
-The project does not claim external adoption in this draft. Its
-near-term significance is that it provides a concrete, repeatable artifact
-readiness gate that can be used by individual maintainers and evaluated against
-public research repositories.
+The project does not claim external adoption in this draft. Its near-term
+significance is that it provides a concrete, repeatable artifact readiness gate
+that can be used by individual maintainers, evaluated against public research
+repositories, and embedded into pull requests or coding-agent repair loops.
 
 The broader research value is measurement. Because reports are deterministic
 and machine-readable, `rrdoctor` can support corpus studies of repository
