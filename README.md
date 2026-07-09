@@ -3,14 +3,16 @@
 Get your research artifact ready for Artifact Evaluation before the deadline:
 scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
-Hosted demo: <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
-Or run the local static scan without installing:
+Web demo for public repos: <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
+If Streamlit asks you to sign in, the demo deployment is private or asleep too deeply;
+the local zero-install command below is the reliable path:
 
 ```bash
 uvx rrdoctor scan .
 ```
 
-Streamlit may take a minute to wake the hosted app after inactivity.
+Maintainers can check anonymous demo access with
+`python scripts/check_live_demo.py https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/`.
 
 ![rrdoctor demo](docs/demo.gif)
 
