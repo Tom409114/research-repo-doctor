@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Reduced `RRD050` first-run noise for model-release repositories by treating
+  root, `scripts/`, and `tools/` `demo.py`, `inference.py`, `predict.py`,
+  `sample.py`, and `generate.py` files plus README-documented commands as
+  experiment entrypoints; `verify` now detects the same entrypoint family for
+  the L3 run-path ladder.
 - Reduced `RRD043` local-path noise for vendored dependency trees such as
   `dependencies/`, `third_party/`, and `vendor/`, after the instant-ngp corpus
   review exposed a vendored TinyEXR Windows test path as non-actionable noise.

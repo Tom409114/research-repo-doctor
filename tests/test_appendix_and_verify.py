@@ -265,6 +265,25 @@ def test_verification_detects_root_main_variant_entrypoint(tmp_path) -> None:
     assert display == "python main_finetune.py"
 
 
+def test_verification_detects_root_demo_entrypoint(tmp_path) -> None:
+    (tmp_path / "demo.py").write_text("print('demo')\n", encoding="utf-8")
+
+    runnable, display = _entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[-1] == "demo.py"
+    assert display == "python demo.py"
+
+
+def test_verification_does_not_autorun_demo_helper(tmp_path) -> None:
+    (tmp_path / "demo_utils.py").write_text("HELPER = True\n", encoding="utf-8")
+
+    runnable, display = _entrypoint_command(tmp_path)
+
+    assert runnable is None
+    assert display == ""
+
+
 def test_verification_prefers_documented_readme_entrypoint(tmp_path) -> None:
     (tmp_path / "train.py").write_text("print('train')\n", encoding="utf-8")
     (tmp_path / "README.md").write_text(
@@ -291,6 +310,29 @@ def test_verification_accepts_documented_main_variant_command(tmp_path) -> None:
     assert runnable is not None
     assert runnable[1:] == ["main_finetune.py", "--eval", "--data_path", "${IMAGENET_DIR}"]
     assert display == "python main_finetune.py --eval --data_path '${IMAGENET_DIR}'"
+
+
+def test_verification_accepts_documented_inference_command(tmp_path) -> None:
+    (tmp_path / "inference.py").write_text("print('infer')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n"
+        "```bash\n"
+        "python inference.py --checkpoint weights/model.pt --input image.jpg\n"
+        "```\n",
+        encoding="utf-8",
+    )
+
+    runnable, display = _readme_entrypoint_command(tmp_path)
+
+    assert runnable is not None
+    assert runnable[1:] == [
+        "inference.py",
+        "--checkpoint",
+        "weights/model.pt",
+        "--input",
+        "image.jpg",
+    ]
+    assert display == "python inference.py --checkpoint weights/model.pt --input image.jpg"
 
 
 def test_verification_ignores_non_file_backed_readme_command(tmp_path) -> None:

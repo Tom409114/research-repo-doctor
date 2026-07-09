@@ -22,6 +22,26 @@ def test_root_main_variant_counts_as_experiment_entrypoint(tmp_path) -> None:
     assert not report.findings
 
 
+def test_root_model_release_demo_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "demo.py").write_text("print('demo inference')\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_helper_demo_utils_does_not_count_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "demo_utils.py").write_text("HELPER = True\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Paper artifact\n\nThis repository does not document a reproduction command.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+
+
 def test_readme_train_command_counts_as_experiment_entrypoint(tmp_path) -> None:
     (tmp_path / "README.md").write_text(
         "# Demo\n\nRun `python train.py config/default.py` to reproduce the main run.\n",
@@ -36,6 +56,18 @@ def test_readme_train_command_counts_as_experiment_entrypoint(tmp_path) -> None:
 def test_readme_main_variant_command_counts_as_experiment_entrypoint(tmp_path) -> None:
     (tmp_path / "README.md").write_text(
         "# Demo\n\nRun `python main_finetune.py --eval --data_path ${IMAGENET_DIR}`.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_readme_inference_command_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "inference.py").write_text("print('infer')\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\nRun `python inference.py --checkpoint weights/model.pt --input image.jpg`.\n",
         encoding="utf-8",
     )
 

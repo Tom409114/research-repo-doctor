@@ -62,12 +62,14 @@ as `python train.py`, `python eval.py`, `make reproduce`, `snakemake`, or
 `nextflow run ...`.
 
 `RRD050` recognizes common research entrypoints including root-level `train.py`,
-`main.py`, `run.py`, `main_*.py`/`main-*.py`, `scripts/`, and ML-style `tools/train.py` or
-`tools/test.py` entrypoints, README-documented `python scripts/*.py` or
-`python tools/*.py` commands, README-documented `python -m package.train`
-commands, pyproject-declared console scripts shown in the README, eval/reproduce
-scripts, Make targets, Snakemake/Nextflow workflow files, and README commands
-such as `python train.py ...`. Reusable library or framework projects with
+`main.py`, `run.py`, `demo.py`, `inference.py`, `sample.py`, `generate.py`,
+`predict.py`, `main_*.py`/`main-*.py`, `scripts/`, and ML-style
+`tools/train.py` or `tools/test.py` entrypoints, README-documented
+`python scripts/*.py` or `python tools/*.py` commands, README-documented
+`python -m package.train` commands, pyproject-declared console scripts shown in
+the README, eval/reproduce/demo/inference scripts, Make targets,
+Snakemake/Nextflow workflow files, and README commands such as
+`python train.py ...`. Reusable library or framework projects with
 standard package metadata, docs/tests/examples structure, and library-oriented
 README language are not treated as missing a paper experiment entrypoint. Common
 monorepo-style library layouts with package metadata under `package/` are also

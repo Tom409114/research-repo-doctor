@@ -32,6 +32,12 @@ class ExperimentEntrypointMissingRule(Rule):
             "train*.py",
             "eval*.py",
             "evaluate*.py",
+            "infer.py",
+            "inference.py",
+            "predict.py",
+            "sample.py",
+            "generate.py",
+            "demo.py",
             "run*.py",
             "main.py",
             "main_*.py",
@@ -48,10 +54,22 @@ class ExperimentEntrypointMissingRule(Rule):
             "scripts/train*.py",
             "scripts/eval*.py",
             "scripts/evaluate*.py",
+            "scripts/infer.py",
+            "scripts/inference.py",
+            "scripts/predict.py",
+            "scripts/sample.py",
+            "scripts/generate.py",
+            "scripts/demo.py",
             "scripts/run*.py",
             "tools/train*.py",
             "tools/eval*.py",
             "tools/evaluate*.py",
+            "tools/infer.py",
+            "tools/inference.py",
+            "tools/predict.py",
+            "tools/sample.py",
+            "tools/generate.py",
+            "tools/demo.py",
             "tools/test*.py",
             "tools/run*.py",
             "*/train.py",
@@ -165,14 +183,14 @@ def _readme_text(context: ScanContext) -> str:
 _DOCUMENTED_ENTRYPOINT_RE = re.compile(
     r"(?ix)"
     r"\b("
-    r"python(?:\d+(?:\.\d+)?)?\s+-m\s+[A-Za-z0-9_.-]*(?:train|main|run|eval|evaluate|infer|reproduce)[A-Za-z0-9_.-]*\b|"
-    r"python(?:\d+(?:\.\d+)?)?(?:\s+-m)?\s+(?:\./)?(?:train|main|run|eval|evaluate|infer|reproduce)(?:\.py)?\b|"
-    r"python(?:\d+(?:\.\d+)?)?\s+(?:\./)?(?:train|main|run|eval|evaluate|infer|reproduce)[_-][^\s`]+\.py\b|"
+    r"python(?:\d+(?:\.\d+)?)?\s+-m\s+[A-Za-z0-9_.-]*(?:train|main|run|eval|evaluate|infer|inference|predict|sample|generate|demo|reproduce)[A-Za-z0-9_.-]*\b|"
+    r"python(?:\d+(?:\.\d+)?)?(?:\s+-m)?\s+(?:\./)?(?:train|main|run|eval|evaluate|infer|inference|predict|sample|generate|demo|reproduce)(?:\.py)?\b|"
+    r"python(?:\d+(?:\.\d+)?)?\s+(?:\./)?(?:train|main|run|eval|evaluate|infer|inference|predict|sample|generate|demo|reproduce)[_-][^\s`]+\.py\b|"
     r"python(?:\d+(?:\.\d+)?)?\s+(?:\./)?(?:scripts|tools)/[^\s`]+\.py\b|"
-    r"python(?:\d+(?:\.\d+)?)?\s+(?:\./)?src/[^\s`]*(?:train|test|eval|evaluate|infer|run|reproduce)[^\s`]*\.py\b|"
-    r"python(?:\d+(?:\.\d+)?)?\s+(?:\$\{?[A-Za-z_][A-Za-z0-9_]*\}?/)?[^\s`]*(?:train|main|run|eval|evaluate|infer|reproduce)[^\s`]*\.py\b|"
-    r"bash\s+(?:\./)?(?:scripts/)?(?:run|reproduce|train|eval)[^\s`]*\.sh\b|"
-    r"make\s+(?:all|run|train|eval|evaluate|reproduce|results)\b|"
+    r"python(?:\d+(?:\.\d+)?)?\s+(?:\./)?src/[^\s`]*(?:train|test|eval|evaluate|infer|inference|predict|sample|generate|demo|run|reproduce)[^\s`]*\.py\b|"
+    r"python(?:\d+(?:\.\d+)?)?\s+(?:\$\{?[A-Za-z_][A-Za-z0-9_]*\}?/)?[^\s`]*(?:train|main|run|eval|evaluate|infer|inference|predict|sample|generate|demo|reproduce)[^\s`]*\.py\b|"
+    r"bash\s+(?:\./)?(?:scripts/)?(?:run|reproduce|train|eval|infer|inference|predict|sample|generate|demo)[^\s`]*\.sh\b|"
+    r"make\s+(?:all|run|train|eval|evaluate|infer|inference|predict|sample|generate|demo|reproduce|results)\b|"
     r"snakemake\b|"
     r"nextflow\s+run\b|"
     r"Rscript\s+[^\s`]+|"

@@ -184,19 +184,50 @@ _PYTHON_ENTRYPOINTS = (
     "reproduce.py",
     "eval.py",
     "evaluate.py",
+    "infer.py",
+    "inference.py",
+    "predict.py",
+    "sample.py",
+    "generate.py",
+    "demo.py",
     "scripts/train.py",
     "scripts/main.py",
     "scripts/run.py",
     "scripts/reproduce.py",
     "scripts/eval.py",
     "scripts/evaluate.py",
+    "scripts/infer.py",
+    "scripts/inference.py",
+    "scripts/predict.py",
+    "scripts/sample.py",
+    "scripts/generate.py",
+    "scripts/demo.py",
     "tools/train.py",
     "tools/test.py",
     "tools/eval.py",
     "tools/evaluate.py",
+    "tools/infer.py",
+    "tools/inference.py",
+    "tools/predict.py",
+    "tools/sample.py",
+    "tools/generate.py",
+    "tools/demo.py",
     "tools/run.py",
     "tools/reproduce.py",
 )
+SCRIPT_ENTRYPOINT_STEMS = {
+    "run",
+    "reproduce",
+    "train",
+    "eval",
+    "evaluate",
+    "infer",
+    "inference",
+    "predict",
+    "sample",
+    "generate",
+    "demo",
+}
 
 
 def _entrypoint_command(root: Path) -> tuple[list[str] | None, str]:
@@ -300,9 +331,9 @@ def _parse_documented_entrypoint(
     if command == "nextflow" and len(parts) > 1 and parts[1] == "run":
         return _parse_documented_nextflow(parts, root)
     if command == "rscript":
-        return _parse_documented_script_runner(parts, root, {"run", "reproduce", "train", "eval"})
+        return _parse_documented_script_runner(parts, root, SCRIPT_ENTRYPOINT_STEMS)
     if command == "julia":
-        return _parse_documented_script_runner(parts, root, {"run", "reproduce", "train", "eval"})
+        return _parse_documented_script_runner(parts, root, SCRIPT_ENTRYPOINT_STEMS)
     if console_scripts and command in console_scripts and len(parts) > 1:
         return parts, shlex.join(parts)
     return None, ""
@@ -386,7 +417,7 @@ def _parse_documented_make(parts: list[str], root: Path) -> tuple[list[str] | No
     if len(parts) == 1:
         return parts, "make"
     target = parts[1]
-    if target in {"all", "run", "train", "eval", "evaluate", "reproduce", "results"}:
+    if target in {"all", "results", *SCRIPT_ENTRYPOINT_STEMS}:
         return parts, shlex.join(parts)
     return None, ""
 
@@ -435,11 +466,22 @@ def _is_python_entrypoint(path: str) -> bool:
             "reproduce.py",
             "eval.py",
             "evaluate.py",
+            "infer.py",
+            "inference.py",
+            "predict.py",
+            "sample.py",
+            "generate.py",
+            "demo.py",
         }
-        or bool(re.match(r"(?i)^(?:train|main|run|reproduce|eval|evaluate)[_-].+\.py$", name))
         or bool(
             re.match(
-                r"(?i)(?:scripts|tools)/.*\.py$|src/.*(?:train|test|run|eval|evaluate|reproduce).*\.py$",
+                r"(?i)^(?:train|main|run|reproduce|eval|evaluate|infer|inference|predict|sample|generate|demo)[_-].+\.py$",
+                name,
+            )
+        )
+        or bool(
+            re.match(
+                r"(?i)(?:scripts|tools)/.*\.py$|src/.*(?:train|test|run|eval|evaluate|infer|inference|predict|sample|generate|demo|reproduce).*\.py$",
                 rel,
             )
         )
