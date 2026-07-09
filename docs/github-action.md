@@ -141,8 +141,11 @@ Set `verify: "true"` to emit a static L1/L2/L3 verification report:
 ```
 
 By default this does not execute target repository code and does not fail the
-workflow. For repositories you trust, add `verify-run: "true"` to resolve
-dependencies and execute the detected entrypoint under `verify-timeout`.
+workflow. For repositories you trust, add `verify-run: "true"`. Supported
+Python repositories are verified in a temporary isolated environment with
+declared dependencies installed before the detected entrypoint runs under
+`verify-timeout`; dependency installation may execute project build hooks.
+Other ecosystems retain an explicit resolver preflight.
 Set `verify-command` when the artifact has a specific quickstart command that
 should be used as the L3 gate. The generated report includes the gate outcome,
 failure threshold, timeout, L3 command source, trust boundary, per-step details,

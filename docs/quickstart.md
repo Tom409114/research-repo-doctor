@@ -71,7 +71,8 @@ rrdoctor prepare . --profile acm --out-dir rrdoctor-prep
 # ACM Artifact Appendix skeleton + ACM badge / NeurIPS checklist mapping:
 rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
 
-# Verification ladder. Static by default; --run actually resolves deps and runs the entrypoint:
+# Verification ladder. Static by default; --run prepares an isolated Python environment
+# where supported, installs declared dependencies, and runs the entrypoint:
 rrdoctor verify . --profile neurips
 rrdoctor verify . --run --timeout 600        # only on repositories you trust
 rrdoctor verify . --command "python train.py config/default.py" --run --timeout 600

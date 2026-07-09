@@ -12,8 +12,13 @@ from rrdoctor.verification import (
     _build_plan,
     _entrypoint_command,
     _l2_step,
+    _python_install_plan,
+    _python_runtime_environment,
+    _PythonRuntime,
     _readme_entrypoint_command,
     _run_command,
+    _runtime_argv,
+    _sanitize_runtime_log,
     build_steps,
     render_verification,
     verification_failed,
@@ -243,6 +248,103 @@ def test_verification_l2_dynamic_uses_parsed_argument_vector(tmp_path, monkeypat
 
     assert step.status == "pass"
     assert captured["cmd"] == ["pip", "install", "--dry-run", "-r", "requirements/main.txt"]
+
+
+def test_python_install_plan_reads_pep621_dependencies(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        'name = "demo"\n'
+        'version = "0.1.0"\n'
+        'dependencies = ["requests==2.32.4", "numpy>=2"]\n',
+        encoding="utf-8",
+    )
+    runtime_python = tmp_path / "venv" / "python"
+
+    argv, display, error = _python_install_plan(tmp_path, Path("pyproject.toml"), runtime_python)
+
+    assert error == ""
+    assert argv is not None
+    assert argv[-2:] == ["requests==2.32.4", "numpy>=2"]
+    assert "python -m pip install" in display
+
+
+def test_runtime_argv_replaces_python_launcher(tmp_path) -> None:
+    runtime = _PythonRuntime(
+        python=tmp_path / "venv" / "python",
+        bin_dir=tmp_path / "venv",
+        env={},
+        temp_root=tmp_path,
+    )
+
+    assert _runtime_argv(["python", "train.py"], runtime) == [
+        str(runtime.python),
+        "train.py",
+    ]
+    assert _runtime_argv(["py", "-3", "train.py"], runtime) == [
+        str(runtime.python),
+        "train.py",
+    ]
+    assert _runtime_argv(["python3.10", "train.py"], runtime) == [
+        str(runtime.python),
+        "train.py",
+    ]
+
+
+def test_python_runtime_environment_drops_host_import_paths(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("PYTHONHOME", str(tmp_path / "host-python"))
+    monkeypatch.setenv("PYTHONPATH", str(tmp_path / "host-packages"))
+
+    env = _python_runtime_environment(tmp_path / "venv", tmp_path / "venv" / "bin")
+
+    assert "PYTHONHOME" not in env
+    assert "PYTHONPATH" not in env
+
+
+def test_runtime_log_redacts_machine_specific_paths(tmp_path) -> None:
+    temp_root = tmp_path / "verify-temp"
+    repo_root = Path.home() / "projects" / "paper-repo"
+    log = (
+        f"created {temp_root / 'venv'}\n"
+        f"processing {repo_root}\n"
+        f"cache {Path.home() / '.cache' / 'pip'}"
+    )
+
+    sanitized = _sanitize_runtime_log(log, temp_root, repo_root)
+
+    assert str(temp_root) not in sanitized
+    assert str(repo_root) not in sanitized
+    assert str(Path.home()) not in sanitized
+    assert "<temporary-environment>" in sanitized
+    assert "<repository-root>" in sanitized
+    assert "<home>" in sanitized
+
+
+def test_dynamic_python_verification_runs_l3_in_isolated_environment(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "isolated-demo"\nversion = "0.1.0"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Isolated demo\n\n```bash\npython train.py\n```\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "train.py").write_text(
+        "import os\n"
+        "import sys\n\n"
+        "assert os.environ.get('VIRTUAL_ENV')\n"
+        "assert sys.prefix != sys.base_prefix\n"
+        "print('isolated')\n",
+        encoding="utf-8",
+    )
+    report = Scanner(DEFAULT_CONFIG).scan(tmp_path)
+
+    steps = build_steps(report, tmp_path, run=True, timeout=30)
+
+    assert steps[1].status == "pass"
+    assert "isolated Python environment" in steps[1].detail
+    assert steps[2].status == "pass"
+    assert "isolated Python environment" in steps[2].detail
+    assert steps[2].log == "isolated"
 
 
 def test_verification_detects_root_python_entrypoint(tmp_path) -> None:

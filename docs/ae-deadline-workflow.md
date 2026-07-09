@@ -138,8 +138,11 @@ rrdoctor verify . --profile acm --command "python train.py config/default.py" --
 ```
 
 Only use `--run` on trusted repositories. Static scans do not execute target
-code. Dynamic verification resolves dependencies and runs the declared
-entrypoint, so it should be treated like running the repository yourself. With
+code. For supported Python repositories, dynamic verification creates a
+temporary isolated environment, installs declared dependencies, and runs the
+declared entrypoint in that environment. Dependency installation may execute
+project build hooks. Other ecosystems retain an explicit resolver preflight.
+Treat dynamic verification like running the repository yourself. With
 `--fail-on error`, static L1 errors and dynamic L2/L3 failures or blocked steps
 return a nonzero exit code, making the command usable as a CI or release gate.
 The same gate decision is shown at the top of the generated verification report

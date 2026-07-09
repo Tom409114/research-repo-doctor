@@ -1,10 +1,12 @@
 """Reproducibility verification ladder (L1 static, L2 build, L3 execution).
 
 L1 is fully deterministic and offline. With ``run=True`` (the CLI ``--run`` flag)
-L2 actually shells out to a dependency resolver and L3 actually executes a
-declared entrypoint, each under a timeout, capturing the real result. When a
-tool is missing or execution is not requested, the step says so honestly instead
-of pretending to have run.
+L2 creates a temporary isolated environment and installs declared dependencies
+for supported Python repositories. L3 then executes a declared entrypoint in
+that environment. Other ecosystems retain an honest resolver preflight. Every
+dynamic command runs under a timeout and captures the real result. When a tool
+is missing or execution is not requested, the step says so instead of pretending
+to have run.
 
 Security note: ``--run`` executes code and resolvers from the target repository.
 Only use it on repositories you trust.
@@ -12,13 +14,21 @@ Only use it on repositories you trust.
 
 from __future__ import annotations
 
+import os
 import re
 import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:  # pragma: no cover - Python 3.10 fallback
+    import tomli as tomllib
 
 from rrdoctor.models import ScanReport
 from rrdoctor.rules.base import read_text
@@ -31,6 +41,8 @@ PYTHON_L2_MANIFESTS = (
     "requirements-dev.txt",
     "requirements/dev.txt",
     "pyproject.toml",
+    "setup.py",
+    "setup.cfg",
 )
 CONDA_L2_MANIFESTS = ("environment.yml", "environment.yaml", "conda.yml", "conda.yaml")
 
@@ -48,7 +60,22 @@ class LadderStep:
     source: str = ""
 
 
-def _run_command(cmd: list[str], cwd: Path, timeout: int) -> tuple[int | None, str]:
+@dataclass(frozen=True)
+class _PythonRuntime:
+    """Temporary Python environment shared by L2 and L3."""
+
+    python: Path
+    bin_dir: Path
+    env: dict[str, str]
+    temp_root: Path
+
+
+def _run_command(
+    cmd: list[str],
+    cwd: Path,
+    timeout: int,
+    env: dict[str, str] | None = None,
+) -> tuple[int | None, str]:
     """Run a command, returning (returncode, captured tail).
 
     returncode is None when the tool is not installed. A timeout maps to 124.
@@ -62,6 +89,7 @@ def _run_command(cmd: list[str], cwd: Path, timeout: int) -> tuple[int | None, s
             text=True,
             timeout=timeout,
             check=False,
+            env=env,
         )
     except FileNotFoundError:
         return None, f"tool not found: {cmd[0]}"
@@ -97,7 +125,12 @@ def _build_plan(root: Path) -> tuple[list[str], str | None, str]:
     python_manifest = _first_existing(root, PYTHON_L2_MANIFESTS)
     if python_manifest:
         target = python_manifest.as_posix()
-        if shutil.which("uv"):
+        if target in {"setup.py", "setup.cfg"} and shutil.which("pip"):
+            display.append("pip install --dry-run .  # resolve Python dependencies")
+            runnable = "pip install --dry-run ."
+        elif target in {"setup.py", "setup.cfg"}:
+            missing = "pip"
+        elif shutil.which("uv"):
             display.append(f"uv pip compile {target}  # resolve Python dependencies")
             runnable = f"uv pip compile {target}"
         elif shutil.which("pip"):
@@ -140,6 +173,220 @@ def _first_available_tool(candidates: tuple[str, ...]) -> str | None:
     return None
 
 
+def _python_runtime_paths(venv_root: Path) -> tuple[Path, Path]:
+    bin_dir = venv_root / ("Scripts" if sys.platform == "win32" else "bin")
+    python = bin_dir / ("python.exe" if sys.platform == "win32" else "python")
+    return python, bin_dir
+
+
+def _python_runtime_environment(venv_root: Path, bin_dir: Path) -> dict[str, str]:
+    env = os.environ.copy()
+    env.pop("PYTHONHOME", None)
+    env.pop("PYTHONPATH", None)
+    env["VIRTUAL_ENV"] = str(venv_root)
+    env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
+    env["PYTHONNOUSERSITE"] = "1"
+    env["PIP_DISABLE_PIP_VERSION_CHECK"] = "1"
+    return env
+
+
+def _read_pyproject(root: Path) -> tuple[dict[str, Any], str]:
+    path = root / "pyproject.toml"
+    try:
+        parsed = tomllib.loads(read_text(path))
+    except (OSError, tomllib.TOMLDecodeError) as exc:
+        return {}, f"Could not parse pyproject.toml: {exc}"
+    return parsed, ""
+
+
+def _python_install_plan(
+    root: Path,
+    manifest: Path,
+    runtime_python: Path,
+) -> tuple[list[str] | None, str, str]:
+    """Return install argv, display command, and a planning error."""
+
+    target = manifest.as_posix()
+    base = [
+        str(runtime_python),
+        "-m",
+        "pip",
+        "install",
+        "--disable-pip-version-check",
+        "--no-input",
+    ]
+    display_base = [
+        "python",
+        "-m",
+        "pip",
+        "install",
+        "--disable-pip-version-check",
+        "--no-input",
+    ]
+
+    if target.endswith(".txt"):
+        args = ["-r", target]
+        return [*base, *args], shlex.join([*display_base, *args]), ""
+
+    if target in {"setup.py", "setup.cfg"}:
+        return [*base, "."], shlex.join([*display_base, "."]), ""
+
+    if target != "pyproject.toml":
+        return None, "", f"Unsupported Python dependency manifest: {target}"
+
+    parsed, error = _read_pyproject(root)
+    if error:
+        return None, "", error
+
+    if isinstance(parsed.get("build-system"), dict):
+        return [*base, "."], shlex.join([*display_base, "."]), ""
+
+    project = parsed.get("project")
+    dependencies = project.get("dependencies", []) if isinstance(project, dict) else []
+    if not isinstance(dependencies, list) or not all(
+        isinstance(dependency, str) for dependency in dependencies
+    ):
+        return None, "", "pyproject.toml project.dependencies must be a list of strings"
+    if dependencies:
+        return [*base, *dependencies], shlex.join([*display_base, *dependencies]), ""
+    return None, "", ""
+
+
+def _sanitize_runtime_log(log: str, temp_root: Path, repo_root: Path | None = None) -> str:
+    sanitized = log
+    replacements = [(temp_root, "<temporary-environment>")]
+    if repo_root is not None:
+        replacements.append((repo_root, "<repository-root>"))
+    replacements.append((Path.home(), "<home>"))
+    flags = re.IGNORECASE if sys.platform == "win32" else 0
+    for path, label in replacements:
+        variants = {str(path), path.as_posix(), str(path).replace("\\", "/")}
+        for value in sorted(variants, key=len, reverse=True):
+            sanitized = re.sub(re.escape(value), label, sanitized, flags=flags)
+    return sanitized
+
+
+def _prepare_python_runtime(
+    root: Path,
+    manifest: Path,
+    temp_root: Path,
+    timeout: int,
+) -> tuple[LadderStep, _PythonRuntime | None]:
+    venv_root = temp_root / "venv"
+    commands = ["python -m venv <temporary-environment>"]
+    create_code, create_log = _run_command(
+        [sys.executable, "-m", "venv", str(venv_root)],
+        root,
+        timeout,
+    )
+    create_log = _sanitize_runtime_log(create_log, temp_root, root)
+    if create_code is None:
+        return (
+            LadderStep(
+                "L2",
+                "Environment is installable",
+                "blocked",
+                "The current Python interpreter could not create an isolated environment.",
+                commands=commands,
+                log=create_log,
+            ),
+            None,
+        )
+    if create_code != 0:
+        return (
+            LadderStep(
+                "L2",
+                "Environment is installable",
+                "fail",
+                f"Creating the isolated Python environment failed (exit {create_code}).",
+                commands=commands,
+                log=create_log,
+            ),
+            None,
+        )
+
+    runtime_python, bin_dir = _python_runtime_paths(venv_root)
+    runtime = _PythonRuntime(
+        runtime_python,
+        bin_dir,
+        _python_runtime_environment(venv_root, bin_dir),
+        temp_root,
+    )
+    install_argv, install_display, plan_error = _python_install_plan(root, manifest, runtime_python)
+    if plan_error:
+        return (
+            LadderStep(
+                "L2",
+                "Environment is installable",
+                "fail",
+                plan_error,
+                commands=commands,
+                log=create_log,
+            ),
+            None,
+        )
+    if install_argv is None:
+        return (
+            LadderStep(
+                "L2",
+                "Environment is installable",
+                "pass",
+                "Created an isolated Python environment; no runtime dependencies were declared.",
+                commands=commands,
+                log=create_log,
+            ),
+            runtime,
+        )
+
+    commands.append(install_display)
+    install_code, install_log = _run_command(
+        install_argv,
+        root,
+        timeout,
+        env=runtime.env,
+    )
+    log = _sanitize_runtime_log(
+        "\n".join(part for part in (create_log, install_log) if part),
+        temp_root,
+        root,
+    )
+    if install_code is None:
+        return (
+            LadderStep(
+                "L2",
+                "Environment is installable",
+                "blocked",
+                "pip is unavailable inside the isolated Python environment.",
+                commands=commands,
+                log=log,
+            ),
+            None,
+        )
+    if install_code != 0:
+        return (
+            LadderStep(
+                "L2",
+                "Environment is installable",
+                "fail",
+                f"Installing declared dependencies failed (exit {install_code}). See log.",
+                commands=commands,
+                log=log,
+            ),
+            None,
+        )
+    return (
+        LadderStep(
+            "L2",
+            "Environment is installable",
+            "pass",
+            "Created an isolated Python environment and installed declared dependencies.",
+            commands=commands,
+            log=log,
+        ),
+        runtime,
+    )
+
+
 def _l2_step(root: Path, run: bool, timeout: int) -> LadderStep:
     display, runnable, missing = _build_plan(root)
     if not display and not missing:
@@ -162,7 +409,7 @@ def _l2_step(root: Path, run: bool, timeout: int) -> LadderStep:
             "L2",
             "Environment is resolvable",
             "skipped",
-            "Static mode. Re-run with --run to actually resolve dependencies.",
+            "Static mode. Re-run with --run to prepare the dynamic environment.",
             commands=display,
         )
 
@@ -451,7 +698,10 @@ def _parse_documented_script_runner(
 
 
 def _is_python_command(command: str) -> bool:
-    return command in {"python", "python3", "python.exe", "py"}
+    executable = Path(command).name.casefold()
+    return executable in {"py", "py.exe"} or bool(
+        re.fullmatch(r"python(?:\d+(?:\.\d+)?)?(?:\.exe)?", executable)
+    )
 
 
 def _is_python_entrypoint(path: str) -> bool:
@@ -554,7 +804,27 @@ def _specified_entrypoint_command(command: str | None) -> tuple[list[str] | None
     return parts, shlex.join(parts)
 
 
-def _l3_step(root: Path, run: bool, timeout: int, command: str | None = None) -> LadderStep:
+def _runtime_argv(runnable: list[str], runtime: _PythonRuntime) -> list[str]:
+    if not runnable:
+        return runnable
+    executable = Path(runnable[0]).name.casefold()
+    if _is_python_command(executable) and executable not in {"py", "py.exe"}:
+        return [str(runtime.python), *runnable[1:]]
+    if executable in {"py", "py.exe"}:
+        args = runnable[1:]
+        if args and re.fullmatch(r"-\d+(?:\.\d+)?", args[0]):
+            args = args[1:]
+        return [str(runtime.python), *args]
+    return runnable
+
+
+def _l3_step(
+    root: Path,
+    run: bool,
+    timeout: int,
+    command: str | None = None,
+    runtime: _PythonRuntime | None = None,
+) -> LadderStep:
     specified = command is not None
     if specified:
         runnable, display = _specified_entrypoint_command(command)
@@ -592,21 +862,31 @@ def _l3_step(root: Path, run: bool, timeout: int, command: str | None = None) ->
             commands=commands,
             source=source,
         )
-    code, log = _run_command(runnable, root, timeout)
+    executed = _runtime_argv(runnable, runtime) if runtime is not None else runnable
+    code, log = _run_command(
+        executed,
+        root,
+        timeout,
+        env=runtime.env if runtime is not None else None,
+    )
+    if runtime is not None:
+        log = _sanitize_runtime_log(log, runtime.temp_root, root)
+    environment = " in the isolated Python environment" if runtime is not None else ""
     if code is None:
         status, detail = (
             "blocked",
-            f"Entrypoint runner is not installed. Command source: {source_label}.",
+            f"Entrypoint runner is not installed{environment}. Command source: {source_label}.",
         )
     elif code == 0:
         status, detail = (
             "pass",
-            f"Entrypoint executed without error. Command source: {source_label}.",
+            f"Entrypoint executed without error{environment}. Command source: {source_label}.",
         )
     else:
         status, detail = (
             "fail",
-            f"Entrypoint failed (exit {code}). Command source: {source_label}. See log.",
+            f"Entrypoint failed (exit {code}){environment}. "
+            f"Command source: {source_label}. See log.",
         )
     return LadderStep(
         "L3",
@@ -631,8 +911,29 @@ def build_steps(
 ) -> list[LadderStep]:
     """Compute all ladder steps."""
 
+    l1 = _l1_step(report)
+    python_manifest = _first_existing(root, PYTHON_L2_MANIFESTS)
+    if run and python_manifest is not None:
+        with tempfile.TemporaryDirectory(prefix="rrdoctor-verify-") as temp_dir:
+            l2, runtime = _prepare_python_runtime(
+                root,
+                python_manifest,
+                Path(temp_dir),
+                timeout,
+            )
+            if runtime is None:
+                l3 = LadderStep(
+                    "L3",
+                    "Declared entrypoint produces output",
+                    "blocked",
+                    "L3 was not executed because isolated Python environment preparation failed.",
+                )
+            else:
+                l3 = _l3_step(root, run, timeout, command, runtime)
+        return [l1, l2, l3]
+
     return [
-        _l1_step(report),
+        l1,
         _l2_step(root, run, timeout),
         _l3_step(root, run, timeout, command),
     ]
@@ -670,14 +971,17 @@ def render_verification(
             "## Evidence summary",
             "",
             "- L1 always uses deterministic local static checks.",
-            "- L2 resolves the dependency environment only when dynamic mode is enabled.",
+            "- L2 creates a temporary isolated environment and installs declared Python "
+            "dependencies when dynamic mode is enabled and a supported Python manifest exists.",
+            "- L2 uses an ecosystem resolver preflight when isolated installation is not "
+            "supported for the detected manifest.",
             "- L3 executes the detected or specified entrypoint only when dynamic mode is enabled.",
             f"- L3 command source: {l3_source}."
             if l3_source
             else "- L3 command source: none detected.",
             (
                 "- Trust boundary: dynamic mode executed target-repository commands in this "
-                "checkout."
+                "checkout and may also have executed dependency build/install hooks."
                 if run
                 else "- Trust boundary: static mode did not execute target-repository code."
             ),
@@ -719,8 +1023,8 @@ def render_verification(
         lines.append("")
     if not run:
         lines.append(
-            "> L1 is deterministic. L2/L3 are static here; pass --run to actually resolve "
-            "dependencies and execute the entrypoint (only on repositories you trust)."
+            "> L1 is deterministic. L2/L3 are static here; pass --run to prepare the "
+            "dynamic environment and execute the entrypoint (only on repositories you trust)."
         )
         lines.append("")
     return "\n".join(lines)

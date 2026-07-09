@@ -92,8 +92,10 @@ If you installed rrdoctor into the environment already, use:
 `scan` and static `verify` are deterministic local analysis. They do not require
 an API key and do not install or execute the target repository.
 
-`verify(run=true, timeout=600)` resolves dependencies and runs the detected
-entrypoint under an explicit timeout. Pass
+`verify(run=true, timeout=600)` creates a temporary isolated environment and
+installs declared dependencies for supported Python repositories, then runs the
+detected entrypoint under an explicit timeout. Dependency installation may run
+project build hooks; other ecosystems retain a resolver preflight. Pass
 `command="python train.py config/default.py"` to pin the artifact's official
 quickstart command as the L3 gate. Use dynamic verification only on repositories
 you trust, just like `rrdoctor verify --run` on the command line.

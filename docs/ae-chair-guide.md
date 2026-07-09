@@ -114,8 +114,9 @@ judgment.
 ## Safety and Limits
 
 - Static scans are safe for untrusted repositories.
-- `verify --run` executes repository code and should be used only for artifacts
-  the author or reviewer already trusts.
+- `verify --run` may install dependencies, execute project build hooks, and run
+  repository code. It should be used only for artifacts the author or reviewer
+  already trusts. Supported Python repositories use a temporary isolated venv.
 - Chairs can ask authors to run `rrdoctor verify --command "..." --run` with the
   artifact's official quickstart command, making the dynamic gate explicit.
 - Generated fixes are starter scaffolds and require human review.

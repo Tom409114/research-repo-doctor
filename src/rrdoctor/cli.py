@@ -444,7 +444,10 @@ def prepare(
         bool,
         typer.Option(
             "--run",
-            help="Resolve deps and execute the L3 entrypoint. Runs repo code.",
+            help=(
+                "Prepare the dynamic environment and execute L3. Supported Python repos "
+                "use a temporary isolated venv. Runs repo code/install hooks."
+            ),
         ),
     ] = False,
     timeout: Annotated[
@@ -581,7 +584,10 @@ def verify(
         bool,
         typer.Option(
             "--run",
-            help="Actually resolve deps (L2) and execute the entrypoint (L3). Runs repo code.",
+            help=(
+                "Actually prepare L2 and execute L3. Supported Python repos use a temporary "
+                "isolated venv. Runs repo code/install hooks."
+            ),
         ),
     ] = False,
     timeout: Annotated[
@@ -603,8 +609,10 @@ def verify(
 ) -> None:
     """Run the reproducibility verification ladder (L1 static, L2 build, L3 run).
 
-    L1 is deterministic. With --run, L2 resolves dependencies and L3 executes a
-    declared entrypoint under a timeout (only use --run on repositories you trust).
+    L1 is deterministic. With --run, supported Python repositories get a
+    temporary isolated environment with declared dependencies installed before
+    L3 executes a declared entrypoint. Other ecosystems use an honest resolver
+    preflight. Only use --run on repositories you trust.
     """
 
     if profile not in PROFILES:

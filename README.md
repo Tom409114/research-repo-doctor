@@ -41,11 +41,13 @@ uvx rrdoctor verify . --profile acm --run --timeout 600 --fail-on error  # trust
 uvx rrdoctor verify . --profile acm --command "python train.py config/default.py" --run --timeout 600 --fail-on error
 ```
 
-For trusted repositories, `rrdoctor verify --run` can go beyond static checks and actually
-resolve dependencies and execute the declared entrypoint under a timeout. With the default
-gate (`--fail-on error`), failed or blocked dynamic L2/L3 steps return a nonzero exit code.
-Use `--command` when the artifact has a specific smoke-test or quickstart command that
-reviewers should run.
+For trusted repositories, `rrdoctor verify --run` can go beyond static checks. For supported
+Python repositories it creates a temporary isolated environment, installs declared
+dependencies, and executes the declared entrypoint there under a timeout. Other ecosystems
+retain an explicit resolver preflight. With the default gate (`--fail-on error`), failed or
+blocked dynamic L2/L3 steps return a nonzero exit code. Use `--command` when the artifact has
+a specific smoke-test or quickstart command that reviewers should run. Dynamic mode may run
+dependency build/install hooks as well as the entrypoint, so never use it on untrusted code.
 `rrdoctor prepare` writes the report, agent plan, artifact appendix, and verification ladder
 into one local evidence directory.
 

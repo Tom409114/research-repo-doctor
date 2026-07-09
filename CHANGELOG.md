@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Upgraded Python `verify --run` from dependency resolution-only checks to a
+  real temporary isolated environment: declared dependencies are installed and
+  L3 executes with the isolated interpreter/PATH. Reports disclose build-hook
+  execution risk, redact temporary paths, and clean the environment afterward.
 - Corrected the citation metadata to reference the archived `v0.2.21` Zenodo
   release rather than the older `v0.2.3` record, documented the stable concept
   DOI, and added an optional post-release Zenodo metadata check.

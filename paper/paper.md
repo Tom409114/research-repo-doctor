@@ -99,9 +99,12 @@ Autofixes follow a non-destructive contract. They may create missing starter
 files, but they do not overwrite existing files. Generated content is explicitly
 a scaffold: maintainers must fill in real data provenance, citation details, and
 experiment context. Dynamic verification is similarly separated from static
-scanning. `rrdoctor verify` can summarize the L1/L2/L3 ladder without execution,
-while `rrdoctor verify --run` is reserved for trusted repositories because it
-resolves dependencies and runs target code.
+scanning. `rrdoctor verify` can summarize the L1/L2/L3 ladder without execution.
+For supported Python repositories, `rrdoctor verify --run` creates a temporary
+isolated environment, installs declared dependencies, and runs the target
+entrypoint in that environment. Other ecosystems retain an explicit resolver
+preflight. Dynamic mode is reserved for trusted repositories because dependency
+builds and target code may execute.
 
 # Evaluation and calibration
 

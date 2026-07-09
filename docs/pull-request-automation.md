@@ -112,10 +112,12 @@ summary and uploaded artifacts:
 ```
 
 The default is static and report-only. Add `verify-run: "true"` only for
-repositories you trust, because dynamic verification resolves dependencies and
-executes the detected entrypoint. Add `verify-command` when you want the L3 gate
-to use the artifact's official quickstart command. Add `verify-fail-on: error`
-when you want that dynamic step to block the workflow:
+repositories you trust. Supported Python repositories use a temporary isolated
+environment, install declared dependencies, and execute the detected entrypoint;
+installation may run project build hooks. Other ecosystems retain a resolver
+preflight. Add `verify-command` when you want the L3 gate to use the artifact's
+official quickstart command. Add `verify-fail-on: error` when you want that
+dynamic step to block the workflow:
 
 ```yaml
       - uses: Tom409114/research-repo-doctor@v0.2.21
