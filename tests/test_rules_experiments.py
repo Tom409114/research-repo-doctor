@@ -153,6 +153,55 @@ def test_documented_python3_package_script_counts_as_experiment_entrypoint(tmp_p
     assert not report.findings
 
 
+def test_reusable_library_project_does_not_require_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname = 'networkx-like-library'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.rst").write_text(
+        "NetworkX-like Library\n=====================\n\n"
+        "This is a Python package and graph analysis library with a stable API.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "tests").mkdir()
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_nested_package_library_does_not_require_experiment_entrypoint(tmp_path) -> None:
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "pyproject.toml").write_text(
+        "[project]\nname = 'mdanalysis-like-library'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.rst").write_text(
+        "MDAnalysis-like Library\n=======================\n\n"
+        "This is a Python package and molecular analysis library with a stable API.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "testsuite").mkdir()
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_paper_artifact_without_entrypoint_still_flags(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Paper artifact\n\n"
+        "This repository accompanies a paper but omits reproduction commands.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+
+
 def test_pyproject_console_script_prose_only_does_not_count(tmp_path) -> None:
     (tmp_path / "pyproject.toml").write_text(
         "[project]\nname = 'demo'\n\n[project.scripts]\ndemo-transcribe = 'demo.cli:main'\n",

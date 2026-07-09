@@ -25,6 +25,48 @@ def test_uuid_token_value_is_not_a_secret() -> None:
     assert not has_secret_like_value("secret = 10be3573-1514-4c36-9d1c-5a225cd40393")
 
 
+def test_url_query_token_is_not_a_secret() -> None:
+    signed_asset_url = (
+        "url = 'https://example-cdn.invalid/image.jpg?token="
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.long-public-asset-token'"
+    )
+
+    assert not has_secret_like_value(signed_asset_url)
+
+
+def test_token_function_call_is_not_a_secret() -> None:
+    assert not has_secret_like_value("token = _emit_tpu_python_callback(")
+
+
+def test_token_dotted_method_call_is_not_a_secret() -> None:
+    assert not has_secret_like_value("token = _given_hyperparameters.set(hparams)")
+
+
+def test_aws_key_substring_inside_biological_sequence_is_not_a_secret() -> None:
+    sequence = "KRVHSFEELERHPDFALPFVLACQSRNAKIATIAIPTIHKLIMAGVV"
+
+    assert not has_secret_like_value(sequence)
+
+
+def test_standalone_aws_access_key_still_flags() -> None:
+    key = "AKIA" + "1234567890ABCDEF"
+
+    assert has_secret_like_value(f"AWS_ACCESS_KEY_ID={key}")
+
+
+def test_generic_test_token_is_not_a_secret(tmp_path) -> None:
+    source = tmp_path / "src" / "package"
+    source.mkdir(parents=True)
+    (source / "testing_utils.py").write_text(
+        'TOKEN = "hf_94wBhPGp6KrrTH3KDchhKpRxZwd6dmHWLL"\n',
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD090"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_pkgdown_docsearch_key_is_not_a_secret(tmp_path) -> None:
     public_search_key = "ead918d7fe8467a2" + "fd38e97f5bbe3ecb"
     (tmp_path / "_pkgdown.yaml").write_text(

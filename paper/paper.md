@@ -12,7 +12,7 @@ authors:
 affiliations:
   - name: Independent open-source maintainers
     index: 1
-date: 6 July 2026
+date: 9 July 2026
 bibliography: paper.bib
 ---
 

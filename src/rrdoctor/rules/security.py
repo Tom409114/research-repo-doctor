@@ -3,7 +3,15 @@
 from __future__ import annotations
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
-from rrdoctor.rules.base import Rule, definition, has_secret_like_value, mask_secret, read_text
+from rrdoctor.rules.base import (
+    Rule,
+    definition,
+    is_generic_secret_match,
+    is_test_fixture_path,
+    iter_secret_matches,
+    mask_secret,
+    read_text,
+)
 from rrdoctor.rules.paths import text_files
 
 COMMON_GITIGNORE_TERMS = (
@@ -45,8 +53,15 @@ class PotentialSecretRule(Rule):
             for line_number, line in enumerate(lines, start=1):
                 if _is_public_docsearch_key(lines, line_number - 1):
                     continue
-                if has_secret_like_value(line):
-                    rel = context.rel(path)
+                matches = iter_secret_matches(line)
+                rel = context.rel(path)
+                if (
+                    matches
+                    and is_test_fixture_path(rel)
+                    and all(is_generic_secret_match(match) for match in matches)
+                ):
+                    continue
+                if matches:
                     return [
                         self.finding(
                             context,

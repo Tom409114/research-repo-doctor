@@ -1,0 +1,16 @@
+version: 1
+repository: torchvision
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD043
+    evidence: URL path segments containing `/home/` inside public dataset links are not local absolute data paths.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature computer-vision package. The previous RRD043
+  finding came from an EMNIST public URL path containing `/home/` as a web path
+  segment. RRD043 now ignores absolute-path-looking substrings embedded inside
+  larger URL/path segments while still flagging standalone local filesystem
+  paths.

@@ -11,10 +11,11 @@ GENERIC_SECRET_ASSIGNMENT_RE = re.compile(
     r"(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*['\"]?([A-Za-z0-9_\-+/=]{16,})"
 )
 UUID_RE = re.compile(r"(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+PYTHON_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 PROVIDER_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"sk-[A-Za-z0-9]{20,}"),
     re.compile(r"ghp_[A-Za-z0-9]{20,}"),
-    re.compile(r"AKIA[0-9A-Z]{16}"),
+    re.compile(r"(?<![0-9A-Z])AKIA[0-9A-Z]{16}(?![0-9A-Z])"),
 )
 SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
     GENERIC_SECRET_ASSIGNMENT_RE,
@@ -48,9 +49,36 @@ def iter_secret_matches(value: str) -> list[re.Match[str]]:
     for match in GENERIC_SECRET_ASSIGNMENT_RE.finditer(value):
         if _is_generated_token_marker(value, match):
             continue
+        if _is_url_query_token(value, match):
+            continue
+        if _is_code_function_reference(value, match):
+            continue
         if _looks_like_random_secret(match.group(2)):
             matches.append(match)
     return matches
+
+
+def is_generic_secret_match(match: re.Match[str]) -> bool:
+    """Return true when a match came from the generic key/value heuristic."""
+
+    return match.re is GENERIC_SECRET_ASSIGNMENT_RE
+
+
+def is_test_fixture_path(rel: str) -> bool:
+    """Return true for paths where generic fake tokens are common test data."""
+
+    normalized = rel.replace("\\", "/").lower()
+    parts = normalized.split("/")
+    fixture_dirs = {"test", "tests", "testing", "fixture", "fixtures", "testdata"}
+    if any(part in fixture_dirs for part in parts):
+        return True
+    name = parts[-1] if parts else normalized
+    return (
+        name.startswith("test_")
+        or name.endswith("_test.py")
+        or name.endswith("_tests.py")
+        or name in {"testing_utils.py", "testing.py"}
+    )
 
 
 def _is_generated_token_marker(value: str, match: re.Match[str]) -> bool:
@@ -59,6 +87,32 @@ def _is_generated_token_marker(value: str, match: re.Match[str]) -> bool:
     prefix = value[: match.start()].strip().lower()
     key = match.group(1).lower()
     return key == "token" and prefix.endswith("generator")
+
+
+def _is_url_query_token(value: str, match: re.Match[str]) -> bool:
+    """Avoid treating public asset URL query tokens as account credentials."""
+
+    key = match.group(1).lower()
+    if key != "token":
+        return False
+    prefix = value[: match.start()].lower()
+    url_start = max(prefix.rfind("http://"), prefix.rfind("https://"))
+    if url_start == -1:
+        return False
+    query_start = max(prefix.rfind("?"), prefix.rfind("&"))
+    return query_start > url_start
+
+
+def _is_code_function_reference(value: str, match: re.Match[str]) -> bool:
+    """Avoid treating assignments from local function calls as credentials."""
+
+    candidate = match.group(2).strip("'\"` ,;)]}")
+    if not PYTHON_IDENTIFIER_RE.fullmatch(candidate):
+        return False
+    suffix = value[match.end(2) :].lstrip()
+    if suffix.startswith("("):
+        return True
+    return bool(re.match(r"^\.[A-Za-z_][A-Za-z0-9_]*\s*\(", suffix))
 
 
 def has_secret_like_value(value: str) -> bool:

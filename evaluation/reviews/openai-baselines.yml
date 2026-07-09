@@ -1,0 +1,17 @@
+version: 1
+repository: openai-baselines
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README documents python -m baselines.run training commands and the repository contains the baselines/run.py module entrypoint.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a legacy reinforcement-learning artifact. The repo-wide
+  README includes install guidance, a pytest command, and multiple
+  `python -m baselines.run` training examples, so missing experiment entrypoint
+  would be high-noise here. RRD050 is now expected absent; remaining data
+  documentation, data/README, CI, and paper metadata findings are left
+  actionable.

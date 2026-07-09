@@ -1,0 +1,17 @@
+version: 1
+repository: guided-diffusion
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README sampling and training commands reference classifier_sample.py, image_sample.py, super_res_sample.py, and scripts/classifier_train.py entrypoints.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a diffusion-model artifact with checkpoint-heavy sampling
+  commands. The scan recognizes the README-documented sampling and training
+  entrypoints, so this entry now gates RRD050 as an expected-absent regression.
+  Remaining findings for missing dependency manifest, data documentation,
+  tests, CI, and unseeded evaluator randomness are kept as actionable release
+  hardening signals.

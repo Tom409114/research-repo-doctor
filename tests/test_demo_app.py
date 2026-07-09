@@ -129,3 +129,9 @@ def test_scan_command_uses_static_json_rrdoctor_scan(monkeypatch, tmp_path) -> N
     assert "none" in captured["command"]
     assert "--quiet" in captured["command"]
     assert "verify" not in captured["command"]
+
+
+def test_demo_avoids_streamlit_metric_frontend_component() -> None:
+    source = Path("demo/app.py").read_text(encoding="utf-8")
+
+    assert ".metric(" not in source

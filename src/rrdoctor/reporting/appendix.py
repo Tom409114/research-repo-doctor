@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from rrdoctor.fixers import infer_fix_context
 from rrdoctor.models import ScanReport
 from rrdoctor.rules.base import read_text
 from rrdoctor.verification import _entrypoint_command
@@ -48,7 +49,9 @@ DEPENDENCY_MANIFESTS = (
     "requirements.txt",
     "requirements-dev.txt",
     "environment.yml",
+    "environment.yaml",
     "conda.yml",
+    "conda.yaml",
     "Pipfile",
     "poetry.lock",
     "uv.lock",
@@ -84,6 +87,7 @@ class AppendixEvidence:
     repo_name: str
     description: str | None = None
     repository_url: str | None = None
+    version: str | None = None
     release_doi: str | None = None
     entrypoint: str | None = None
     dependency_manifests: tuple[str, ...] = ()
@@ -173,12 +177,18 @@ def _appendix_evidence(report: ScanReport) -> AppendixEvidence:
         return AppendixEvidence(repo_name=repo_name)
 
     metadata = _read_project_metadata(root)
+    fix_context = infer_fix_context(root)
     citation = _read_citation_metadata(root)
     entrypoint = _entrypoint_command(root)[1] or None
     return AppendixEvidence(
-        repo_name=repo_name,
+        repo_name=fix_context.project_name or metadata.get("name") or repo_name,
         description=metadata.get("description") or _readme_summary(root),
-        repository_url=metadata.get("repository_url") or citation.get("repository_url"),
+        repository_url=(
+            metadata.get("repository_url")
+            or citation.get("repository_url")
+            or fix_context.repository_url
+        ),
+        version=metadata.get("version") or fix_context.version,
         release_doi=citation.get("doi"),
         entrypoint=entrypoint,
         dependency_manifests=_existing_paths(root, DEPENDENCY_MANIFESTS),
@@ -202,6 +212,8 @@ def _read_project_metadata(root: Path) -> dict[str, str]:
     for key, target in (
         ("description", "description"),
         ("requires-python", "requires_python"),
+        ("name", "name"),
+        ("version", "version"),
     ):
         value = project.get(key)
         if isinstance(value, str) and value.strip():
@@ -320,6 +332,15 @@ def _docs_summary(paths: tuple[str, ...], satisfied: str, missing: str) -> str:
     return satisfied if satisfied.startswith("TODO:") else satisfied or f"TODO: {missing}"
 
 
+def _access_summary(evidence: AppendixEvidence, fallback: str) -> str:
+    lines: list[str] = []
+    if evidence.repository_url:
+        lines.append(f"Repository URL: <{evidence.repository_url}>.")
+    if evidence.version:
+        lines.append(f"Version: `{evidence.version}`.")
+    return "\n".join(lines) if lines else fallback
+
+
 def render_appendix(report: ScanReport) -> str:
     """Render an ACM-style Artifact Appendix skeleton, pre-filled where possible.
 
@@ -409,14 +430,13 @@ def render_appendix(report: ScanReport) -> str:
         "",
         "### How to access",
         "",
-        (
-            f"Repository URL: <{evidence.repository_url}>."
-            if evidence.repository_url
-            else todo_if(
+        _access_summary(
+            evidence,
+            todo_if(
                 "RRD101",
                 "Tagged release / version metadata is available.",
                 "tag a release and archive it for a citable DOI.",
-            )
+            ),
         ),
         "",
         "### Hardware dependencies",

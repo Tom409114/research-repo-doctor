@@ -1,0 +1,16 @@
+version: 1
+repository: keras
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Mature framework/package projects with package metadata, examples/tests structure, and framework-oriented README language are not treated as missing paper experiment entrypoints.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature ML framework. Keras is not a single paper
+  artifact with one reproduction script, so a missing train/eval entrypoint
+  should not be an error. RRD050 now distinguishes library/framework-shaped
+  projects from paper artifact repositories that still need a reviewer-facing
+  reproduction command.

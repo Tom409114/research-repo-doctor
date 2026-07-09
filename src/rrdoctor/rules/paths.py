@@ -73,21 +73,41 @@ def first_absolute_path(text: str) -> tuple[str, int] | None:
 
     for index, line in enumerate(text.splitlines(), start=1):
         match = ABSOLUTE_PATH_RE.search(line)
-        if match and not is_placeholder_absolute_path(match.group(0)):
+        if (
+            match
+            and not is_embedded_path_segment(line, match.start())
+            and not is_placeholder_absolute_path(match.group(0))
+        ):
             return match.group(0), index
     return None
+
+
+def is_embedded_path_segment(line: str, start: int) -> bool:
+    """Return true when a match is embedded in a URL or larger path segment."""
+
+    if start <= 0:
+        return False
+    previous = line[start - 1]
+    return previous.isalnum() or previous in {"/", ".", "-", "_", ":"}
 
 
 def is_placeholder_absolute_path(value: str) -> bool:
     """Return true for documentation examples rather than leaked local paths."""
 
-    normalized = value.replace("\\", "/").lower()
+    normalized = re.sub(r"/+", "/", value.replace("\\", "/").lower())
     return (
         normalized.startswith("/home/user/")
+        or normalized.startswith("/home/joe/")
         or normalized.startswith("/users/user/")
+        or normalized.startswith("/users/me/")
+        or normalized.startswith("c:/program files/")
+        or normalized.startswith("c:/program files (x86)/")
+        or normalized.startswith("c:/folder")
+        or normalized.startswith("c:/local_folder")
         or normalized.startswith("/home/...")
         or normalized.startswith("/users/...")
         or "/<user>/" in normalized
+        or "/<your_user>/" in normalized
         or "\\<user>\\" in value.lower()
         or "/absolute_path" in normalized
         or "/path_to_" in normalized

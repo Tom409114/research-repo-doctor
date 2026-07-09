@@ -1,0 +1,17 @@
+version: 1
+repository: vision-transformer
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: README and vit_jax/configs/README.md document python -m vit_jax.main fine-tuning commands with config files.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a JAX Vision Transformer artifact with configs,
+  checkpoints, Colab notebooks, and documented fine-tuning commands. The scan
+  recognizes the package-module training entrypoint, so RRD050 is now
+  expected absent. The RRD052 warning is kept actionable because the TensorFlow
+  input pipeline uses random augmentation and shuffling without an obvious
+  TensorFlow seed, even though JAX model initialization uses PRNGKey(0).

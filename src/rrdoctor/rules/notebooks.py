@@ -9,7 +9,14 @@ from typing import Any
 import nbformat
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
-from rrdoctor.rules.base import Rule, definition, has_secret_like_value, mask_secret
+from rrdoctor.rules.base import (
+    Rule,
+    definition,
+    is_generic_secret_match,
+    is_test_fixture_path,
+    iter_secret_matches,
+    mask_secret,
+)
 from rrdoctor.rules.paths import ABSOLUTE_PATH_RE, find_files, is_placeholder_absolute_path
 
 
@@ -162,9 +169,16 @@ class NotebookSecretOutputRule(Rule):
             for cell_index, cell in enumerate(nb.cells, start=1):
                 for output in cell.get("outputs", []):
                     text = json.dumps(output, default=str)
-                    if has_secret_like_value(text):
+                    matches = iter_secret_matches(text)
+                    rel = context.rel(path)
+                    if (
+                        matches
+                        and is_test_fixture_path(rel)
+                        and all(is_generic_secret_match(match) for match in matches)
+                    ):
+                        continue
+                    if matches:
                         masked = mask_secret(text)
-                        rel = context.rel(path)
                         return [
                             self.finding(
                                 context,

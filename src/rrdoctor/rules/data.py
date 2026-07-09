@@ -137,7 +137,11 @@ class LocalAbsoluteDataPathRule(Rule):
     def check(self, context: ScanContext) -> list[Finding]:
         for path in text_files(context):
             rel = context.rel(path)
-            if _is_ci_config_path(rel) or _is_test_or_fixture_path(rel):
+            if (
+                path.suffix.lower() == ".ipynb"
+                or _is_ci_config_path(rel)
+                or _is_test_or_fixture_path(rel)
+            ):
                 continue
             text = read_text(path)
             result = first_absolute_path(text)

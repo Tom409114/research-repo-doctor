@@ -64,39 +64,39 @@ where a single noisy finding can undermine confidence in a first scan.
 Latest local maintainer smoke run, generated on 2026-07-09:
 
 ```bash
-python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
+python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
 ```
 
-- Repositories listed: 60
-- Scanned successfully: 60
+- Repositories listed: 80
+- Scanned successfully: 80
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Focused manual review notes: 33
-- Not yet manually reviewed: 27
-- Average score across scanned repositories: 65.1
+- Focused manual review notes: 51
+- Not yet manually reviewed: 29
+- Average score across scanned repositories: 67.5
 
 Readiness distribution:
 
 | Readiness | Repositories |
 | --- | ---: |
-| Available | 42 |
-| Functional | 16 |
+| Available | 56 |
+| Functional | 22 |
 | Needs preparation | 2 |
 
 Top actionable rule frequencies:
 
 | Rule | Error/warning findings |
 | --- | ---: |
-| RRD040 | 41 |
-| RRD004 | 37 |
-| RRD071 | 32 |
-| RRD002 | 30 |
-| RRD091 | 26 |
-| RRD034 | 24 |
-| RRD043 | 24 |
-| RRD030 | 23 |
-| RRD070 | 19 |
-| RRD060 | 18 |
+| RRD040 | 56 |
+| RRD004 | 50 |
+| RRD034 | 43 |
+| RRD060 | 39 |
+| RRD071 | 36 |
+| RRD002 | 32 |
+| RRD091 | 30 |
+| RRD110 | 26 |
+| RRD043 | 23 |
+| RRD030 | 22 |
 
 This snapshot is calibration evidence, not a benchmark or ranking of the scanned
 projects. The scanner does not install dependencies, import target modules,
@@ -110,10 +110,14 @@ Manual review flags captured in this snapshot:
 | --- | --- | ---: |
 | False positive | RRD090 | 4 |
 
-Focused reviews currently cover BERT, CLIP, improved-diffusion, MAE,
-AlphaFold, DETR, YOLOv5, DynamicalSystems.jl, Scanpy, scikit-learn, Astropy,
-scvi-tools, DINOv2, t5x, GraphCast, and SciPy. The repository contains 33
-reviewed notes and 27 repositories still awaiting focused manual review. Those additions
+Focused reviews currently cover BERT, CLIP, guided-diffusion,
+improved-diffusion, vision-transformer, MAE, AlphaFold, DETR, YOLOv5,
+DynamicalSystems.jl, Scanpy, scikit-learn, Astropy, scvi-tools, DINOv2, t5x,
+GraphCast, SciPy, scikit-image, JAX, NetworkX, Keras, openai-baselines,
+Transformers, PyTorch Lightning, Biopython, torchvision, xarray, MDAnalysis,
+QuTiP, ESM, stable-diffusion, nerfstudio, and FAISS. The repository contains
+51 reviewed notes and 29 repositories still awaiting focused manual review.
+Those additions
 confirm that BERT local RNG seeding via
 `random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
 `nn.Parameter(torch.randn(...))`, MAE-style root `main_*.py` entrypoints,
@@ -127,8 +131,32 @@ such as `graphcast_demo.ipynb` count as notebook-first experiment entrypoints.
 The SciPy review confirms that `LICENSE.txt`, CI/devcontainer environment paths,
 and placeholder examples such as `/home/...` or Windows `<user>` cache paths do
 not create high-noise license or local-path findings.
+The torchvision, MDAnalysis, and QuTiP reviews confirm that URL path segments
+containing `/home/`, common documentation examples such as `/home/joe/...` and
+`/Users/Me/...`, nested `package/` dependency manifests, and reusable
+library-shaped layouts no longer create high-noise `RRD043`, `RRD030`, or
+`RRD050` findings. The FAISS review keeps a specific hardcoded benchmark
+dataset path as actionable rather than suppressing it.
+The guided-diffusion, vision-transformer, and openai-baselines reviews confirm
+that README-documented script, module, and config-driven training commands are
+recognized as experiment entrypoint evidence rather than noisy `RRD050`
+findings.
+The ESM and nerfstudio reviews confirm that notebook output tracebacks and
+installation-doc placeholder paths are filtered without suppressing notebook
+source-cell checks or concrete hardcoded source-code paths.
+The stable-diffusion review confirms that Conda `environment.yaml` manifests,
+editable pip `#egg=` entries, and documented seed plumbing through
+`pytorch_lightning.seed_everything(...)` are recognized.
+The scikit-image and JAX reviews confirm that public URL query `token=` values
+and internal compiler/runtime variables named `token` no longer create
+high-noise secret findings. The NetworkX and Keras reviews confirm that mature
+library/framework repositories are not treated as missing paper experiment
+entrypoints.
 The dependency gap check also focuses on runtime-like Python files instead of
 docs, tests, benchmarks, vendored code, or maintainer tooling.
+
+The 80-repository manifest currently has 51 focused manual review notes and 29
+repositories still awaiting focused review.
 
 The v0.2.19 PyPI package was also spot-checked against nanoGPT, the original
 first-run trust regression case. The static scan reported `Functional`, 76/100,

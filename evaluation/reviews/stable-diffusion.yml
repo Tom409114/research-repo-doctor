@@ -1,0 +1,18 @@
+version: 1
+repository: stable-diffusion
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD030
+    evidence: Root-level environment.yaml is recognized as a Conda dependency manifest.
+  - rule_id: RRD052
+    evidence: README documents --seed, and scripts/txt2img.py and scripts/img2img.py apply opt.seed via pytorch_lightning.seed_everything(...).
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review of a widely used diffusion-model research release. This checked
+  Conda .yaml manifest detection, editable pip dependency parsing, and the
+  documented seed plumbing for inference scripts. Remaining findings concern
+  data availability documentation, data/README absence, stale notebook outputs,
+  test/CI evidence, and dependency gaps not declared in environment.yaml.

@@ -6,6 +6,7 @@ import ast
 import re
 import sys
 from collections.abc import Iterable
+from pathlib import Path
 from typing import Any
 
 if sys.version_info >= (3, 11):
@@ -22,7 +23,9 @@ DEPENDENCY_FILES = [
     "pyproject.toml",
     "requirements.txt",
     "environment.yml",
+    "environment.yaml",
     "conda.yml",
+    "conda.yaml",
     "Pipfile",
     "poetry.lock",
     "uv.lock",
@@ -37,6 +40,7 @@ DEPENDENCY_FILES = [
     "Project.toml",
     "Manifest.toml",
 ]
+NESTED_MANIFEST_DIRS = ("package",)
 
 # Patterns that indicate a documented runtime/language version across ecosystems.
 RUNTIME_VERSION_RE = re.compile(
@@ -68,11 +72,12 @@ class DependencyManifestMissingRule(Rule):
         ("minimal", "standard", "strict", "ml"),
         "Checks for dependency manifests.",
         "A repository without dependency metadata is hard to reproduce.",
-        "Add pyproject.toml, requirements.txt, environment.yml, or another supported manifest.",
+        "Add pyproject.toml, requirements.txt, environment.yml/.yaml, or another "
+        "supported manifest.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
-        if not has_file(context.root, DEPENDENCY_FILES):
+        if not _existing_dependency_manifests(context.root):
             readme = context.root / "README.md"
             if readme.exists() and README_INSTALL_RE.search(read_text(readme)):
                 rel = context.rel(readme)
@@ -86,7 +91,7 @@ class DependencyManifestMissingRule(Rule):
                         evidence=[Evidence("README contains an install command.", rel)],
                         recommendation=(
                             "Promote the documented install command into requirements.txt, "
-                            "pyproject.toml, environment.yml, renv.lock, or another lockable "
+                            "pyproject.toml, environment.yml/.yaml, renv.lock, or another lockable "
                             "manifest."
                         ),
                         file=rel,
@@ -111,9 +116,7 @@ class PythonVersionHintMissingRule(Rule):
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
-        existing = [
-            context.root / name for name in DEPENDENCY_FILES if (context.root / name).exists()
-        ]
+        existing = _existing_dependency_manifests(context.root)
         if not existing:
             return []
         combined = "\n".join(read_text(path) for path in existing)
@@ -223,12 +226,14 @@ IMPORT_TO_DISTRIBUTION = {
     "torch": "torch",
     "tensorflow": "tensorflow",
     "google": "protobuf",
+    "imwatermark": "invisible-watermark",
     "mpl_toolkits": "matplotlib",
     "openssl": "pyopenssl",
     "setuptools_scm": "setuptools-scm",
 }
 
 _REQ_NAME_RE = re.compile(r"^[A-Za-z0-9_.\-]+")
+_EGG_NAME_RE = re.compile(r"[#&]egg=([A-Za-z0-9_.\-]+)")
 
 
 def _normalize(name: str) -> str:
@@ -237,23 +242,38 @@ def _normalize(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name.strip().lower())
 
 
+def _declared_name_from_requirement_spec(spec: str) -> str | None:
+    stripped = spec.strip()
+    if not stripped or stripped.startswith("#"):
+        return None
+    egg = _EGG_NAME_RE.search(stripped)
+    if egg:
+        return _normalize(egg.group(1))
+    if stripped.startswith("-"):
+        return None
+    match = _REQ_NAME_RE.match(stripped)
+    if match:
+        return _normalize(match.group(0))
+    return None
+
+
 def _declared_distributions(context: ScanContext) -> set[str]:
     """Best-effort set of declared dependency distribution names (normalized)."""
 
     declared: set[str] = set()
 
-    req = context.root / "requirements.txt"
-    if req.exists():
+    for req in _candidate_manifest_paths(context.root, ("requirements.txt",)):
+        if not req.exists():
+            continue
         for line in read_text(req).splitlines():
             stripped = line.strip()
-            if not stripped or stripped.startswith(("#", "-")):
-                continue
-            match = _REQ_NAME_RE.match(stripped)
-            if match:
-                declared.add(_normalize(match.group(0)))
+            name = _declared_name_from_requirement_spec(stripped)
+            if name:
+                declared.add(name)
 
-    pyproject = context.root / "pyproject.toml"
-    if pyproject.exists():
+    for pyproject in _candidate_manifest_paths(context.root, ("pyproject.toml",)):
+        if not pyproject.exists():
+            continue
         text = read_text(pyproject)
         parsed = _declared_from_pyproject_toml(text)
         if parsed:
@@ -261,16 +281,36 @@ def _declared_distributions(context: ScanContext) -> set[str]:
         else:
             declared.update(_declared_from_pyproject_text(text))
 
-    for env_name in ("environment.yml", "conda.yml"):
-        env = context.root / env_name
-        if env.exists():
-            for line in read_text(env).splitlines():
-                stripped = line.strip().lstrip("-").strip()
-                match = _REQ_NAME_RE.match(stripped)
-                if match and match.group(0) not in {"dependencies", "pip", "name", "channels"}:
-                    declared.add(_normalize(match.group(0)))
+    for env_name in ("environment.yml", "environment.yaml", "conda.yml", "conda.yaml"):
+        for env in _candidate_manifest_paths(context.root, (env_name,)):
+            if env.exists():
+                for line in read_text(env).splitlines():
+                    stripped = line.strip().lstrip("-").strip()
+                    match = _REQ_NAME_RE.match(stripped)
+                    if match and match.group(0) not in {
+                        "dependencies",
+                        "pip",
+                        "name",
+                        "channels",
+                    }:
+                        name = _declared_name_from_requirement_spec(stripped)
+                        if name:
+                            declared.add(name)
 
     return declared
+
+
+def _existing_dependency_manifests(root: Path) -> list[Path]:
+    return [
+        path for path in _candidate_manifest_paths(root, tuple(DEPENDENCY_FILES)) if path.exists()
+    ]
+
+
+def _candidate_manifest_paths(root: Path, names: tuple[str, ...]) -> list[Path]:
+    paths = [root / name for name in names]
+    for base in NESTED_MANIFEST_DIRS:
+        paths.extend(root / base / name for name in names)
+    return paths
 
 
 def _declared_from_pyproject_toml(text: str) -> set[str]:
@@ -326,9 +366,9 @@ def _add_requirement_specs(declared: set[str], specs: Any) -> None:
     for spec in specs:
         if not isinstance(spec, str):
             continue
-        match = _REQ_NAME_RE.match(spec)
-        if match:
-            declared.add(_normalize(match.group(0)))
+        name = _declared_name_from_requirement_spec(spec)
+        if name:
+            declared.add(name)
 
 
 def _as_mapping(value: Any) -> dict[str, Any]:

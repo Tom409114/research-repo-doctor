@@ -1,0 +1,15 @@
+version: 1
+repository: nerfstudio
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent: []
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a neural-rendering research platform. Installation-doc
+  examples such as Windows system paths, escaped C:\folder1\folder2 examples,
+  and /home/<YOUR_USER>/ cache mounts are now filtered as placeholders. The
+  remaining RRD043 finding points to a concrete hardcoded default Path under
+  /home/... in source code, so this pass keeps it actionable rather than adding
+  an expected-absent gate.

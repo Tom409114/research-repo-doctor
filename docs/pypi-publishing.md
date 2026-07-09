@@ -7,7 +7,7 @@ API tokens.
 ## Current Package
 
 - PyPI project: `rrdoctor`
-- Current package version: `0.2.19`
+- Current package version: `0.2.20`
 - Release workflow: [`.github/workflows/release.yml`](../.github/workflows/release.yml)
 - PyPI environment name: `pypi`
 
@@ -75,3 +75,9 @@ Confirm the version is consistent in:
 python -m pip index versions rrdoctor
 uvx rrdoctor --help
 ```
+
+7. Redeploy or restart the hosted Streamlit demo after PyPI lists the new
+   version. The demo installs `rrdoctor` from `demo/requirements.txt`, so a
+   repository push can briefly point Streamlit at a package version that PyPI
+   does not expose yet. Treat the demo as launch-ready only after a browser
+   check shows the app body and `Powered by rrdoctor <version>`.

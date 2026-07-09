@@ -87,3 +87,55 @@ def test_notebook_secret_output_flags_high_confidence_secret(tmp_path) -> None:
 
     assert len(report.findings) == 1
     assert report.findings[0].rule_id == "RRD063"
+
+
+def test_notebook_secret_output_ignores_generic_fixture_token(tmp_path) -> None:
+    fixture_dir = tmp_path / "tests" / "fixtures"
+    fixture_dir.mkdir(parents=True)
+    notebook_path = fixture_dir / "example.ipynb"
+    notebook = nbformat.v4.new_notebook(
+        cells=[
+            nbformat.v4.new_code_cell(
+                "print('fake token')",
+                outputs=[
+                    nbformat.v4.new_output(
+                        "stream",
+                        name="stdout",
+                        text="api_key: abc123XYZ789def456GHI\n",
+                    )
+                ],
+            )
+        ]
+    )
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD063"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_notebook_secret_output_still_flags_provider_key_in_fixture(tmp_path) -> None:
+    fixture_dir = tmp_path / "tests" / "fixtures"
+    fixture_dir.mkdir(parents=True)
+    notebook_path = fixture_dir / "example.ipynb"
+    key = "AKIA" + "1234567890ABCDEF"
+    notebook = nbformat.v4.new_notebook(
+        cells=[
+            nbformat.v4.new_code_cell(
+                "print('provider key')",
+                outputs=[
+                    nbformat.v4.new_output(
+                        "stream",
+                        name="stdout",
+                        text=f"AWS_ACCESS_KEY_ID={key}\n",
+                    )
+                ],
+            )
+        ]
+    )
+    nbformat.write(notebook, notebook_path)
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD063"}).scan(tmp_path)
+
+    assert len(report.findings) == 1
+    assert report.findings[0].rule_id == "RRD063"

@@ -10,6 +10,7 @@ left to the agent fix plan instead.
 
 from __future__ import annotations
 
+import ast
 import re
 import sys
 from collections.abc import Callable
@@ -89,7 +90,8 @@ def infer_fix_context(
 ) -> FixContext:
     """Infer useful scaffold metadata from local repository files."""
 
-    metadata = _read_setup_cfg_metadata(root)
+    metadata = _read_setup_py_metadata(root)
+    metadata.update(_read_setup_cfg_metadata(root))
     metadata.update(_read_pyproject_metadata(root))
     inferred_name = project_name or _metadata_str(metadata, "name") or root.name
     metadata_authors = _metadata_authors(metadata)
@@ -167,6 +169,108 @@ def _read_setup_cfg_metadata(root: Path) -> Metadata:
     if url:
         metadata["repository_url"] = url
     return metadata
+
+
+def _read_setup_py_metadata(root: Path) -> Metadata:
+    setup_py = root / "setup.py"
+    if not setup_py.exists():
+        return {}
+    try:
+        tree = ast.parse(read_text(setup_py))
+    except SyntaxError:
+        return {}
+
+    constants = _setup_py_string_constants(tree)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call) or not _is_setup_call(node.func):
+            continue
+        metadata = _metadata_from_setup_call(node, constants)
+        if metadata:
+            return metadata
+    return {}
+
+
+def _setup_py_string_constants(tree: ast.AST) -> dict[str, str]:
+    constants: dict[str, str] = {}
+    for node in getattr(tree, "body", []):
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            continue
+        if node.value is None:
+            continue
+        value = _setup_py_string_value(node.value, constants)
+        if value is None:
+            continue
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        for target in targets:
+            if isinstance(target, ast.Name):
+                constants[target.id] = value
+    return constants
+
+
+def _is_setup_call(node: ast.AST) -> bool:
+    if isinstance(node, ast.Name):
+        return node.id == "setup"
+    if isinstance(node, ast.Attribute):
+        return (
+            node.attr == "setup"
+            and isinstance(node.value, ast.Name)
+            and node.value.id
+            in {
+                "setuptools",
+                "distutils",
+            }
+        )
+    return False
+
+
+def _metadata_from_setup_call(node: ast.Call, constants: dict[str, str]) -> Metadata:
+    metadata: Metadata = {}
+    for keyword in node.keywords:
+        if keyword.arg == "name":
+            _set_if_str(metadata, "name", _setup_py_string_value(keyword.value, constants))
+        elif keyword.arg == "version":
+            _set_if_str(metadata, "version", _setup_py_string_value(keyword.value, constants))
+        elif keyword.arg == "author":
+            author = _clean_author_name(_setup_py_string_value(keyword.value, constants) or "")
+            if author:
+                metadata["author"] = author
+                metadata["authors"] = (author,)
+        elif keyword.arg == "maintainer" and "author" not in metadata:
+            maintainer = _clean_author_name(_setup_py_string_value(keyword.value, constants) or "")
+            if maintainer:
+                metadata["author"] = maintainer
+                metadata["authors"] = (maintainer,)
+        elif keyword.arg == "url":
+            url = _setup_py_string_value(keyword.value, constants)
+            if url:
+                metadata["repository_url"] = _normalize_git_url(url)
+        elif keyword.arg == "project_urls":
+            url = _url_from_mapping(_setup_py_dict_value(keyword.value, constants))
+            if url:
+                metadata["repository_url"] = url
+    return {key: value for key, value in metadata.items() if value}
+
+
+def _setup_py_string_value(node: ast.AST, constants: dict[str, str]) -> str | None:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.Name):
+        return constants.get(node.id)
+    return None
+
+
+def _setup_py_dict_value(node: ast.AST, constants: dict[str, str]) -> dict[str, str]:
+    if not isinstance(node, ast.Dict):
+        return {}
+    values: dict[str, str] = {}
+    for key_node, value_node in zip(node.keys, node.values, strict=False):
+        if key_node is None:
+            continue
+        key = _setup_py_string_value(key_node, constants)
+        value = _setup_py_string_value(value_node, constants)
+        if key and value:
+            values[key] = value
+    return values
 
 
 def _url_from_setup_cfg(parser: ConfigParser) -> str | None:

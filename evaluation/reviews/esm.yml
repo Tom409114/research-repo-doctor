@@ -1,0 +1,17 @@
+version: 1
+repository: esm
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD043
+    evidence: Notebook output traceback paths such as /home/<developer>/... are ignored by the data-path rule; notebook source cells remain covered by RRD062.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a protein-language-model research artifact with notebooks
+  and model-download examples. The previous RRD043 finding came from a local
+  source path embedded in notebook output text, not from a source cell or
+  documented data location. RRD043 now skips raw notebook JSON so notebook
+  outputs do not create data-path findings; notebook source cells remain covered
+  by RRD062, and large/stale outputs remain covered by RRD060/RRD061.

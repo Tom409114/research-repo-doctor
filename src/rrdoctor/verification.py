@@ -24,6 +24,15 @@ from rrdoctor.models import ScanReport
 from rrdoctor.rules.base import read_text
 
 DEFAULT_TIMEOUT = 300
+PYTHON_L2_MANIFESTS = (
+    "requirements.txt",
+    "requirements/base.txt",
+    "requirements/main.txt",
+    "requirements-dev.txt",
+    "requirements/dev.txt",
+    "pyproject.toml",
+)
+CONDA_L2_MANIFESTS = ("environment.yml", "environment.yaml", "conda.yml", "conda.yaml")
 
 
 @dataclass(frozen=True)
@@ -85,23 +94,25 @@ def _build_plan(root: Path) -> tuple[list[str], str | None, str]:
     runnable: str | None = None
     missing = ""
 
-    has_req = (root / "requirements.txt").exists()
-    has_pyproject = (root / "pyproject.toml").exists()
-    if has_req or has_pyproject:
-        target = "requirements.txt" if has_req else "pyproject.toml"
+    python_manifest = _first_existing(root, PYTHON_L2_MANIFESTS)
+    if python_manifest:
+        target = python_manifest.as_posix()
         if shutil.which("uv"):
             display.append(f"uv pip compile {target}  # resolve Python dependencies")
             runnable = f"uv pip compile {target}"
         elif shutil.which("pip"):
-            arg = f"-r {target}" if has_req else "."
+            arg = f"-r {target}" if target.endswith(".txt") else "."
             display.append(f"pip install --dry-run {arg}  # resolve Python dependencies")
             runnable = f"pip install --dry-run {arg}"
         else:
             missing = "uv or pip"
-    elif (root / "environment.yml").exists() or (root / "conda.yml").exists():
-        if shutil.which("conda") or shutil.which("mamba"):
-            display.append("conda env create -f environment.yml --dry-run")
-            runnable = "conda env create -f environment.yml --dry-run"
+
+    elif conda_manifest := _first_existing(root, CONDA_L2_MANIFESTS):
+        target = conda_manifest.as_posix()
+        conda_tool = _first_available_tool(("conda", "mamba"))
+        if conda_tool:
+            display.append(f"{conda_tool} env create -f {target} --dry-run")
+            runnable = f"{conda_tool} env create -f {target} --dry-run"
         else:
             missing = "conda/mamba"
     elif (root / "renv.lock").exists() or (root / "DESCRIPTION").exists():
@@ -112,6 +123,21 @@ def _build_plan(root: Path) -> tuple[list[str], str | None, str]:
             missing = "Rscript (R)"
 
     return display, runnable, missing
+
+
+def _first_existing(root: Path, candidates: tuple[str, ...]) -> Path | None:
+    for candidate in candidates:
+        path = root / candidate
+        if path.exists():
+            return Path(candidate)
+    return None
+
+
+def _first_available_tool(candidates: tuple[str, ...]) -> str | None:
+    for candidate in candidates:
+        if shutil.which(candidate):
+            return candidate
+    return None
 
 
 def _l2_step(root: Path, run: bool, timeout: int) -> LadderStep:
@@ -141,7 +167,7 @@ def _l2_step(root: Path, run: bool, timeout: int) -> LadderStep:
         )
 
     assert runnable is not None
-    code, log = _run_command(runnable.split(), root, timeout)
+    code, log = _run_command(shlex.split(runnable), root, timeout)
     if code is None:
         status, detail = "blocked", "Resolver tool disappeared between detection and run."
     elif code == 0:

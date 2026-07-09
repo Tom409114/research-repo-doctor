@@ -45,6 +45,7 @@ REQUIRED_DOC_INDEX_LINKS = {
     "Feedback and calibration": "feedback.md",
     "Maintainer workflows": "maintainer-workflows.md",
 }
+ACTION_REFERENCE_RE = re.compile(r"Tom409114/research-repo-doctor@v[0-9][^\s`'\"]*")
 FORBIDDEN_TRACKED_PATH_PARTS = (
     "Y29kZXgtZm9yLW9zcy1hcHBsaWNhdGlvbg==",
     "aW5pdGlhbC1pc3N1ZXM=",
@@ -92,8 +93,10 @@ def check_public_readiness(root: Path = ROOT) -> list[str]:
     tracked_files = _tracked_files(root)
 
     _check_internal_materials(root, tracked_files, failures)
-    _check_readme_and_demo(root, failures)
+    _check_readme_and_demo(root, tracked_files, failures)
     _check_package_metadata(root, failures)
+    _check_action_references(root, tracked_files, failures)
+    _check_git_history_internal_materials(root, failures)
     _check_release_metadata(root, failures)
     _check_issue_templates(root, failures)
     _check_self_scan_badge(root, failures)
@@ -132,7 +135,57 @@ def _check_internal_materials(root: Path, tracked_files: list[str], failures: li
         )
 
 
-def _check_readme_and_demo(root: Path, failures: list[str]) -> None:
+def _check_git_history_internal_materials(root: Path, failures: list[str]) -> None:
+    forbidden_path_parts = _decode_public_guard_terms(FORBIDDEN_TRACKED_PATH_PARTS)
+    forbidden_text = _decode_public_guard_terms(FORBIDDEN_PUBLIC_TEXT)
+
+    revs = _git_lines(root, ["rev-list", "--all"])
+    if not revs:
+        return
+
+    historical_paths = _git_lines(root, ["log", "--all", "--name-only", "--pretty=format:"])
+    leaked_paths = sorted(
+        {
+            path
+            for path in historical_paths
+            if path and any(part.lower() in path.lower() for part in forbidden_path_parts)
+        }
+    )
+    if leaked_paths:
+        failures.append(
+            "out-of-scope working files exist in git history: " + ", ".join(leaked_paths)
+        )
+
+    leaks: list[str] = []
+    for chunk in _chunks(revs, 40):
+        command = ["git", "grep", "-I", "-n", "-F"]
+        for forbidden in forbidden_text:
+            command.extend(["-e", forbidden])
+        command.extend(chunk)
+        result = subprocess.run(
+            command,
+            cwd=root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            leaks.extend(line for line in result.stdout.splitlines() if line)
+        elif result.returncode != 1:
+            failures.append(
+                "could not scan git history for internal material: "
+                + (result.stderr.strip() or result.stdout.strip() or "unknown git grep error")
+            )
+            return
+
+    if leaks:
+        preview = "; ".join(leaks[:10])
+        if len(leaks) > 10:
+            preview += f"; ... {len(leaks) - 10} more"
+        failures.append("public git history leaks out-of-scope or placeholder material: " + preview)
+
+
+def _check_readme_and_demo(root: Path, tracked_files: list[str], failures: list[str]) -> None:
     readme = _read_required_text(root / "README.md", failures)
     if not readme:
         return
@@ -141,6 +194,8 @@ def _check_readme_and_demo(root: Path, failures: list[str]) -> None:
         failures.append("README.md does not link the live zero-install demo near the top.")
     if "![rrdoctor demo](docs/demo.gif)" not in readme:
         failures.append("README.md does not embed docs/demo.gif.")
+    if "docs/demo.gif" not in tracked_files:
+        failures.append("docs/demo.gif is not tracked by git.")
 
     demo = root / "docs" / "demo.gif"
     if not demo.exists():
@@ -150,6 +205,53 @@ def _check_readme_and_demo(root: Path, failures: list[str]) -> None:
         failures.append(f"docs/demo.gif is smaller than {MIN_DEMO_GIF_BYTES} bytes.")
     if demo.read_bytes()[:6] not in {b"GIF87a", b"GIF89a"}:
         failures.append("docs/demo.gif is not a GIF file.")
+
+
+def _check_action_references(root: Path, tracked_files: list[str], failures: list[str]) -> None:
+    pyproject = _load_toml(root / "pyproject.toml", failures)
+    project = pyproject.get("project", {}) if pyproject else {}
+    version = project.get("version")
+    if not isinstance(version, str) or not version:
+        failures.append("pyproject.toml is missing project.version.")
+        return
+
+    expected = f"Tom409114/research-repo-doctor@v{version}"
+    stale: list[str] = []
+    for tracked_path in tracked_files:
+        if not _is_current_action_reference_surface(tracked_path):
+            continue
+        path = root / tracked_path
+        if path.suffix.lower() not in TEXT_SUFFIXES:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for match in ACTION_REFERENCE_RE.findall(text):
+            if match != expected:
+                stale.append(f"{tracked_path}: {match}")
+
+    if stale:
+        failures.append(
+            "GitHub Action examples use stale rrdoctor release tags: " + "; ".join(stale)
+        )
+
+
+def _is_current_action_reference_surface(tracked_path: str) -> bool:
+    path = Path(tracked_path)
+    parts = path.parts
+    if tracked_path == "README.md":
+        return True
+    if len(parts) >= 2 and parts[0] == "docs" and path.suffix.lower() == ".md":
+        return True
+    if parts[:1] == ("examples",) and path.name.endswith("workflow.yml"):
+        return True
+    return (
+        len(parts) >= 3
+        and parts[0] == ".github"
+        and parts[1] == "workflows"
+        and path.suffix.lower() in {".yml", ".yaml"}
+    )
 
 
 def _check_package_metadata(root: Path, failures: list[str]) -> None:
@@ -313,14 +415,22 @@ def _check_docs_index(root: Path, failures: list[str]) -> None:
 
 
 def _tracked_files(root: Path) -> list[str]:
+    return _git_lines(root, ["ls-files"])
+
+
+def _git_lines(root: Path, args: list[str]) -> list[str]:
     result = subprocess.run(
-        ["git", "ls-files"],
+        ["git", *args],
         cwd=root,
         check=True,
         capture_output=True,
         text=True,
     )
     return [line for line in result.stdout.splitlines() if line]
+
+
+def _chunks(values: list[str], size: int) -> list[list[str]]:
+    return [values[index : index + size] for index in range(0, len(values), size)]
 
 
 def _read_required_text(path: Path, failures: list[str]) -> str:

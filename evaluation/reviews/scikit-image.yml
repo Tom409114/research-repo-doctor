@@ -1,0 +1,16 @@
+version: 1
+repository: scikit-image
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD090
+    evidence: Public asset URL query tokens in documented image-download examples are ignored as non-credential evidence.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature scientific Python package. The scan originally
+  treated a long `token=` query parameter in a documented public image URL as a
+  committed secret. RRD090 now ignores ordinary URL query `token=` values while
+  retaining provider-specific secret patterns such as OpenAI, GitHub, and AWS
+  key formats.

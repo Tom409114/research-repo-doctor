@@ -1,0 +1,16 @@
+version: 1
+repository: transformers
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD090
+    evidence: Generic fake Hugging Face tokens in test helper modules such as testing_utils.py are ignored as test scaffolding rather than committed production credentials.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature ML framework. The scan originally treated a
+  generic `TOKEN = "hf_..."` constant in `src/transformers/testing_utils.py`
+  as a committed secret. RRD090 now skips generic secret-like assignments in
+  obvious test or fixture paths while retaining standalone provider-specific
+  key detection.

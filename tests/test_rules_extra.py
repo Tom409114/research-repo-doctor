@@ -92,6 +92,63 @@ def test_local_absolute_path_rule_ignores_placeholder_path(tmp_path) -> None:
     assert not report.findings
 
 
+def test_local_absolute_path_rule_ignores_url_path_segments(tmp_path) -> None:
+    (tmp_path / "dataset.py").write_text(
+        'URL = "https://www.example.edu/bens/home/reproducible_research/data"\n',
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
+def test_local_absolute_path_rule_ignores_common_example_users(tmp_path) -> None:
+    (tmp_path / "util.py").write_text(
+        ">>> split(\"/home/joe/protein.pdb.bz2\")\nhint = '/Users/Me/Desktop/bloch.png'\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
+def test_local_absolute_path_rule_ignores_notebook_outputs(tmp_path) -> None:
+    (tmp_path / "notebook.ipynb").write_text(
+        '{"cells":[{"cell_type":"code","source":"print(1)",'
+        '"outputs":[{"text":"/home/alice/project/src/file.py:1: warning"}]}]}',
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
+def test_local_absolute_path_rule_ignores_system_install_and_user_placeholders(
+    tmp_path,
+) -> None:
+    (tmp_path / "installation.md").write_text(
+        "Copy files from C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8.\n"
+        "Mount cache with -v /home/<YOUR_USER>/.cache/:/home/user/.cache/.\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+    (tmp_path / "installation.md").write_text(
+        "Windows paths may be escaped, for example C:\\\\folder1\\\\folder2.\n",
+        encoding="utf-8",
+    )
+
+    escaped_report = _scan(tmp_path, "RRD043")
+
+    assert not escaped_report.findings
+
+
 def test_local_absolute_path_rule_ignores_angle_bracket_user_placeholder(tmp_path) -> None:
     path_hint = "C:" + "\\Users\\<user>\\AppData\\Local\\<AppAuthor>\\scipy-data\\Cache"
     (tmp_path / "README.md").write_text(

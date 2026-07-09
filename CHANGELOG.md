@@ -2,12 +2,43 @@
 
 ## Unreleased
 
+## v0.2.20 - 2026-07-09
+
 - Refreshed the nanoGPT first-run case study and corpus review notes against
   PyPI `rrdoctor==0.2.19`, confirming that `RRD050` and `RRD063` remain absent.
 - Reduced mature scientific-package noise by recognizing common license
   filenames such as `LICENSE.txt` and ignoring CI/devcontainer plus placeholder
-  absolute paths in `RRD043`. Added SciPy as a focused corpus review case and
-  regression gate for `RRD010` and `RRD043`.
+  absolute paths, URL path segments, and common example-user paths in `RRD043`.
+  Added SciPy, torchvision, MDAnalysis, QuTiP, and ESM as focused corpus review
+  cases and regression gates for `RRD010`, `RRD030`, `RRD043`, and `RRD050`.
+- Reduced `RRD090` and `RRD050` first-run noise found while expanding the corpus:
+  public URL query `token=` values, local function-call or method-call token
+  variables, generic test-helper tokens, and `AKIA...` substrings embedded in
+  longer biological/test sequences are no longer treated as committed secrets;
+  mature library/framework projects, including nested `package/` layouts, are
+  not forced to expose paper experiment entrypoints.
+- Expanded the public calibration corpus from 60 to 80 repositories, adding
+  probabilistic ML, JAX ecosystem, scientific Python, legacy RL, scientific
+  package, neural-rendering, protein-model, and similarity-search projects. The
+  80-repository gate passes with 0 expected-absent regressions and 48 focused
+  review notes loaded.
+- Added stable-diffusion as a focused review case and expected-absent gate for
+  `RRD030` and `RRD052`; Conda `environment.yaml`/`conda.yaml` manifests and
+  editable pip entries with `#egg=` are now recognized by dependency checks.
+- Improved auto-fix scaffolds for legacy Python research repositories:
+  `rrdoctor fix --write` can now read simple literal `setup.py` metadata
+  statically, without executing repository code, before generating
+  `CITATION.cff`, data, and results provenance notes.
+- Improved Artifact Appendix scaffolds for legacy Python research repositories:
+  repository URL and version fields can now be pre-filled from the same static
+  local metadata inference used by auto-fix scaffolds.
+- Improved L2 dynamic verification coverage for common research repository
+  layouts: `verify --run` now recognizes nested Python requirement files such
+  as `requirements/base.txt` and `requirements/main.txt`, plus `.yaml` Conda
+  environment files.
+- Reduced `RRD063` notebook-output false positives by sharing the `RRD090`
+  test/fixture generic fake-token suppression, while still flagging standalone
+  provider-style keys.
 
 ## v0.2.19 - 2026-07-09
 

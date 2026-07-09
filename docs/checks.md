@@ -67,11 +67,16 @@ as `python train.py`, `python eval.py`, `make reproduce`, `snakemake`, or
 `python tools/*.py` commands, README-documented `python -m package.train`
 commands, pyproject-declared console scripts shown in the README, eval/reproduce
 scripts, Make targets, Snakemake/Nextflow workflow files, and README commands
-such as `python train.py ...`.
+such as `python train.py ...`. Reusable library or framework projects with
+standard package metadata, docs/tests/examples structure, and library-oriented
+README language are not treated as missing a paper experiment entrypoint. Common
+monorepo-style library layouts with package metadata under `package/` are also
+recognized.
 
 `RRD030` treats a lockable dependency manifest as the strongest evidence. If no
 manifest exists but the README contains concrete install commands, the finding is
-downgraded to a warning rather than an error.
+downgraded to a warning rather than an error. Root manifests and common nested
+package manifests such as `package/pyproject.toml` are both recognized.
 
 `RRD034` uses Python AST import statements rather than regex text matching, so
 comments, docstrings, notebooks, and prose examples are not treated as imports.
@@ -87,13 +92,23 @@ dataset sections and documented `python data/.../prepare.py` style preparation
 commands.
 
 `RRD043` and notebook path rule `RRD062` ignore obvious documentation
-placeholders such as `/home/user/absolute_path_to_the_output_dir` while still
-flagging machine-specific personal home-directory paths.
+placeholders such as `/home/user/absolute_path_to_the_output_dir`, URL path
+segments that merely contain `/home/`, CI/devcontainer paths, test fixtures, and
+common example-user paths such as `/Users/Me/...` or `/home/joe/...`, system
+install locations such as `C:\Program Files\...`, and escaped Windows path
+examples such as `C:\\folder1\\folder2`. Raw notebook output JSON is skipped by
+RRD043 so traceback paths do not look like data locations; notebook source
+cells remain covered by `RRD062`. The rule still flags machine-specific
+personal home-directory paths in source or docs.
 
 `RRD063` and `RRD090` are intentionally conservative. Generic `token`,
 `api_key`, `secret`, or `password` text must be paired with a credential-like
 random value before it is reported; canonical UUID values are treated as public
-identifiers, and known provider key prefixes are still flagged.
+identifiers, public URL query `token=` values, local function-call or method-call
+token variables, and generic fake tokens in test/fixture paths are ignored.
+Provider-like keys still need a token boundary, so an `AKIA...` substring inside
+a longer biological/test sequence is not treated as a standalone AWS key, while
+known standalone provider key prefixes are still flagged.
 
 `RRD091` is likewise conservative: an existing `.gitignore` only needs basic
 coverage across generated outputs, credential files, notebook checkpoints, or

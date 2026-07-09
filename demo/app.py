@@ -222,6 +222,11 @@ def sample_repository_urls() -> tuple[str, ...]:
     return tuple(url for _label, url in SAMPLE_REPOSITORIES)
 
 
+def render_stat(st: Any, label: str, value: str | int) -> None:
+    st.markdown(f"**{label}**")
+    st.markdown(f"### {value}")
+
+
 def main() -> None:
     st = importlib.import_module("streamlit")
     rrdoctor_version = rrdoctor_version_label()
@@ -272,16 +277,16 @@ def main() -> None:
         readiness_level = str(readiness.get("level") or readiness_level)
         readiness_note = str(readiness.get("description") or "")
     st.subheader(f"Results for [{target.owner}/{target.repo}]({target.web_url})")
-    st.metric("Artifact readiness", readiness_level)
+    render_stat(st, "Artifact readiness", readiness_level)
     if readiness_note:
         st.caption(readiness_note)
-    st.metric("Heuristic score", f"{score}/100")
+    render_stat(st, "Heuristic score", f"{score}/100")
     st.progress(max(0, min(score, 100)) / 100)
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("Errors", _summary_value(report, "error"))
-    col2.metric("Warnings", _summary_value(report, "warning"))
-    col3.metric("Info", _summary_value(report, "info"))
+    render_stat(col1, "Errors", _summary_value(report, "error"))
+    render_stat(col2, "Warnings", _summary_value(report, "warning"))
+    render_stat(col3, "Info", _summary_value(report, "info"))
 
     findings = report.get("findings", [])
     if not isinstance(findings, list) or not findings:

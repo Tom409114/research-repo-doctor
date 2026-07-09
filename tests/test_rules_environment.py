@@ -42,6 +42,30 @@ def test_r_description_satisfies_manifest_and_version_hint(tmp_path) -> None:
     assert not report.findings
 
 
+def test_nested_package_manifest_satisfies_environment_rules(tmp_path) -> None:
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "pyproject.toml").write_text(
+        "[project]\nname = 'nested-package'\nrequires-python = '>=3.10'\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_conda_yaml_manifest_satisfies_environment_rules(tmp_path) -> None:
+    (tmp_path / "environment.yaml").write_text(
+        "name: demo\ndependencies:\n  - python=3.11\n  - numpy=1.26\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_undeclared_import_flagged(tmp_path) -> None:
     (tmp_path / "requirements.txt").write_text("numpy\n", encoding="utf-8")
     (tmp_path / "main.py").write_text(
@@ -55,6 +79,27 @@ def test_undeclared_import_flagged(tmp_path) -> None:
     assert "requests" in message  # undeclared third-party
     assert "numpy" not in message  # declared
     assert "os" not in message  # stdlib
+
+
+def test_undeclared_import_reads_conda_yaml_manifest(tmp_path) -> None:
+    (tmp_path / "conda.yaml").write_text(
+        "name: demo\n"
+        "dependencies:\n"
+        "  - numpy=1.26\n"
+        "  - pip\n"
+        "  - pip:\n"
+        "    - invisible-watermark\n"
+        "    - -e git+https://github.com/openai/CLIP.git@main#egg=clip\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "main.py").write_text(
+        "import clip\nimport imwatermark\nimport numpy\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
 
 
 def test_undeclared_import_alias_resolves(tmp_path) -> None:
@@ -151,6 +196,20 @@ def test_undeclared_import_reads_build_system_requires(tmp_path) -> None:
 
 def test_undeclared_import_skipped_without_manifest(tmp_path) -> None:
     (tmp_path / "main.py").write_text("import requests\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_undeclared_import_reads_nested_package_manifest(tmp_path) -> None:
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "pyproject.toml").write_text(
+        "[project]\nname = 'nested-package'\ndependencies = ['numpy']\n",
+        encoding="utf-8",
+    )
+    (package / "main.py").write_text("import numpy\n", encoding="utf-8")
 
     report = Scanner(DEFAULT_CONFIG, include={"RRD034"}).scan(tmp_path)
 

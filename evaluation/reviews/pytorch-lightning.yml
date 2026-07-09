@@ -1,0 +1,16 @@
+version: 1
+repository: pytorch-lightning
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD090
+    evidence: Context-manager token variables assigned from method calls such as token = _given_hyperparameters.set(...) are ignored as runtime handles, not credentials.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature ML training framework. The scan originally
+  treated a contextvar-style token returned by `_given_hyperparameters.set(...)`
+  as a committed secret. RRD090 now skips token variables assigned from local
+  function or method calls while keeping random credential-like values in
+  ordinary configuration files actionable.

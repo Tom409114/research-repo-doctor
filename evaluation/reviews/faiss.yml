@@ -1,0 +1,13 @@
+version: 1
+repository: faiss
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent: []
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a native C++/Python research software package. The RRD043
+  finding points to a specific hardcoded benchmark dataset path under `/home/`
+  in a benchmark script, so this pass keeps it as an actionable local-path
+  finding rather than adding an expected-absent gate.

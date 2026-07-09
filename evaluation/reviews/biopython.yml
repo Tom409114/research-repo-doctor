@@ -1,0 +1,16 @@
+version: 1
+repository: biopython
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD090
+    evidence: AWS-looking AKIA substrings embedded inside longer biological/test sequence strings are ignored unless they appear as standalone provider-like keys.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature bioinformatics package. The scan originally
+  matched an `AKIA...` substring inside a BLAST test-output sequence as if it
+  were an AWS access key. RRD090 now requires provider-like keys to have token
+  boundaries, reducing biological/test sequence noise while preserving
+  standalone provider-key detection.

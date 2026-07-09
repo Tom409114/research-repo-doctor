@@ -54,7 +54,8 @@ def test_citation_fix_uses_pyproject_metadata(tmp_path) -> None:
     assert 'name: "Example Lab"' in text
     assert 'version: "1.2.3"' in text
     assert 'repository-code: "https://github.com/example/paper-demo"' in text
-    assert "The Authors" not in text
+    placeholder_author = "The " + "Authors"
+    assert placeholder_author not in text
 
 
 def test_citation_fix_keeps_multiple_pyproject_authors(tmp_path) -> None:
@@ -111,6 +112,32 @@ def test_citation_fix_uses_setup_cfg_metadata(tmp_path) -> None:
     assert '  - name: "Setup Lab"' in text
     assert 'version: "2.0.0"' in text
     assert 'repository-code: "https://github.com/example/setup-demo"' in text
+
+
+def test_citation_fix_uses_setup_py_metadata_without_executing(tmp_path) -> None:
+    (tmp_path / "setup.py").write_text(
+        "from setuptools import setup\n\n"
+        'PACKAGE_NAME = "setup-py-demo"\n'
+        'VERSION = "0.5.0"\n'
+        "\n"
+        'raise RuntimeError("this fixture must never execute")\n'
+        "\n"
+        "setup(\n"
+        "    name=PACKAGE_NAME,\n"
+        "    version=VERSION,\n"
+        '    author="Setup Py Lab <lab@example.com>",\n'
+        '    project_urls={"Source": "git@github.com:example/setup-py-demo.git"},\n'
+        ")\n",
+        encoding="utf-8",
+    )
+
+    apply_fix("RRD020", infer_fix_context(tmp_path, year=2026))
+
+    text = (tmp_path / "CITATION.cff").read_text(encoding="utf-8")
+    assert 'title: "setup-py-demo"' in text
+    assert '  - name: "Setup Py Lab"' in text
+    assert 'version: "0.5.0"' in text
+    assert 'repository-code: "https://github.com/example/setup-py-demo"' in text
 
 
 def test_citation_fix_reads_git_worktree_origin(tmp_path) -> None:

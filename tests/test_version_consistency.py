@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import rrdoctor
@@ -18,3 +19,18 @@ def test_package_version_metadata_is_consistent() -> None:
     assert rrdoctor.__version__ == version
     assert f"version: {version}" in Path("CITATION.cff").read_text(encoding="utf-8")
     assert f"rrdoctor=={version}" in Path("demo/requirements.txt").read_text(encoding="utf-8")
+
+
+def test_github_action_examples_use_current_release_tag() -> None:
+    version = _project_version()
+    expected = f"Tom409114/research-repo-doctor@v{version}"
+    checked_files = [
+        Path("README.md"),
+        *Path("docs").glob("*.md"),
+        *Path("examples").glob("*workflow.yml"),
+    ]
+
+    for path in checked_files:
+        text = path.read_text(encoding="utf-8")
+        for match in re.findall(r"Tom409114/research-repo-doctor@v[0-9][^\s`'\"]*", text):
+            assert match == expected, f"{path} uses stale action tag {match}"

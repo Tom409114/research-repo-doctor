@@ -40,6 +40,7 @@ repositories:
     url: https://github.com/CompVis/stable-diffusion
     ecosystem: python-ml
     reason: Research code release with configs, checkpoints, and inference/training paths.
+    expected_absent: [RRD030, RRD052]
     review_focus: [configs, checkpoint-hygiene, entrypoints]
   - name: mmdetection
     url: https://github.com/open-mmlab/mmdetection
@@ -116,6 +117,7 @@ repositories:
     url: https://github.com/openai/guided-diffusion
     ecosystem: python-ml
     reason: Diffusion research artifact with scripts, checkpoints, and sampling commands.
+    expected_absent: [RRD050]
     review_focus: [entrypoints, checkpoint-docs, dependency-docs]
   - name: improved-diffusion
     url: https://github.com/openai/improved-diffusion
@@ -126,6 +128,7 @@ repositories:
     url: https://github.com/google-research/vision_transformer
     ecosystem: python-ml
     reason: Vision Transformer artifact with configs, checkpoints, and dataset instructions.
+    expected_absent: [RRD050]
     review_focus: [configs, checkpoint-docs, data-docs]
   - name: t5x
     url: https://github.com/google-research/t5x
@@ -327,3 +330,115 @@ repositories:
     ecosystem: python-statistics
     reason: Probabilistic programming project with examples, docs, and tests.
     review_focus: [package-metadata, examples, testing]
+  - name: pyro
+    url: https://github.com/pyro-ppl/pyro
+    ecosystem: python-probabilistic-ml
+    reason: Probabilistic programming research toolkit with examples, tutorials, and tests.
+    review_focus: [package-metadata, examples, dependency-docs]
+  - name: tensorflow-probability
+    url: https://github.com/tensorflow/probability
+    ecosystem: python-probabilistic-ml
+    reason: TensorFlow probabilistic programming project with examples and multi-package metadata.
+    review_focus: [package-metadata, examples, dependency-docs]
+  - name: scikit-image
+    url: https://github.com/scikit-image/scikit-image
+    ecosystem: python-science
+    reason: Mature scientific Python image-processing project with docs, examples, and tests.
+    expected_absent: [RRD090]
+    review_focus: [package-metadata, docs, testing]
+  - name: statsmodels
+    url: https://github.com/statsmodels/statsmodels
+    ecosystem: python-statistics
+    reason: Statistical modeling package with examples, docs, and release metadata.
+    review_focus: [package-metadata, examples, testing]
+  - name: networkx
+    url: https://github.com/networkx/networkx
+    ecosystem: python-science
+    reason: Mature scientific Python graph-analysis project with docs and package metadata.
+    expected_absent: [RRD050]
+    review_focus: [package-metadata, docs, testing]
+  - name: keras
+    url: https://github.com/keras-team/keras
+    ecosystem: python-ml
+    reason: Widely used ML framework with examples, tests, and release metadata.
+    expected_absent: [RRD050]
+    review_focus: [package-metadata, examples, testing]
+  - name: jax
+    url: https://github.com/jax-ml/jax
+    ecosystem: python-ml
+    reason: ML/scientific computing project with native build, examples, and docs.
+    expected_absent: [RRD090]
+    review_focus: [native-build, package-metadata, docs]
+  - name: optax
+    url: https://github.com/google-deepmind/optax
+    ecosystem: python-ml
+    reason: JAX optimizer library used across research code with examples and package metadata.
+    review_focus: [package-metadata, examples, testing]
+  - name: brax
+    url: https://github.com/google/brax
+    ecosystem: python-rl
+    reason: JAX-based reinforcement-learning simulator with examples and training scripts.
+    review_focus: [entrypoints, examples, dependency-docs]
+  - name: openai-baselines
+    url: https://github.com/openai/baselines
+    ecosystem: python-rl-legacy
+    reason: Classic reinforcement-learning artifact with training entrypoints and legacy dependencies.
+    expected_absent: [RRD050]
+    review_focus: [legacy-artifact, entrypoints, dependency-docs]
+  - name: transformers
+    url: https://github.com/huggingface/transformers
+    ecosystem: python-ml
+    reason: Widely used ML model framework with examples, docs, tests, and release metadata.
+    expected_absent: [RRD090]
+    review_focus: [package-metadata, examples, testing]
+  - name: pytorch-lightning
+    url: https://github.com/Lightning-AI/pytorch-lightning
+    ecosystem: python-ml
+    reason: Training framework used in research repositories with docs, examples, and CI.
+    expected_absent: [RRD090]
+    review_focus: [package-metadata, examples, ci-docs]
+  - name: torchvision
+    url: https://github.com/pytorch/vision
+    ecosystem: python-ml
+    reason: Computer-vision package with models, examples, datasets, and native build metadata.
+    expected_absent: [RRD043]
+    review_focus: [package-metadata, examples, native-build]
+  - name: xarray
+    url: https://github.com/pydata/xarray
+    ecosystem: python-geoscience
+    reason: Scientific data-analysis package common in climate and geoscience workflows.
+    review_focus: [package-metadata, data-docs, testing]
+  - name: biopython
+    url: https://github.com/biopython/biopython
+    ecosystem: python-bioinformatics
+    reason: Mature bioinformatics toolkit with docs, examples, tests, and citation expectations.
+    expected_absent: [RRD090]
+    review_focus: [package-metadata, citation, testing]
+  - name: mdanalysis
+    url: https://github.com/MDAnalysis/mdanalysis
+    ecosystem: python-computational-biology
+    reason: Molecular-dynamics analysis project with examples, datasets, and scientific docs.
+    expected_absent: [RRD030, RRD043, RRD050]
+    review_focus: [package-metadata, data-docs, testing]
+  - name: qutip
+    url: https://github.com/qutip/qutip
+    ecosystem: python-physics
+    reason: Quantum simulation toolkit with examples, docs, and scientific citation metadata.
+    expected_absent: [RRD043]
+    review_focus: [package-metadata, citation, examples]
+  - name: esm
+    url: https://github.com/facebookresearch/esm
+    ecosystem: python-bio-ml
+    reason: Protein-language-model research artifact with model downloads and example scripts.
+    expected_absent: [RRD043]
+    review_focus: [model-artifacts, entrypoints, dependency-docs]
+  - name: nerfstudio
+    url: https://github.com/nerfstudio-project/nerfstudio
+    ecosystem: python-graphics-ml
+    reason: Neural-rendering research platform with CLI entrypoints, data docs, and configs.
+    review_focus: [entrypoints, data-docs, configs]
+  - name: faiss
+    url: https://github.com/facebookresearch/faiss
+    ecosystem: cpp-python-ml
+    reason: Similarity-search research software with native build docs, examples, and benchmarks.
+    review_focus: [native-build, examples, testing]

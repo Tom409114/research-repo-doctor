@@ -83,10 +83,11 @@ rrdoctor appendix . --profile acm --output ARTIFACT_APPENDIX.md
 The appendix output is a scaffold for the submission package. It maps findings
 to ACM Artifact Evaluation badge tiers and the NeurIPS-style reproducibility
 checklist. rrdoctor pre-fills what it can from local README text, project
-metadata, dependency manifests, data/results docs, config files, and detected
-entrypoint commands. Fill in the human parts that rrdoctor cannot know, such as
-hardware expectations, expected runtime, dataset access restrictions, and result
-interpretation.
+metadata, dependency manifests, data/results docs, config files, git remotes,
+and detected entrypoint commands. Legacy `setup.py` metadata is parsed
+statically and is never executed. Fill in the human parts that rrdoctor cannot
+know, such as hardware expectations, expected runtime, dataset access
+restrictions, and result interpretation.
 
 For another venue, switch profiles:
 
@@ -108,6 +109,11 @@ This reports L1 static readiness and explains what would block L2 environment
 setup or L3 entrypoint execution. The report starts with an evidence summary:
 gate outcome, `--fail-on` threshold, timeout, L3 command source, trust boundary,
 and a copyable rerun command.
+
+L2 recognizes common dependency manifests used by research artifacts, including
+`pyproject.toml`, top-level and nested Python requirement files such as
+`requirements/base.txt` or `requirements/main.txt`, and Conda
+`environment.yml`/`environment.yaml` files.
 
 L3 prefers documented README run commands when they are conservative and
 file-backed, then falls back to common research entrypoints such as
@@ -162,7 +168,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.19
+      - uses: Tom409114/research-repo-doctor@v0.2.20
         with:
           profile: acm
           fail-on: none

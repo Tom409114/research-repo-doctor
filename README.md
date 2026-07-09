@@ -3,8 +3,14 @@
 Get your research artifact ready for Artifact Evaluation before the deadline:
 scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
-Try it on any public repo (no install): <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
-Streamlit may take a minute to wake the app after inactivity.
+Hosted demo: <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
+Or run the local static scan without installing:
+
+```bash
+uvx rrdoctor scan .
+```
+
+Streamlit may take a minute to wake the hosted app after inactivity.
 
 ![rrdoctor demo](docs/demo.gif)
 
@@ -133,10 +139,10 @@ The fastest way to improve rrdoctor is real scan feedback from real research
 repositories. If a finding looks wrong, missing, or too severe, please open a
 [false-positive](https://github.com/Tom409114/research-repo-doctor/issues/new?template=false_positive.yml),
 [false-negative](https://github.com/Tom409114/research-repo-doctor/issues/new?template=false_negative.yml),
-or [scan-case](https://github.com/Tom409114/research-repo-doctor/issues/new?template=scan_case.yml)
+[scan-case](https://github.com/Tom409114/research-repo-doctor/issues/new?template=scan_case.yml),
+or [new-rule](https://github.com/Tom409114/research-repo-doctor/issues/new?template=rule_request.yml)
 issue. Include the rule ID, command, rrdoctor version, and a sanitized minimal
-repo shape. See [feedback and calibration](docs/feedback.md) for the short
-checklist.
+repo shape. See [feedback and calibration](docs/feedback.md) for the short checklist.
 
 ## Why this matters
 
@@ -146,9 +152,9 @@ underspecified, data paths are local, notebooks contain stale outputs, dependenc
 unpinned, or the citation is unclear.
 
 Research Repo Doctor turns those recurring release blockers into deterministic checks with
-concrete remediation - and, where it is safe to do so, fixes them for you. It is built to
-sit in the ordinary maintenance path: run locally while preparing a release, then run
-automatically on pull requests through GitHub Actions.
+concrete remediation - and, where it is safe to do so, scaffolds the mechanical starting
+points. It is built to sit in the ordinary maintenance path: run locally while preparing
+a release, then run automatically on pull requests through GitHub Actions.
 
 The audit runs without an AI API key, network access, or hosted service. That same
 determinism makes it an honest grader: it can verify fixes made by a person or a coding
@@ -161,6 +167,39 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   |       rrdoctor fix --write                       --fail-on-new error
   rrdoctor scan
 ```
+
+## What's new in 0.2.20
+
+- **Lower-noise mature scientific package scans**: `RRD010` now recognizes
+  common license filenames such as `LICENSE.txt`, and `RRD043` ignores
+  CI/devcontainer paths, tests/fixtures, URL path segments, and documented
+  placeholder/example absolute paths.
+- **Lower-noise library and secret heuristics**: `RRD050` no longer treats
+  mature package/library projects, including common nested `package/` layouts,
+  as missing paper experiment entrypoints, and `RRD090` ignores URL query
+  tokens, local function-call or method-call token variables, generic fake
+  tokens in test helpers, and provider-looking substrings embedded inside
+  longer biological/test sequences.
+- **More reviewed corpus evidence**: SciPy is now a focused review case and an
+  expected-absent regression gate for `RRD010` and `RRD043`; scikit-image,
+  JAX, NetworkX, Keras, Transformers, PyTorch Lightning, Biopython,
+  torchvision, MDAnalysis, QuTiP, ESM, and stable-diffusion add first-run trust
+  gates or focused review evidence. The latest 80-repository corpus gate has 0
+  expected-absent regressions, 48 reviewed notes, and 32 repositories still
+  awaiting focused review.
+- **Less template-like auto-fix output**: `rrdoctor fix --write` can now read
+  simple literal `setup.py` metadata statically, without executing repository
+  code, when generating citation and provenance scaffolds.
+- **More filled Artifact Appendix access notes**: `rrdoctor appendix` reuses the
+  same local metadata inference to pre-fill repository URLs and versions for
+  legacy `setup.py`/`setup.cfg` projects.
+- **More realistic L2 environment checks**: `rrdoctor verify --run` now resolves
+  common nested Python requirement files such as `requirements/base.txt` and
+  `requirements/main.txt`, plus `.yaml` Conda environment files, instead of
+  skipping those repository layouts.
+- **Lower-noise notebook secret checks**: `RRD063` now shares the test/fixture
+  generic fake-token suppression used by `RRD090`, while still flagging
+  standalone provider-style keys.
 
 ## What's new in 0.2.19
 
@@ -420,7 +459,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.19
+      - uses: Tom409114/research-repo-doctor@v0.2.20
         with:
           profile: standard
           fail-on: none
@@ -527,15 +566,15 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 Use the included [CITATION.cff](CITATION.cff) or cite the archived release DOI:
 [10.5281/zenodo.21045373](https://doi.org/10.5281/zenodo.21045373).
 
-A JOSS-style draft manuscript is available in [paper/](paper/) for review and
-will be updated before any formal submission with final author metadata and
-only verified external-use claims.
+A JOSS-style draft manuscript is available in [paper/](paper/) for review. It is
+not a submitted manuscript and intentionally avoids unverified adoption claims;
+formal submission metadata will be updated only when it is true.
 
 ```bibtex
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.19},
+  version = {0.2.20},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

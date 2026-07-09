@@ -15,29 +15,29 @@ or release-preparation workflows.
 Latest local maintainer smoke run:
 
 - Date: 2026-07-09
-- Command: `python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent`
-- Corpus slice: all 60 public repositories currently listed in `evaluation/corpus.yml`
-- Scanned successfully: 60 of 60
+- Command: `python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent`
+- Corpus slice: all 80 public repositories currently listed in `evaluation/corpus.yml`
+- Scanned successfully: 80 of 80
 - Clone or scan errors: 0
-- Average score across scanned repositories: 65.1
+- Average score across scanned repositories: 67.5
 - Expected-absent regressions: 0
-- Focused manual review notes: 33
-- Not yet manually reviewed: 27
+- Focused manual review notes: 51
+- Not yet manually reviewed: 29
 
 Top actionable rule frequencies in that snapshot:
 
 | Rule | Error/warning findings |
 | --- | ---: |
-| RRD040 | 41 |
-| RRD004 | 37 |
-| RRD071 | 32 |
-| RRD002 | 30 |
-| RRD091 | 26 |
-| RRD034 | 24 |
-| RRD043 | 24 |
-| RRD030 | 23 |
-| RRD070 | 19 |
-| RRD060 | 18 |
+| RRD040 | 56 |
+| RRD004 | 50 |
+| RRD034 | 43 |
+| RRD060 | 39 |
+| RRD071 | 36 |
+| RRD002 | 32 |
+| RRD091 | 30 |
+| RRD110 | 26 |
+| RRD043 | 23 |
+| RRD030 | 22 |
 
 This is not a benchmark and should not be read as a ranking of projects. The
 snapshot is a maintainer calibration tool: high-frequency rules are candidates
@@ -54,13 +54,21 @@ Manual review flags captured in this snapshot:
 
 Focused review coverage in the current snapshot:
 
-- Focused manual review notes loaded: 33
-- Repositories still awaiting focused manual review: 27
-- Includes BERT, CLIP, improved-diffusion, MAE, AlphaFold, DETR, YOLOv5,
-  DynamicalSystems.jl, Scanpy, scikit-learn, Astropy, scvi-tools, DINOv2,
-  t5x, GraphCast, and SciPy reviews for README evidence, experiment-entrypoint
-  recognition, path-noise handling, Julia test/CI recognition, dependency
-  signal quality, notebook-first artifacts, and randomness-seed signal quality.
+- Focused manual review notes loaded: 51
+- Repositories still awaiting focused manual review: 29
+- Includes BERT, CLIP, guided-diffusion, improved-diffusion,
+  vision-transformer, MAE, AlphaFold, DETR, YOLOv5, DynamicalSystems.jl,
+  Scanpy, scikit-learn, Astropy, scvi-tools, DINOv2, t5x, GraphCast, SciPy,
+  scikit-image, JAX, NetworkX, Keras, openai-baselines, Transformers, PyTorch
+  Lightning, Biopython, torchvision, xarray, MDAnalysis, QuTiP, ESM,
+  stable-diffusion, nerfstudio, and FAISS reviews for
+  README evidence, experiment-entrypoint recognition, path-noise handling,
+  secret-heuristic noise, library-shaped package handling, Julia test/CI
+  recognition, dependency signal quality, Conda `.yaml` manifest handling,
+  editable pip dependency parsing, notebook-first artifacts, and
+  randomness-seed signal quality.
+- The 80-repository manifest now has focused review notes for all repositories
+  added in the latest expansion except the remaining older unreviewed entries.
 - Confirmed that BERT's local `random.Random(seed)` usage, CLIP model parameter
   initialization, MAE-style root `main_*.py` scripts, and AlphaFold
   `random_seed=` plumbing are not reported as noisy findings.
@@ -72,9 +80,26 @@ Focused review coverage in the current snapshot:
   documented `python3 ${T5X_DIR}/t5x/train.py` commands, and clearly named
   demo notebooks such as `graphcast_demo.ipynb` count as experiment entrypoint
   evidence.
+- Confirmed that README-documented script, module, and config-driven training
+  commands in guided-diffusion, vision-transformer, and openai-baselines count
+  as experiment entrypoint evidence.
 - Confirmed that SciPy's `LICENSE.txt`, CI/devcontainer environment paths, and
   placeholder examples such as `/home/...` and Windows `<user>` cache paths do
   not trigger noisy `RRD010` or `RRD043` findings.
+- Confirmed that public asset URL query `token=` values and internal compiler
+  variables named `token` do not trigger noisy `RRD090` findings, and that
+  mature library/framework projects such as NetworkX and Keras are not treated
+  as missing paper experiment entrypoints.
+- Confirmed that URL path segments containing `/home/`, common documentation
+  examples such as `/home/joe/...` and `/Users/Me/...`, nested `package/`
+  dependency manifests, and reusable library-shaped layouts no longer create
+  high-noise `RRD043`, `RRD030`, or `RRD050` findings. The FAISS review keeps a
+  specific hardcoded benchmark dataset path as actionable rather than
+  suppressing it.
+- Confirmed that notebook output tracebacks with local source paths no longer
+  create `RRD043` data-path findings; notebook source cells remain covered by
+  `RRD062`, and large/stale notebook outputs remain covered by `RRD060` and
+  `RRD061`.
 
 First-run trust spot check refreshed on 2026-07-09:
 
@@ -93,7 +118,7 @@ python scripts/scan_corpus.py --limit 1 --output evaluation/reports/corpus-scan.
 Run the current maintainer gate:
 
 ```bash
-python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
+python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
 ```
 
 The generated reports are written under `evaluation/reports/`, which is ignored

@@ -1,0 +1,16 @@
+version: 1
+repository: networkx
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD050
+    evidence: Mature package/library projects with standard package metadata, docs/tests structure, and library-oriented README language are not required to expose a paper experiment entrypoint.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature scientific Python library. RRD050 should not make
+  a reusable graph-analysis package look like a broken paper artifact merely
+  because it does not provide a train/eval/reproduce script. The rule now skips
+  library-shaped packages while continuing to flag paper artifacts that provide
+  no reproduction entrypoint.

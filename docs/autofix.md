@@ -22,9 +22,10 @@ If `--author` or `--project-name` is omitted, `rrdoctor` tries to infer sensible
 values from `pyproject.toml` and the local git remote. Generated citation
 metadata can include the project name, version, release date, multiple authors,
 and repository URL when those are already available locally. PEP 621
-`[project]` metadata, Poetry `[tool.poetry]` metadata, and `setup.cfg`
-`[metadata]` are supported, and git worktree remotes are recognized without
-running repository code.
+`[project]` metadata, Poetry `[tool.poetry]` metadata, `setup.cfg`
+`[metadata]`, and simple literal `setup.py` calls are supported. `setup.py`
+is parsed statically and never executed, and git worktree remotes are
+recognized without running repository code.
 
 Generated data-provenance notes also include local evidence when it exists:
 top-level data directories, likely data download or preprocessing scripts, and

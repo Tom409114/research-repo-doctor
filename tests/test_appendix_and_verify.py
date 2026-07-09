@@ -9,7 +9,9 @@ from rrdoctor.reporting.appendix import badge_status, render_appendix, render_ch
 from rrdoctor.scanner import Scanner
 from rrdoctor.verification import (
     LadderStep,
+    _build_plan,
     _entrypoint_command,
+    _l2_step,
     _readme_entrypoint_command,
     _run_command,
     build_steps,
@@ -46,6 +48,33 @@ def test_appendix_has_required_sections() -> None:
     assert "`results/README.md`" in rendered
     assert "`configs/default.yaml`" in rendered
     assert "python scripts/train.py --config configs/default.yaml" in rendered
+
+
+def test_appendix_uses_setup_py_metadata_without_executing(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Setup Py Demo\n\nA tiny legacy package artifact.\n\n```bash\npython train.py\n```\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "train.py").write_text("print('train')\n", encoding="utf-8")
+    (tmp_path / "setup.py").write_text(
+        "from setuptools import setup\n\n"
+        'NAME = "setup-py-demo"\n'
+        'VERSION = "0.5.0"\n'
+        'raise RuntimeError("appendix must never execute setup.py")\n'
+        "setup(\n"
+        "    name=NAME,\n"
+        "    version=VERSION,\n"
+        '    url="git@github.com:example/setup-py-demo.git",\n'
+        ")\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG).scan(tmp_path)
+    rendered = render_appendix(report)
+
+    assert "This artifact package contains `setup-py-demo`" in rendered
+    assert "Repository URL: <https://github.com/example/setup-py-demo>." in rendered
+    assert "Version: `0.5.0`." in rendered
 
 
 def test_badge_status_blocks_on_missing_basics() -> None:
@@ -160,6 +189,60 @@ def test_run_command_missing_tool_returns_none(tmp_path) -> None:
 
     assert code is None
     assert "tool not found" in message
+
+
+def test_verification_l2_detects_nested_requirements_file(tmp_path, monkeypatch) -> None:
+    requirements = tmp_path / "requirements"
+    requirements.mkdir()
+    (requirements / "base.txt").write_text("numpy==1.26.0\n", encoding="utf-8")
+    monkeypatch.setattr(
+        "rrdoctor.verification.shutil.which",
+        lambda tool: "pip" if tool == "pip" else None,
+    )
+
+    display, runnable, missing = _build_plan(tmp_path)
+
+    assert missing == ""
+    assert display == [
+        "pip install --dry-run -r requirements/base.txt  # resolve Python dependencies"
+    ]
+    assert runnable == "pip install --dry-run -r requirements/base.txt"
+
+
+def test_verification_l2_detects_environment_yaml(tmp_path, monkeypatch) -> None:
+    (tmp_path / "environment.yaml").write_text("name: demo\n", encoding="utf-8")
+    monkeypatch.setattr(
+        "rrdoctor.verification.shutil.which",
+        lambda tool: "mamba" if tool == "mamba" else None,
+    )
+
+    display, runnable, missing = _build_plan(tmp_path)
+
+    assert missing == ""
+    assert display == ["mamba env create -f environment.yaml --dry-run"]
+    assert runnable == "mamba env create -f environment.yaml --dry-run"
+
+
+def test_verification_l2_dynamic_uses_parsed_argument_vector(tmp_path, monkeypatch) -> None:
+    requirements = tmp_path / "requirements"
+    requirements.mkdir()
+    (requirements / "main.txt").write_text("numpy==1.26.0\n", encoding="utf-8")
+    captured: dict[str, list[str]] = {}
+    monkeypatch.setattr(
+        "rrdoctor.verification.shutil.which",
+        lambda tool: "pip" if tool == "pip" else None,
+    )
+
+    def fake_run_command(cmd, cwd, timeout):
+        captured["cmd"] = cmd
+        return 0, "ok"
+
+    monkeypatch.setattr("rrdoctor.verification._run_command", fake_run_command)
+
+    step = _l2_step(tmp_path, run=True, timeout=30)
+
+    assert step.status == "pass"
+    assert captured["cmd"] == ["pip", "install", "--dry-run", "-r", "requirements/main.txt"]
 
 
 def test_verification_detects_root_python_entrypoint(tmp_path) -> None:

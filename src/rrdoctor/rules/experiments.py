@@ -91,13 +91,75 @@ class ExperimentEntrypointMissingRule(Rule):
             "workflows/*.nf",
             "nextflow.config",
         ]
-        if not find_files(context, patterns) and not _has_documented_entrypoint(context):
+        if (
+            not find_files(context, patterns)
+            and not _has_documented_entrypoint(context)
+            and not _looks_like_reusable_library(context)
+        ):
             return [
                 self.finding(
                     context, message="No experiment or reproduction entrypoint was detected."
                 )
             ]
         return []
+
+
+PACKAGE_METADATA_FILES = (
+    "pyproject.toml",
+    "setup.cfg",
+    "setup.py",
+    "DESCRIPTION",
+    "Project.toml",
+)
+NESTED_PACKAGE_DIRS = ("package",)
+LIBRARY_STRUCTURE_DIRS = (
+    "docs",
+    "doc",
+    "tests",
+    "test",
+    "testsuite",
+    "examples",
+    "src",
+    "package",
+)
+LIBRARY_README_TERMS = (
+    " library",
+    " package",
+    " framework",
+    " toolkit",
+    " api",
+    "module",
+)
+
+
+def _looks_like_reusable_library(context: ScanContext) -> bool:
+    """Return true for library/package projects that are not paper artifacts."""
+
+    if not _has_package_metadata(context):
+        return False
+    if not context.exists_any(list(LIBRARY_STRUCTURE_DIRS)):
+        return False
+    readme_text = _readme_text(context).lower()
+    if not readme_text:
+        return False
+    return any(term in readme_text for term in LIBRARY_README_TERMS)
+
+
+def _has_package_metadata(context: ScanContext) -> bool:
+    if context.exists_any(list(PACKAGE_METADATA_FILES)):
+        return True
+    for base in NESTED_PACKAGE_DIRS:
+        if any((context.root / base / name).exists() for name in PACKAGE_METADATA_FILES):
+            return True
+    return False
+
+
+def _readme_text(context: ScanContext) -> str:
+    for candidate in ("README.md", "README.rst", "README.txt"):
+        path = context.root / candidate
+        if path.exists():
+            return read_text(path)
+    return ""
 
 
 _DOCUMENTED_ENTRYPOINT_RE = re.compile(

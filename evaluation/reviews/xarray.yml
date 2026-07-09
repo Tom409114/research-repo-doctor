@@ -1,0 +1,14 @@
+version: 1
+repository: xarray
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent: []
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature scientific data-analysis package. The current
+  findings are broad artifact-readiness signals around README install/result
+  framing, undeclared optional/runtime imports, release notes, and pyproject
+  metadata. No focused false-positive or expected-absent gate was added in this
+  pass.
