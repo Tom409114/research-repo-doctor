@@ -174,6 +174,25 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   rrdoctor scan
 ```
 
+## What's new in 0.2.21
+
+- **More honest corpus evidence**: the public 80-repository calibration corpus
+  now has 80 focused review notes, 0 repositories awaiting focused review, and
+  a concise data brief that explains what the corpus does and does not prove.
+- **Lower-noise model-release scans**: `RRD050` and `verify` now recognize
+  common model-release entrypoints such as `demo.py`, `inference.py`,
+  `predict.py`, `sample.py`, and `generate.py` in root, `scripts/`, and
+  `tools/` layouts.
+- **Less noisy secret checks**: `RRD063` and `RRD090` now require stronger
+  entropy evidence for generic `api_key`/`token`/`secret`/`password`
+  assignments while still flagging provider-shaped keys.
+- **More agent integrations**: the repository includes copyable GitHub Copilot
+  instructions alongside the existing Agent Skill and Cursor templates for the
+  baseline -> plan -> verify loop.
+- **Clearer launch artifacts**: the JOSS draft now states the evaluation
+  evidence and limitations more explicitly, and the live-demo check documents
+  when Streamlit sharing still blocks anonymous users.
+
 ## What's new in 0.2.20
 
 - **Lower-noise mature scientific package scans**: `RRD010` now recognizes
@@ -468,7 +487,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.20
+      - uses: Tom409114/research-repo-doctor@v0.2.21
         with:
           profile: standard
           fail-on: none
@@ -583,7 +602,7 @@ formal submission metadata will be updated only when it is true.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.20},
+  version = {0.2.21},
   year = {2026},
   doi = {10.5281/zenodo.21045373},
   url = {https://github.com/Tom409114/research-repo-doctor}

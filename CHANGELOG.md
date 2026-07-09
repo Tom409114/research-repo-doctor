@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.21 - 2026-07-09
+
 - Strengthened the JOSS draft manuscript with an explicit evaluation and
   calibration section covering the reviewed 80-repository static corpus,
   expected-absent regression gate, and limits of the evidence.

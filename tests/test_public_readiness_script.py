@@ -40,7 +40,7 @@ def test_markdown_field_extracts_bold_report_values() -> None:
 def test_action_reference_check_rejects_stale_release_tag(tmp_path) -> None:
     script = _load_public_readiness_script()
     (tmp_path / "pyproject.toml").write_text(
-        "[project]\nname = 'rrdoctor'\nversion = '0.2.20'\n",
+        "[project]\nname = 'rrdoctor'\nversion = '0.2.21'\n",
         encoding="utf-8",
     )
     (tmp_path / "README.md").write_text(
@@ -60,7 +60,7 @@ def test_action_reference_check_rejects_stale_release_tag(tmp_path) -> None:
 def test_action_reference_check_ignores_historical_release_notes(tmp_path) -> None:
     script = _load_public_readiness_script()
     (tmp_path / "pyproject.toml").write_text(
-        "[project]\nname = 'rrdoctor'\nversion = '0.2.20'\n",
+        "[project]\nname = 'rrdoctor'\nversion = '0.2.21'\n",
         encoding="utf-8",
     )
     (tmp_path / "RELEASE_NOTES_v0.1.0.md").write_text(
