@@ -92,6 +92,29 @@ def test_local_absolute_path_rule_ignores_placeholder_path(tmp_path) -> None:
     assert not report.findings
 
 
+def test_local_absolute_path_rule_ignores_angle_bracket_user_placeholder(tmp_path) -> None:
+    path_hint = "C:" + "\\Users\\<user>\\AppData\\Local\\<AppAuthor>\\scipy-data\\Cache"
+    (tmp_path / "README.md").write_text(
+        f"# Demo\n\nThe default cache path is `{path_hint}`.\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
+def test_local_absolute_path_rule_ignores_ellipsis_user_placeholder(tmp_path) -> None:
+    (tmp_path / "example.py").write_text(
+        "lib = ctypes.CDLL('/home/.../testlib.*')  # use absolute path\ndocs = '/home/...'\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
 def test_local_absolute_path_rule_flags_real_windows_path(tmp_path) -> None:
     path_hint = "C:" + "\\Users\\alice\\private-datasets\\demo"
     (tmp_path / "README.md").write_text(
@@ -108,6 +131,50 @@ def test_local_absolute_path_rule_flags_real_windows_path(tmp_path) -> None:
 def test_local_absolute_path_rule_ignores_regex_escapes(tmp_path) -> None:
     (tmp_path / "pyproject.toml").write_text(
         '[tool.pytest.ini_options]\nfilterwarnings = ["ignore:\\\\n*.*scipy\\\\.sparse"]\n',
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
+def test_local_absolute_path_rule_ignores_ci_config_paths(tmp_path) -> None:
+    circleci_dir = tmp_path / ".circleci"
+    circleci_dir.mkdir()
+    (circleci_dir / "config.yml").write_text(
+        "jobs:\n"
+        "  docs:\n"
+        "    environment:\n"
+        "      CCACHE_DIR: /home/circleci/.ccache\n"
+        "    steps:\n"
+        "      - run: cp -R /tmp/build/html/. .\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
+def test_local_absolute_path_rule_ignores_devcontainer_paths(tmp_path) -> None:
+    devcontainer_dir = tmp_path / ".devcontainer"
+    devcontainer_dir.mkdir()
+    (devcontainer_dir / "setup.sh").write_text(
+        "echo 'envs_dirs:\n  - /home/codespace/micromamba/envs' > /opt/conda/.condarc\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
+def test_local_absolute_path_rule_ignores_test_fixtures(tmp_path) -> None:
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    (tests_dir / "test_paths.py").write_text(
+        "BAD_PATH = '/home/alice/private-datasets/demo'\n",
         encoding="utf-8",
     )
 

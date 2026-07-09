@@ -1,0 +1,19 @@
+version: 1
+repository: scipy
+status: reviewed
+reviewed_at: 2026-07-09
+reviewer: Research Repo Doctor maintainers
+confirmed_absent:
+  - rule_id: RRD010
+    evidence: SciPy uses a root LICENSE.txt file; rrdoctor now treats common LICENSE.* and COPYING.* filenames as license evidence.
+  - rule_id: RRD043
+    evidence: CI/devcontainer paths and documented placeholder paths such as /home/... and Windows <user> cache paths are ignored as non-data-path examples.
+false_positives: []
+false_negatives: []
+notes: >
+  Focused review for a mature scientific Python package. The review found two
+  first-run trust problems: RRD010 did not recognize SciPy's LICENSE.txt, and
+  RRD043 treated CI/devcontainer paths plus documentation placeholders as local
+  research data paths. Both are now regression-gated as expected-absent. The
+  remaining findings are broader artifact-preparation signals and need separate
+  policy review before being classified as false positives.

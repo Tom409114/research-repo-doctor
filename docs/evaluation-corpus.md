@@ -71,17 +71,17 @@ python scripts/scan_corpus.py --limit 60 --timeout 120 --max-mb 500 --progress -
 - Scanned successfully: 60
 - Clone or scan errors: 0
 - Expected-absent regressions: 0
-- Focused manual review notes: 32
-- Not yet manually reviewed: 28
-- Average score across scanned repositories: 63.5
+- Focused manual review notes: 33
+- Not yet manually reviewed: 27
+- Average score across scanned repositories: 65.1
 
 Readiness distribution:
 
 | Readiness | Repositories |
 | --- | ---: |
-| Available | 36 |
-| Functional | 14 |
-| Needs preparation | 10 |
+| Available | 42 |
+| Functional | 16 |
+| Needs preparation | 2 |
 
 Top actionable rule frequencies:
 
@@ -92,8 +92,8 @@ Top actionable rule frequencies:
 | RRD071 | 32 |
 | RRD002 | 30 |
 | RRD091 | 26 |
-| RRD043 | 25 |
 | RRD034 | 24 |
+| RRD043 | 24 |
 | RRD030 | 23 |
 | RRD070 | 19 |
 | RRD060 | 18 |
@@ -112,8 +112,8 @@ Manual review flags captured in this snapshot:
 
 Focused reviews currently cover BERT, CLIP, improved-diffusion, MAE,
 AlphaFold, DETR, YOLOv5, DynamicalSystems.jl, Scanpy, scikit-learn, Astropy,
-scvi-tools, DINOv2, t5x, and GraphCast. The repository contains 32 reviewed
-notes and 28 repositories still awaiting focused manual review. Those additions
+scvi-tools, DINOv2, t5x, GraphCast, and SciPy. The repository contains 33
+reviewed notes and 27 repositories still awaiting focused manual review. Those additions
 confirm that BERT local RNG seeding via
 `random.Random(FLAGS.random_seed)`, CLIP model parameter initialization via
 `nn.Parameter(torch.randn(...))`, MAE-style root `main_*.py` entrypoints,
@@ -124,6 +124,9 @@ also confirms that package-level research binaries such as `t5x/train.py` and
 documented `python3 ${T5X_DIR}/t5x/train.py` commands count as experiment
 entrypoints. The GraphCast review confirms that clearly named demo notebooks
 such as `graphcast_demo.ipynb` count as notebook-first experiment entrypoints.
+The SciPy review confirms that `LICENSE.txt`, CI/devcontainer environment paths,
+and placeholder examples such as `/home/...` or Windows `<user>` cache paths do
+not create high-noise license or local-path findings.
 The dependency gap check also focuses on runtime-like Python files instead of
 docs, tests, benchmarks, vendored code, or maintainer tooling.
 

@@ -19,10 +19,10 @@ Latest local maintainer smoke run:
 - Corpus slice: all 60 public repositories currently listed in `evaluation/corpus.yml`
 - Scanned successfully: 60 of 60
 - Clone or scan errors: 0
-- Average score across scanned repositories: 63.5
+- Average score across scanned repositories: 65.1
 - Expected-absent regressions: 0
-- Focused manual review notes: 32
-- Not yet manually reviewed: 28
+- Focused manual review notes: 33
+- Not yet manually reviewed: 27
 
 Top actionable rule frequencies in that snapshot:
 
@@ -33,8 +33,8 @@ Top actionable rule frequencies in that snapshot:
 | RRD071 | 32 |
 | RRD002 | 30 |
 | RRD091 | 26 |
-| RRD043 | 25 |
 | RRD034 | 24 |
+| RRD043 | 24 |
 | RRD030 | 23 |
 | RRD070 | 19 |
 | RRD060 | 18 |
@@ -54,11 +54,11 @@ Manual review flags captured in this snapshot:
 
 Focused review coverage in the current snapshot:
 
-- Focused manual review notes loaded: 32
-- Repositories still awaiting focused manual review: 28
+- Focused manual review notes loaded: 33
+- Repositories still awaiting focused manual review: 27
 - Includes BERT, CLIP, improved-diffusion, MAE, AlphaFold, DETR, YOLOv5,
   DynamicalSystems.jl, Scanpy, scikit-learn, Astropy, scvi-tools, DINOv2,
-  t5x, and GraphCast reviews for README evidence, experiment-entrypoint
+  t5x, GraphCast, and SciPy reviews for README evidence, experiment-entrypoint
   recognition, path-noise handling, Julia test/CI recognition, dependency
   signal quality, notebook-first artifacts, and randomness-seed signal quality.
 - Confirmed that BERT's local `random.Random(seed)` usage, CLIP model parameter
@@ -72,6 +72,9 @@ Focused review coverage in the current snapshot:
   documented `python3 ${T5X_DIR}/t5x/train.py` commands, and clearly named
   demo notebooks such as `graphcast_demo.ipynb` count as experiment entrypoint
   evidence.
+- Confirmed that SciPy's `LICENSE.txt`, CI/devcontainer environment paths, and
+  placeholder examples such as `/home/...` and Windows `<user>` cache paths do
+  not trigger noisy `RRD010` or `RRD043` findings.
 
 First-run trust spot check refreshed on 2026-07-09:
 

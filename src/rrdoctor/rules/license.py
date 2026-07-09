@@ -6,6 +6,21 @@ from rrdoctor.models import Category, Finding, ScanContext, Severity
 from rrdoctor.rules.base import Rule, definition
 from rrdoctor.rules.paths import has_file
 
+LICENSE_FILENAMES = [
+    "LICENSE",
+    "LICENSE.md",
+    "LICENSE.rst",
+    "LICENSE.txt",
+    "LICENCE",
+    "LICENCE.md",
+    "LICENCE.rst",
+    "LICENCE.txt",
+    "COPYING",
+    "COPYING.md",
+    "COPYING.rst",
+    "COPYING.txt",
+]
+
 
 class LicenseMissingRule(Rule):
     definition = definition(
@@ -20,7 +35,7 @@ class LicenseMissingRule(Rule):
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
-        if not has_file(context.root, ["LICENSE", "LICENSE.md", "COPYING"]):
+        if not has_file(context.root, LICENSE_FILENAMES):
             return [self.finding(context, message="No LICENSE file was found.")]
         return []
 

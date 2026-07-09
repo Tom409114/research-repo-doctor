@@ -4,6 +4,10 @@
 
 - Refreshed the nanoGPT first-run case study and corpus review notes against
   PyPI `rrdoctor==0.2.19`, confirming that `RRD050` and `RRD063` remain absent.
+- Reduced mature scientific-package noise by recognizing common license
+  filenames such as `LICENSE.txt` and ignoring CI/devcontainer plus placeholder
+  absolute paths in `RRD043`. Added SciPy as a focused corpus review case and
+  regression gate for `RRD010` and `RRD043`.
 
 ## v0.2.19 - 2026-07-09
 

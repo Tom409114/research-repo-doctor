@@ -13,6 +13,22 @@ DATA_ACCESS_RE = re.compile(
     r"(?i)\b(download|prepare|preprocess|dataset|datasets|data/|wget|curl|kaggle|zenodo|doi)\b"
 )
 DATA_PREP_COMMAND_RE = re.compile(r"(?i)\b(python|Rscript|julia|bash)\s+[^\n`]*data/[^\n`]*prepare")
+CI_CONFIG_PATH_PREFIXES = (
+    ".github/workflows/",
+    ".circleci/",
+    ".buildkite/",
+    ".devcontainer/",
+)
+CI_CONFIG_FILENAMES = {
+    ".appveyor.yml",
+    ".cirrus.yml",
+    ".gitlab-ci.yml",
+    ".travis.yml",
+    "azure-pipelines.yml",
+    "jenkinsfile",
+}
+TEST_PATH_PREFIXES = ("test/", "tests/")
+TEST_FILENAME_MARKERS = ("test_", "_test.")
 
 
 class DataDocsMissingRule(Rule):
@@ -120,11 +136,13 @@ class LocalAbsoluteDataPathRule(Rule):
 
     def check(self, context: ScanContext) -> list[Finding]:
         for path in text_files(context):
+            rel = context.rel(path)
+            if _is_ci_config_path(rel) or _is_test_or_fixture_path(rel):
+                continue
             text = read_text(path)
             result = first_absolute_path(text)
             if result:
                 value, line = result
-                rel = context.rel(path)
                 return [
                     self.finding(
                         context,
@@ -137,6 +155,22 @@ class LocalAbsoluteDataPathRule(Rule):
                     )
                 ]
         return []
+
+
+def _is_ci_config_path(rel_path: str) -> bool:
+    normalized = rel_path.replace("\\", "/").lower()
+    return normalized in CI_CONFIG_FILENAMES or normalized.startswith(CI_CONFIG_PATH_PREFIXES)
+
+
+def _is_test_or_fixture_path(rel_path: str) -> bool:
+    normalized = rel_path.replace("\\", "/").lower()
+    name = normalized.rsplit("/", 1)[-1]
+    return (
+        normalized.startswith(TEST_PATH_PREFIXES)
+        or "fixtures/" in normalized
+        or name == "conftest.py"
+        or any(marker in name for marker in TEST_FILENAME_MARKERS)
+    )
 
 
 RULES = [

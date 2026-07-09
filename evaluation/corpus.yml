@@ -198,6 +198,7 @@ repositories:
     url: https://github.com/scipy/scipy
     ecosystem: python-science
     reason: Mature scientific computing project with native build and extensive governance.
+    expected_absent: [RRD010, RRD043]
     review_focus: [native-build, package-metadata, governance]
   - name: astropy
     url: https://github.com/astropy/astropy

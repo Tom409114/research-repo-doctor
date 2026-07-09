@@ -24,6 +24,14 @@ def test_missing_license_rule() -> None:
     assert report.findings[0].rule_id == "RRD010"
 
 
+def test_license_rule_accepts_text_license_filename(tmp_path) -> None:
+    (tmp_path / "LICENSE.txt").write_text("BSD-3-Clause\n", encoding="utf-8")
+
+    report = _scan(tmp_path, "RRD010")
+
+    assert not report.findings
+
+
 def test_setup_rule_accepts_install_command_without_heading(tmp_path) -> None:
     (tmp_path / "README.md").write_text(
         "# Demo\n\nClone the repo, then run:\n\n```bash\npip install -e .\n```\n",

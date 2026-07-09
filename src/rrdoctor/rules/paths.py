@@ -85,6 +85,10 @@ def is_placeholder_absolute_path(value: str) -> bool:
     return (
         normalized.startswith("/home/user/")
         or normalized.startswith("/users/user/")
+        or normalized.startswith("/home/...")
+        or normalized.startswith("/users/...")
+        or "/<user>/" in normalized
+        or "\\<user>\\" in value.lower()
         or "/absolute_path" in normalized
         or "/path_to_" in normalized
         or "/path/to/" in normalized
