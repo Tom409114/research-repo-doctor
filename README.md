@@ -4,8 +4,8 @@ Get your research artifact ready for Artifact Evaluation before the deadline:
 scan the repo, scaffold the easy fixes, verify the run path, and generate the appendix.
 
 Web demo for public repos: <https://research-repo-doctor-bckncrcwwmg6jrbsrd6btj.streamlit.app/>
-If Streamlit asks you to sign in, the demo deployment is private or asleep too deeply;
-the local zero-install command below is the reliable path:
+If the hosted demo is waking up or reinstalling dependencies, the local zero-install
+command below is the reliable fallback:
 
 ```bash
 uvx rrdoctor scan .
@@ -190,8 +190,8 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   instructions alongside the existing Agent Skill and Cursor templates for the
   baseline -> plan -> verify loop.
 - **Clearer launch artifacts**: the JOSS draft now states the evaluation
-  evidence and limitations more explicitly, and the live-demo check documents
-  when Streamlit sharing still blocks anonymous users.
+  evidence and limitations more explicitly, and the live-demo check now follows
+  Streamlit's anonymous redirect handshake before deciding whether the app is reachable.
 
 ## What's new in 0.2.20
 

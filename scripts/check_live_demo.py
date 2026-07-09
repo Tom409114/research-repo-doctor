@@ -3,8 +3,10 @@ from __future__ import annotations
 import argparse
 import sys
 from dataclasses import dataclass
+from http.cookiejar import CookieJar
 from urllib.error import HTTPError, URLError
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.parse import urlparse
+from urllib.request import HTTPCookieProcessor, Request, build_opener
 
 DEFAULT_TIMEOUT_SECONDS = 20
 
@@ -15,33 +17,40 @@ class DemoCheck:
     message: str
 
 
-class NoRedirect(HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
-        return None
-
-
 def check_demo_url(url: str, timeout: int = DEFAULT_TIMEOUT_SECONDS) -> DemoCheck:
     request = Request(url, headers={"User-Agent": "rrdoctor-live-demo-check/1.0"})
-    opener = build_opener(NoRedirect)
+    opener = build_opener(HTTPCookieProcessor(CookieJar()))
     try:
         with opener.open(request, timeout=timeout) as response:
             status = response.status
             if 200 <= status < 300:
-                return DemoCheck(True, f"Demo is anonymously reachable: HTTP {status}.")
+                final_url = response.geturl()
+                if _is_auth_url(final_url):
+                    return DemoCheck(
+                        False,
+                        "Demo still lands on Streamlit auth after redirects. "
+                        "Check app sharing/visibility and redeploy.",
+                    )
+                if not _same_host(url, final_url):
+                    return DemoCheck(False, f"Demo ended on an unexpected URL: {final_url}")
+                return DemoCheck(
+                    True,
+                    f"Demo is anonymously reachable after redirects: HTTP {status}.",
+                )
             return DemoCheck(False, f"Unexpected demo response: HTTP {status}.")
     except HTTPError as exc:
-        location = exc.headers.get("Location", "")
-        if exc.code in {301, 302, 303, 307, 308}:
-            if "share.streamlit.io/-/auth" in location:
-                return DemoCheck(
-                    False,
-                    "Demo redirects anonymous visitors to Streamlit auth. "
-                    "Set the app sharing/visibility to public and redeploy.",
-                )
-            return DemoCheck(False, f"Demo redirects before loading: HTTP {exc.code} -> {location}")
         return DemoCheck(False, f"Demo returned HTTP {exc.code}.")
     except URLError as exc:
         return DemoCheck(False, f"Could not reach demo URL: {exc.reason}")
+
+
+def _same_host(expected_url: str, actual_url: str) -> bool:
+    return urlparse(expected_url).netloc.lower() == urlparse(actual_url).netloc.lower()
+
+
+def _is_auth_url(url: str) -> bool:
+    parsed = urlparse(url)
+    return parsed.netloc.lower() == "share.streamlit.io" and parsed.path.startswith("/-/auth")
 
 
 def main(argv: list[str] | None = None) -> int:

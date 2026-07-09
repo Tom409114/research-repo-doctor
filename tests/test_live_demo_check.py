@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
-from email.message import Message
 from pathlib import Path
-from urllib.error import HTTPError
 
 
 def _load_live_demo_script():
@@ -20,6 +18,7 @@ def _load_live_demo_script():
 
 class _Response:
     status = 200
+    url = "https://demo.example"
 
     def __enter__(self):
         return self
@@ -27,23 +26,29 @@ class _Response:
     def __exit__(self, *args):
         return False
 
+    def geturl(self):
+        return self.url
+
 
 class _SuccessOpener:
     def open(self, request, timeout):
         return _Response()
 
 
-class _AuthRedirectOpener:
+class _StreamlitHandshakeOpener:
     def open(self, request, timeout):
-        headers = Message()
-        headers["Location"] = "https://share.streamlit.io/-/auth/app?redirect_uri=demo"
-        raise HTTPError(
-            request.full_url,
-            303,
-            "See Other",
-            headers,
-            fp=None,
-        )
+        response = _Response()
+        response.url = request.full_url
+        return response
+
+
+class _AuthLandingResponse(_Response):
+    url = "https://share.streamlit.io/-/auth/app?redirect_uri=https%3A%2F%2Fdemo.example%2F"
+
+
+class _AuthLandingOpener:
+    def open(self, request, timeout):
+        return _AuthLandingResponse()
 
 
 def test_live_demo_check_accepts_anonymous_success(monkeypatch) -> None:
@@ -56,9 +61,19 @@ def test_live_demo_check_accepts_anonymous_success(monkeypatch) -> None:
     assert "anonymously reachable" in result.message
 
 
-def test_live_demo_check_rejects_streamlit_auth_redirect(monkeypatch) -> None:
+def test_live_demo_check_accepts_streamlit_redirect_handshake(monkeypatch) -> None:
     script = _load_live_demo_script()
-    monkeypatch.setattr(script, "build_opener", lambda handler: _AuthRedirectOpener())
+    monkeypatch.setattr(script, "build_opener", lambda handler: _StreamlitHandshakeOpener())
+
+    result = script.check_demo_url("https://demo.example")
+
+    assert result.ok is True
+    assert "after redirects" in result.message
+
+
+def test_live_demo_check_rejects_streamlit_auth_landing(monkeypatch) -> None:
+    script = _load_live_demo_script()
+    monkeypatch.setattr(script, "build_opener", lambda handler: _AuthLandingOpener())
 
     result = script.check_demo_url("https://demo.example")
 
