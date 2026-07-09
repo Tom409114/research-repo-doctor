@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a copyable GitHub Copilot instructions template so the rrdoctor
+  baseline -> plan -> verify loop can be installed in target research
+  repositories alongside the existing Agent Skill and Cursor templates.
 - Added an 80-repository calibration data brief that turns the reviewed corpus
   snapshot into a public, caveated launch artifact with reproducible commands
   and copy-ready framing for community posts.

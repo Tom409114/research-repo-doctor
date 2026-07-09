@@ -6,6 +6,8 @@ Copyable integration templates for using rrdoctor outside the plain CLI.
   verify loop for Agent Skills / Claude Code-style workflows.
 - [Cursor project rule](cursor/rrdoctor-verify.mdc) gives Cursor the same
   deterministic definition of done.
+- [GitHub Copilot instructions](github-copilot/copilot-instructions.md) can be
+  copied into `.github/copilot-instructions.md` in a research repository.
 
 The core scanner remains deterministic, local-first, and key-free. These
 templates only teach an agent how to run rrdoctor; they do not require a hosted

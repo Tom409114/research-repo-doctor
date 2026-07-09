@@ -69,6 +69,8 @@ Ready-to-copy templates live under `integrations/`:
 - `integrations/agent-skills/rrdoctor-verify/SKILL.md` for Agent Skills /
   Claude Code-style skill workflows.
 - `integrations/cursor/rrdoctor-verify.mdc` for Cursor project rules.
+- `integrations/github-copilot/copilot-instructions.md` for GitHub Copilot
+  Chat, Copilot code review, and Copilot coding agent.
 
 Copy the relevant template into the research repository you want the agent to
 edit. The template tells the agent to create a baseline, work through
