@@ -137,37 +137,43 @@ def clone_repo(target: RepoTarget, destination: Path) -> Path:
 
 
 def run_rrdoctor_scan(repo_dir: Path) -> dict[str, Any]:
-    command = [
-        sys.executable,
-        "-m",
-        "rrdoctor",
-        "scan",
-        str(repo_dir),
-        "--format",
-        "json",
-        "--fail-on",
-        "none",
-        "--quiet",
-    ]
-    try:
-        completed = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=SCAN_TIMEOUT_SECONDS,
-            check=False,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise DemoError("The static scan took too long for this web demo.") from exc
+    with tempfile.TemporaryDirectory(prefix="rrdoctor-demo-report-") as tmp:
+        report_path = Path(tmp) / "report.json"
+        command = [
+            sys.executable,
+            "-m",
+            "rrdoctor",
+            "scan",
+            str(repo_dir),
+            "--profile",
+            "standard",
+            "--format",
+            "json",
+            "--output",
+            str(report_path),
+            "--fail-on",
+            "none",
+            "--quiet",
+        ]
+        try:
+            completed = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=SCAN_TIMEOUT_SECONDS,
+                check=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise DemoError("The static scan took too long for this web demo.") from exc
 
-    if completed.returncode != 0:
-        detail = (completed.stderr or completed.stdout).strip()
-        raise DemoError(f"rrdoctor scan failed: {detail[:500] or 'unknown error'}")
+        if completed.returncode != 0:
+            detail = (completed.stderr or completed.stdout).strip()
+            raise DemoError(f"rrdoctor scan failed: {detail[:500] or 'unknown error'}")
 
-    try:
-        payload = json.loads(completed.stdout)
-    except json.JSONDecodeError as exc:
-        raise DemoError("rrdoctor returned an unreadable JSON report.") from exc
+        try:
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise DemoError("rrdoctor returned an unreadable JSON report.") from exc
 
     if not isinstance(payload, dict):
         raise DemoError("rrdoctor returned an unexpected report shape.")

@@ -116,10 +116,12 @@ def test_scan_command_uses_static_json_rrdoctor_scan(monkeypatch, tmp_path) -> N
 
     def fake_run(command, **kwargs):
         captured["command"] = command
+        output = Path(command[command.index("--output") + 1])
+        output.write_text('{"score": 100, "summary": {}, "findings": []}', encoding="utf-8")
         return CompletedProcess(
             command,
             0,
-            stdout='{"score": 100, "summary": {}, "findings": []}',
+            stdout="",
             stderr="",
         )
 
@@ -129,12 +131,38 @@ def test_scan_command_uses_static_json_rrdoctor_scan(monkeypatch, tmp_path) -> N
 
     assert report["score"] == 100
     assert captured["command"][1:4] == ["-m", "rrdoctor", "scan"]
+    assert "--profile" in captured["command"]
+    assert "standard" in captured["command"]
     assert "--format" in captured["command"]
     assert "json" in captured["command"]
+    assert "--output" in captured["command"]
     assert "--fail-on" in captured["command"]
     assert "none" in captured["command"]
     assert "--quiet" in captured["command"]
     assert "verify" not in captured["command"]
+
+
+def test_scan_command_overrides_repository_report_output(tmp_path) -> None:
+    app = _load_demo_app()
+    repository = tmp_path / "configured-repo"
+    repository.mkdir()
+    (repository / "README.md").write_text("# Configured repo\n", encoding="utf-8")
+    (repository / ".rrdoctor.yml").write_text(
+        """version: 1
+profile: minimal
+fail_on: error
+report:
+  format: markdown
+  output: configured-report.md
+""",
+        encoding="utf-8",
+    )
+
+    report = app.run_rrdoctor_scan(repository)
+
+    assert report["profile"] == "standard"
+    assert isinstance(report["score"], int)
+    assert not (repository / "configured-report.md").exists()
 
 
 def test_demo_avoids_streamlit_metric_frontend_component() -> None:
