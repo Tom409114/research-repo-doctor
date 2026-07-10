@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.23 - 2026-07-10
+
 - Hardened the release sequence so the Streamlit demo can remain pinned to the
   last published package until the new PyPI version is publicly installable,
   avoiding a deployment race during Trusted Publishing propagation.

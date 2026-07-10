@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.22
+      - uses: Tom409114/research-repo-doctor@v0.2.23
         with:
           profile: standard
           fail-on: error
@@ -210,6 +210,23 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   |       rrdoctor fix --write                       --fail-on-new error
   rrdoctor scan
 ```
+
+## What's new in 0.2.23
+
+- **A safer release path**: the hosted demo can stay pinned to the latest
+  published PyPI package while a new release propagates, avoiding broken
+  Streamlit deployments during Trusted Publishing.
+- **A first-class GitHub Action path**: a compact pull-request workflow now
+  appears near the top of the README and is guarded by public-readiness tests.
+- **A shorter feedback loop**: completed web-demo scans link to a structured
+  10-minute trial report for useful findings, false positives, false negatives,
+  and real deadline fit.
+- **Official MCP Registry readiness**: versioned `server.json` metadata and the
+  PyPI ownership marker are included, with MCP support remaining an optional
+  extra rather than a core scanner dependency.
+- **Stronger dynamic verification coverage**: an offline integration test proves
+  L3 can install and import a declared local wheel inside its temporary Python
+  environment.
 
 ## What's new in 0.2.22
 
@@ -538,7 +555,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.22
+      - uses: Tom409114/research-repo-doctor@v0.2.23
         with:
           profile: standard
           fail-on: none
@@ -642,10 +659,9 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 
 ## Citation
 
-Use the included [CITATION.cff](CITATION.cff) or cite the archived `v0.2.22`
-release DOI: [10.5281/zenodo.21285257](https://doi.org/10.5281/zenodo.21285257).
-For the complete version lineage, use the
-[concept DOI 10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161).
+Use the included [CITATION.cff](CITATION.cff) or cite the stable concept DOI:
+[10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161). It resolves
+to the latest archived release and preserves the complete version lineage.
 
 A JOSS-style draft manuscript is available in [paper/](paper/) for review. It is
 not a submitted manuscript and intentionally avoids unverified adoption claims;
@@ -655,9 +671,9 @@ formal submission metadata will be updated only when it is true.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.22},
+  version = {0.2.23},
   year = {2026},
-  doi = {10.5281/zenodo.21285257},
+  doi = {10.5281/zenodo.21045161},
   url = {https://github.com/Tom409114/research-repo-doctor}
 }
 ```
