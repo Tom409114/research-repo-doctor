@@ -15,7 +15,7 @@ else:  # pragma: no cover - Python 3.10 fallback
     import tomli as tomllib
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
-from rrdoctor.rules.base import Rule, definition, read_text
+from rrdoctor.rules.base import Rule, definition, parse_python_ast, read_text
 from rrdoctor.rules.paths import has_file
 
 DEPENDENCY_FILES = [
@@ -41,8 +41,29 @@ DEPENDENCY_FILES = [
     # Julia
     "Project.toml",
     "Manifest.toml",
+    # Rust
+    "Cargo.toml",
+    "Cargo.lock",
+    # C and C++
+    "CMakeLists.txt",
+    "meson.build",
+    "conanfile.txt",
+    "conanfile.py",
+    "vcpkg.json",
+    # Reproducible environments
+    "Dockerfile",
+    "flake.nix",
+    "flake.lock",
 ]
 NESTED_MANIFEST_DIRS = ("package",)
+RUNTIME_HINT_FILES = (
+    "runtime.txt",
+    ".python-version",
+    ".node-version",
+    ".nvmrc",
+    "rust-toolchain",
+    "rust-toolchain.toml",
+)
 
 # Patterns that indicate a documented runtime/language version across ecosystems.
 RUNTIME_VERSION_RE = re.compile(
@@ -55,13 +76,19 @@ RUNTIME_VERSION_RE = re.compile(
     r"|depends:\s*r\s*\(|r\s*\(\s*>="  # R DESCRIPTION: "Depends: R (>= 4.1)"
     r"|rversion|r-version"  # renv.lock R version field
     r"|julia\s*[<>=~]|\[compat\]"  # Julia Project.toml compat
+    r"|rust-version\s*=|channel\s*=\s*['\"]\d"  # Cargo / rust-toolchain
+    r"|cmake_minimum_required\s*\(\s*version"  # CMake runtime floor
+    r"|(?m:^\s*from\s+(?:--platform=\S+\s+)?(?:\S+/)*[^/\s:@]+"
+    r"(?::(?!latest(?:\s|$))[^@\s]+|@sha256:[0-9a-f]{16,})"
+    r"(?:\s+as\s+\S+)?\s*$)"  # Versioned or digest-pinned container base image
     r")"
 )
 README_INSTALL_RE = re.compile(
     r"(?i)\b("
     r"pip\s+install|uv\s+pip\s+install|pipx\s+run|uvx\s+|"
     r"conda\s+env\s+create|mamba\s+env\s+create|poetry\s+install|"
-    r"renv::restore|Rscript\s+|julia\s+--project|npm\s+install"
+    r"renv::restore|Rscript\s+|julia\s+--project|npm\s+install|"
+    r"cargo\s+(?:install|build)|cmake\s+|docker\s+build|nix\s+(?:build|develop)"
     r")"
 )
 
@@ -75,8 +102,8 @@ class DependencyManifestMissingRule(Rule):
         ("minimal", "standard", "strict", "ml"),
         "Checks for dependency manifests.",
         "A repository without dependency metadata is hard to reproduce.",
-        "Add pyproject.toml, requirements.txt, environment.yml/.yaml, or another "
-        "supported manifest.",
+        "Add a language manifest such as pyproject.toml/Cargo.toml, a container or "
+        "build environment such as Dockerfile/CMakeLists.txt, or another supported manifest.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
@@ -94,8 +121,8 @@ class DependencyManifestMissingRule(Rule):
                         evidence=[Evidence("README contains an install command.", rel)],
                         recommendation=(
                             "Promote the documented install command into requirements.txt, "
-                            "pyproject.toml, environment.yml/.yaml, renv.lock, or another lockable "
-                            "manifest."
+                            "pyproject.toml, Cargo.toml/Cargo.lock, environment.yml/.yaml, "
+                            "renv.lock, or another lockable manifest."
                         ),
                         file=rel,
                         severity=Severity.WARNING,
@@ -113,16 +140,18 @@ class PythonVersionHintMissingRule(Rule):
         Severity.WARNING,
         ("minimal", "standard", "strict", "ml"),
         "Checks dependency manifests for a language/runtime version hint.",
-        "Language/runtime versions (Python, R, Julia, Node) are part of the environment.",
-        "Add requires-python, an R version in DESCRIPTION, [compat] in Project.toml, "
-        "runtime.txt, or another documented runtime version.",
+        "Language/runtime versions (Python, R, Julia, Node, Rust, containers, and CMake) "
+        "are part of the environment.",
+        "Add requires-python, an R/Julia/Rust version, a versioned container base, "
+        "cmake_minimum_required, runtime.txt, or another documented runtime version.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
         existing = _existing_dependency_manifests(context.root)
         if not existing:
             return []
-        combined = "\n".join(read_text(path) for path in existing)
+        runtime_hints = _existing_runtime_hints(context.root)
+        combined = "\n".join(read_text(path) for path in [*existing, *runtime_hints])
         if not RUNTIME_VERSION_RE.search(combined):
             evidence = [
                 Evidence(
@@ -133,7 +162,7 @@ class PythonVersionHintMissingRule(Rule):
             return [
                 self.finding(
                     context,
-                    message="Dependency manifest lacks a Python/environment version hint.",
+                    message="Dependency manifest lacks a runtime/environment version hint.",
                     evidence=evidence,
                     file=context.rel(existing[0]),
                 )
@@ -309,6 +338,10 @@ def _existing_dependency_manifests(root: Path) -> list[Path]:
     ]
 
 
+def _existing_runtime_hints(root: Path) -> list[Path]:
+    return [root / name for name in RUNTIME_HINT_FILES if (root / name).exists()]
+
+
 def _candidate_manifest_paths(root: Path, names: tuple[str, ...]) -> list[Path]:
     paths = [root / name for name in names]
     for base in NESTED_MANIFEST_DIRS:
@@ -406,9 +439,8 @@ def _local_modules(context: ScanContext) -> set[str]:
 def _python_import_roots(text: str) -> set[str]:
     """Return top-level modules imported by real Python import statements."""
 
-    try:
-        tree = ast.parse(text)
-    except SyntaxError:
+    tree = parse_python_ast(text)
+    if tree is None:
         # Be conservative for generated or version-specific files: a regex
         # fallback is too noisy because it also scans comments and docstrings.
         return set()

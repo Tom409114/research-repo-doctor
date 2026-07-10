@@ -230,6 +230,17 @@ def test_local_absolute_path_rule_ignores_regex_escapes(tmp_path) -> None:
     assert not report.findings
 
 
+def test_local_absolute_path_rule_ignores_python_escaped_newline_after_exception(tmp_path) -> None:
+    (tmp_path / "runner.py").write_text(
+        'source = """except SystemExit as e:\\n    pass\\n"""\n',
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD043")
+
+    assert not report.findings
+
+
 def test_local_absolute_path_rule_ignores_ci_config_paths(tmp_path) -> None:
     circleci_dir = tmp_path / ".circleci"
     circleci_dir.mkdir()
@@ -327,6 +338,33 @@ def test_julia_test_directory_and_runner_are_detected(tmp_path) -> None:
     )
 
     report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071", "RRD081"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_cargo_tests_and_ci_commands_are_detected(tmp_path) -> None:
+    tests_dir = tmp_path / "tests"
+    workflow_dir = tmp_path / ".github" / "workflows"
+    tests_dir.mkdir()
+    workflow_dir.mkdir(parents=True)
+    (tmp_path / "Cargo.toml").write_text(
+        '[package]\nname = "demo"\nversion = "0.1.0"\n', encoding="utf-8"
+    )
+    (tests_dir / "cli.rs").write_text("#[test]\nfn cli_works() {}\n", encoding="utf-8")
+    (workflow_dir / "ci.yml").write_text(
+        "jobs:\n  test:\n    steps:\n      - run: cargo test --verbose\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071", "RRD081"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_artifact_verify_script_counts_as_test_and_runner(tmp_path) -> None:
+    (tmp_path / "verify_build.sh").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071"}).scan(tmp_path)
 
     assert not report.findings
 

@@ -16,6 +16,10 @@ TEST_FILE_PATTERNS = [
     "**/*_test.py",
     "runtests.jl",
     "**/runtests.jl",
+    "verify*.sh",
+    "smoke*.sh",
+    "scripts/verify*.sh",
+    "scripts/smoke*.sh",
 ]
 
 TEST_RUNNER_TERMS = (
@@ -24,6 +28,8 @@ TEST_RUNNER_TERMS = (
     "nox",
     "npm test",
     "ruff check",
+    "cargo test",
+    "cargo nextest",
     "julia-actions/julia-runtest",
     "julia-runtest",
     "pkg.test",
@@ -63,6 +69,15 @@ def _has_bazel_test_target(context: ScanContext) -> bool:
     return False
 
 
+def _has_artifact_smoke_script(context: ScanContext) -> bool:
+    return bool(
+        find_files(
+            context,
+            ["verify*.sh", "smoke*.sh", "scripts/verify*.sh", "scripts/smoke*.sh"],
+        )
+    )
+
+
 class TestsMissingRule(Rule):
     definition = definition(
         "RRD070",
@@ -90,10 +105,11 @@ class TestRunnerMissingRule(Rule):
         Category.TESTING,
         Severity.WARNING,
         ("standard", "strict", "ml"),
-        "Checks for pytest/tox/nox/package scripts, Julia test targets, or CI test invocation.",
+        "Checks for pytest/tox/nox/package scripts, Cargo/Julia/Bazel tests, artifact smoke "
+        "scripts, or CI test invocation.",
         "Tests are most useful when maintainers know how to run them consistently.",
-        "Document or configure a test runner such as pytest, tox, nox, package scripts, "
-        "or Julia Pkg.test.",
+        "Document or configure a test runner such as pytest, cargo test, an artifact "
+        "verify/smoke script, package scripts, or Julia Pkg.test.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
@@ -121,6 +137,7 @@ class TestRunnerMissingRule(Rule):
             not any(term in combined for term in TEST_RUNNER_TERMS)
             and not _has_julia_test_target(combined)
             and not _has_bazel_test_target(context)
+            and not _has_artifact_smoke_script(context)
         ):
             return [
                 self.finding(
@@ -129,7 +146,7 @@ class TestRunnerMissingRule(Rule):
                     evidence=[
                         Evidence(
                             "Searched pyproject, tox/nox, package scripts, "
-                            "Julia Project.toml/tests, and workflows."
+                            "Cargo/Julia project metadata, artifact smoke scripts, and workflows."
                         )
                     ],
                 )
