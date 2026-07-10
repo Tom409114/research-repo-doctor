@@ -35,6 +35,11 @@ reviewed-repository, false-positive, and false-negative counts to the aggregate.
 The runner never installs target dependencies, imports target modules, builds
 the target project, or executes target repository scripts.
 
+`--timeout` applies separately to the shallow clone and GitHub archive
+fallback. A clone timeout terminates the whole Git process tree, and archive
+reads enforce both a wall-clock deadline and `--max-mb`; a slow repository is
+recorded as an error instead of stalling the remaining corpus run.
+
 For longer local runs, add `--progress` to print one line per repository to
 stderr while preserving the JSON and Markdown report formats.
 

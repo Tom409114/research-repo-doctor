@@ -6,6 +6,8 @@ import sys
 import zipfile
 from pathlib import Path
 
+import pytest
+
 from rrdoctor.config import DEFAULT_CONFIG
 from rrdoctor.scanner import Scanner
 
@@ -107,6 +109,44 @@ def test_extract_github_archive_rejects_unsafe_paths(tmp_path) -> None:
         raise AssertionError("unsafe archive path was accepted")
 
 
+class _ChunkedResponse:
+    def __init__(self, payload: bytes) -> None:
+        self.payload = payload
+
+    def read1(self, size: int) -> bytes:
+        chunk = self.payload[:size]
+        self.payload = self.payload[size:]
+        return chunk
+
+    def read(self, size: int) -> bytes:
+        return self.read1(size)
+
+
+def test_archive_reader_enforces_wall_clock_timeout(monkeypatch) -> None:
+    runner = _load_runner()
+    ticks = iter((0.0, 0.5, 1.1))
+    monkeypatch.setattr(runner.time, "monotonic", lambda: next(ticks))
+
+    with pytest.raises(TimeoutError, match="wall-clock timeout"):
+        runner._read_archive_payload(
+            _ChunkedResponse(b"still downloading"),
+            deadline=1.0,
+            max_bytes=1024,
+        )
+
+
+def test_archive_reader_stops_after_size_sentinel() -> None:
+    runner = _load_runner()
+
+    payload = runner._read_archive_payload(
+        _ChunkedResponse(b"0123456789"),
+        deadline=runner.time.monotonic() + 10,
+        max_bytes=4,
+    )
+
+    assert payload == b"01234"
+
+
 def test_clone_repo_uses_archive_fallback_on_git_timeout(tmp_path, monkeypatch) -> None:
     runner = _load_runner()
     entry = runner.CorpusEntry(
@@ -128,7 +168,7 @@ def test_clone_repo_uses_archive_fallback_on_git_timeout(tmp_path, monkeypatch) 
         destination.mkdir()
         return destination
 
-    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(runner, "_run_clone_command", fake_run)
     monkeypatch.setattr(runner, "_download_github_archive", fake_archive_fallback)
 
     destination = runner.clone_repo(entry, tmp_path, timeout=1, max_bytes=1024)
@@ -138,6 +178,38 @@ def test_clone_repo_uses_archive_fallback_on_git_timeout(tmp_path, monkeypatch) 
         "entry": "demo",
         "clone_error": "git clone timed out after 1 seconds",
     }
+
+
+class _FakeProcess:
+    pid = 4242
+
+    def __init__(self) -> None:
+        self.killed = False
+
+    def poll(self):
+        return None
+
+    def kill(self) -> None:
+        self.killed = True
+
+
+def test_terminate_process_tree_uses_taskkill_on_windows(monkeypatch) -> None:
+    runner = _load_runner()
+    process = _FakeProcess()
+    commands = []
+
+    def fake_run(command, **kwargs):
+        commands.append((command, kwargs))
+        return runner.subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(runner.os, "name", "nt")
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    runner._terminate_process_tree(process)
+
+    assert commands[0][0] == ["taskkill", "/PID", "4242", "/T", "/F"]
+    assert commands[0][1]["timeout"] == 10
+    assert process.killed is False
 
 
 def test_scan_entries_progress_reports_to_stderr(tmp_path, monkeypatch, capsys) -> None:

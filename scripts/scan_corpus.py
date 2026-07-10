@@ -14,9 +14,11 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -38,6 +40,8 @@ DEFAULT_MARKDOWN = Path("evaluation/reports/corpus-summary.md")
 DEFAULT_REVIEW_NOTES = Path("evaluation/reviews")
 DEFAULT_TIMEOUT_SECONDS = 90
 DEFAULT_MAX_BYTES = 300 * 1024 * 1024
+ARCHIVE_READ_CHUNK_BYTES = 64 * 1024
+ARCHIVE_SOCKET_TIMEOUT_SECONDS = 15
 LOCAL_PATH_RE = re.compile(
     r"(?i)\b[A-Z]:\\(?:[^\\\s'\",\]]+\\)*[^\\\s'\",\]]+|"
     r"(?:/tmp|/var/folders|/private/var/folders)/[^\s'\",\]]+"
@@ -171,14 +175,7 @@ def clone_repo(entry: CorpusEntry, root: Path, timeout: int, max_bytes: int) -> 
         str(destination),
     ]
     try:
-        completed = subprocess.run(
-            command,
-            capture_output=True,
-            env=env,
-            text=True,
-            timeout=timeout,
-            check=False,
-        )
+        completed = _run_clone_command(command, env=env, timeout=timeout)
     except subprocess.TimeoutExpired:
         return _download_github_archive(
             entry,
@@ -205,6 +202,60 @@ def clone_repo(entry: CorpusEntry, root: Path, timeout: int, max_bytes: int) -> 
         limit_mb = max_bytes // (1024 * 1024)
         raise RuntimeError(f"clone exceeds {limit_mb} MB size limit")
     return destination
+
+
+def _run_clone_command(
+    command: list[str], *, env: dict[str, str], timeout: int
+) -> subprocess.CompletedProcess[str]:
+    """Run git clone and terminate its whole process tree on timeout."""
+
+    popen_options: dict[str, Any] = {
+        "stdout": subprocess.PIPE,
+        "stderr": subprocess.PIPE,
+        "env": env,
+        "text": True,
+    }
+    if os.name == "nt":
+        popen_options["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+        popen_options["start_new_session"] = True
+
+    process = subprocess.Popen(command, **popen_options)
+    try:
+        stdout, stderr = process.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _terminate_process_tree(process)
+        try:
+            process.communicate(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.communicate()
+        raise
+
+    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
+
+
+def _terminate_process_tree(process: subprocess.Popen[str]) -> None:
+    """Terminate a process group created by `_run_clone_command`."""
+
+    if process.poll() is not None:
+        return
+    if os.name == "nt":
+        completed = subprocess.run(
+            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        if completed.returncode != 0 and process.poll() is None:
+            process.kill()
+        return
+
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        return
 
 
 def _github_archive_url(repo_url: str) -> str | None:
@@ -244,9 +295,18 @@ def _download_github_archive(
             "User-Agent": "rrdoctor-corpus-runner",
         },
     )
+    archive_deadline = time.monotonic() + max(timeout, 1)
+    socket_timeout = max(1, min(timeout, ARCHIVE_SOCKET_TIMEOUT_SECONDS))
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            payload = response.read(max_bytes + 1)
+        with urllib.request.urlopen(request, timeout=socket_timeout) as response:
+            payload = _read_archive_payload(
+                response,
+                deadline=archive_deadline,
+                max_bytes=max_bytes,
+            )
+    except TimeoutError as exc:
+        detail = f"{clone_error}; GitHub archive fallback timed out after {timeout} seconds"
+        raise RuntimeError(_sanitize_error_message(detail[:700])) from exc
     except (OSError, urllib.error.URLError) as exc:
         detail = f"{clone_error}; GitHub archive fallback failed: {exc}"
         raise RuntimeError(_sanitize_error_message(detail[:700])) from exc
@@ -266,6 +326,29 @@ def _download_github_archive(
         limit_mb = max_bytes // (1024 * 1024)
         raise RuntimeError(f"GitHub archive extraction exceeds {limit_mb} MB size limit")
     return destination
+
+
+def _read_archive_payload(response: Any, *, deadline: float, max_bytes: int) -> bytes:
+    """Read an archive without letting a continuously slow response run forever."""
+
+    payload = bytearray()
+    read_chunk = getattr(response, "read1", response.read)
+    while True:
+        if time.monotonic() >= deadline:
+            raise TimeoutError("GitHub archive download exceeded its wall-clock timeout")
+
+        remaining = max_bytes + 1 - len(payload)
+        if remaining <= 0:
+            break
+        chunk = read_chunk(min(ARCHIVE_READ_CHUNK_BYTES, remaining))
+        if not chunk:
+            break
+        payload.extend(chunk)
+
+        if time.monotonic() >= deadline:
+            raise TimeoutError("GitHub archive download exceeded its wall-clock timeout")
+
+    return bytes(payload)
 
 
 def _extract_github_archive(payload: bytes, destination: Path) -> None:
