@@ -221,9 +221,11 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
 - **A shorter feedback loop**: completed web-demo scans link to a structured
   10-minute trial report for useful findings, false positives, false negatives,
   and real deadline fit.
-- **Official MCP Registry readiness**: versioned `server.json` metadata and the
-  PyPI ownership marker are included, with MCP support remaining an optional
-  extra rather than a core scanner dependency.
+- **Official MCP Registry distribution**: `v0.2.23` is published as
+  [`io.github.Tom409114/rrdoctor`](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.Tom409114/rrdoctor),
+  with MCP support remaining an optional extra rather than a core scanner
+  dependency. Registry inclusion is distribution metadata, not endorsement or
+  evidence of adoption.
 - **Stronger dynamic verification coverage**: an offline integration test proves
   L3 can install and import a declared local wheel inside its temporary Python
   environment.
@@ -659,9 +661,10 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 
 ## Citation
 
-Use the included [CITATION.cff](CITATION.cff) or cite the stable concept DOI:
-[10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161). It resolves
-to the latest archived release and preserves the complete version lineage.
+Use the included [CITATION.cff](CITATION.cff) or cite the archived `v0.2.23`
+release DOI: [10.5281/zenodo.21287310](https://doi.org/10.5281/zenodo.21287310).
+For the complete version lineage, use the
+[concept DOI 10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161).
 
 A JOSS-style draft manuscript is available in [paper/](paper/) for review. It is
 not a submitted manuscript and intentionally avoids unverified adoption claims;
@@ -673,7 +676,7 @@ formal submission metadata will be updated only when it is true.
   author = {{Research Repo Doctor Maintainers}},
   version = {0.2.23},
   year = {2026},
-  doi = {10.5281/zenodo.21045161},
+  doi = {10.5281/zenodo.21287310},
   url = {https://github.com/Tom409114/research-repo-doctor}
 }
 ```
