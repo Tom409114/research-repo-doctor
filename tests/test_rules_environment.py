@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import warnings
+
 from rrdoctor.config import DEFAULT_CONFIG
 from rrdoctor.scanner import Scanner
 
@@ -76,6 +78,83 @@ def test_conda_yaml_manifest_satisfies_environment_rules(tmp_path) -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
 
     assert not report.findings
+
+
+def test_cargo_manifest_and_rust_version_satisfy_environment_rules(tmp_path) -> None:
+    (tmp_path / "Cargo.toml").write_text(
+        '[package]\nname = "demo"\nversion = "0.1.0"\nrust-version = "1.85"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "Cargo.lock").write_text("version = 4\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_rust_toolchain_version_satisfies_runtime_rule_but_not_manifest_rule(tmp_path) -> None:
+    (tmp_path / "Cargo.toml").write_text(
+        '[package]\nname = "demo"\nversion = "0.1.0"\n', encoding="utf-8"
+    )
+    (tmp_path / "rust-toolchain.toml").write_text(
+        '[toolchain]\nchannel = "1.85.0"\n', encoding="utf-8"
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert not report.findings
+
+    (tmp_path / "Cargo.toml").unlink()
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert [finding.rule_id for finding in report.findings] == ["RRD030"]
+
+
+def test_versioned_dockerfile_satisfies_environment_rules(tmp_path) -> None:
+    (tmp_path / "Dockerfile").write_text(
+        "FROM nvidia/cuda:12.9.1-devel-ubuntu22.04\nRUN apt-get update\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_latest_dockerfile_does_not_count_as_runtime_version(tmp_path) -> None:
+    (tmp_path / "Dockerfile").write_text("FROM ubuntu:latest\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert [finding.rule_id for finding in report.findings] == ["RRD031"]
+
+
+def test_cmake_version_satisfies_environment_rules(tmp_path) -> None:
+    (tmp_path / "CMakeLists.txt").write_text(
+        "cmake_minimum_required(VERSION 3.25)\nproject(demo)\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_static_ast_rules_do_not_emit_target_source_syntax_warnings(tmp_path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\ndependencies = ["numpy"]\n', encoding="utf-8"
+    )
+    (tmp_path / "train.py").write_text(
+        'import numpy as np\npattern = "\\."\nprint(np.random.rand())\n',
+        encoding="utf-8",
+    )
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        report = Scanner(DEFAULT_CONFIG, include={"RRD034", "RRD052"}).scan(tmp_path)
+
+    assert [finding.rule_id for finding in report.findings] == ["RRD052"]
+    assert not [warning for warning in caught if warning.category is SyntaxWarning]
 
 
 def test_undeclared_import_flagged(tmp_path) -> None:

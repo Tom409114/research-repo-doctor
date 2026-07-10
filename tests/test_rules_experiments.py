@@ -185,6 +185,46 @@ def test_documented_python3_package_script_counts_as_experiment_entrypoint(tmp_p
     assert not report.findings
 
 
+def test_documented_artifact_verify_script_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "verify_build.sh").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Artifact\n\nAfter building, run `./verify_build.sh` as the smoke test.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_documented_cargo_run_counts_as_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Artifact\n\nRun `cargo run --release -- reproduce.toml`.\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_reusable_cargo_library_does_not_require_experiment_entrypoint(tmp_path) -> None:
+    (tmp_path / "Cargo.toml").write_text(
+        '[package]\nname = "demo-library"\nversion = "0.1.0"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "# Demo library\n\nA reusable framework with a documented API.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "src").mkdir()
+    (tmp_path / "tests").mkdir()
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD050"}).scan(tmp_path)
+
+    assert not report.findings
+
+
 def test_reusable_library_project_does_not_require_experiment_entrypoint(tmp_path) -> None:
     (tmp_path / "pyproject.toml").write_text(
         "[project]\nname = 'networkx-like-library'\n",

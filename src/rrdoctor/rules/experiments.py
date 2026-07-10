@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
-from rrdoctor.rules.base import Rule, definition, read_text
+from rrdoctor.rules.base import Rule, definition, parse_python_ast, read_text
 from rrdoctor.rules.notebooks import read_notebook
 from rrdoctor.rules.paths import find_files, text_files
 
@@ -23,8 +23,8 @@ class ExperimentEntrypointMissingRule(Rule):
         ("minimal", "standard", "strict", "ml"),
         "Checks for scripts or commands that reproduce experiments.",
         "Reviewers need an obvious entrypoint for rerunning experiments.",
-        "Add scripts/reproduce.sh, scripts/run*.sh, a Makefile, or documented "
-        "CLI/train/eval scripts.",
+        "Add scripts/reproduce.sh, a documented verify/smoke script, a Make/Cargo target, "
+        "or documented CLI/train/eval commands.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
@@ -45,12 +45,16 @@ class ExperimentEntrypointMissingRule(Rule):
             "reproduce*.py",
             "run*.sh",
             "reproduce*.sh",
+            "verify*.sh",
+            "smoke*.sh",
             "*demo*.ipynb",
             "*example*.ipynb",
             "*examples*.ipynb",
             "*reproduce*.ipynb",
             "scripts/run*.sh",
             "scripts/reproduce*.sh",
+            "scripts/verify*.sh",
+            "scripts/smoke*.sh",
             "scripts/train*.py",
             "scripts/eval*.py",
             "scripts/evaluate*.py",
@@ -128,6 +132,9 @@ PACKAGE_METADATA_FILES = (
     "setup.py",
     "DESCRIPTION",
     "Project.toml",
+    "Cargo.toml",
+    "CMakeLists.txt",
+    "meson.build",
 )
 NESTED_PACKAGE_DIRS = ("package",)
 LIBRARY_STRUCTURE_DIRS = (
@@ -190,7 +197,9 @@ _DOCUMENTED_ENTRYPOINT_RE = re.compile(
     r"python(?:\d+(?:\.\d+)?)?\s+(?:\./)?src/[^\s`]*(?:train|test|eval|evaluate|infer|inference|predict|sample|generate|demo|run|reproduce)[^\s`]*\.py\b|"
     r"python(?:\d+(?:\.\d+)?)?\s+(?:\$\{?[A-Za-z_][A-Za-z0-9_]*\}?/)?[^\s`]*(?:train|main|run|eval|evaluate|infer|inference|predict|sample|generate|demo|reproduce)[^\s`]*\.py\b|"
     r"bash\s+(?:\./)?(?:scripts/)?(?:run|reproduce|train|eval|infer|inference|predict|sample|generate|demo)[^\s`]*\.sh\b|"
+    r"(?:bash\s+)?(?:\./)?[^\s`]*(?:verify|smoke|reproduce|benchmark|evaluate|run)[^\s`]*\.(?:sh|bash)\b|"
     r"make\s+(?:all|run|train|eval|evaluate|infer|inference|predict|sample|generate|demo|reproduce|results)\b|"
+    r"cargo\s+(?:run|test|bench)\b|"
     r"snakemake\b|"
     r"nextflow\s+run\b|"
     r"Rscript\s+[^\s`]+|"
@@ -568,9 +577,8 @@ def _scan_python_randomness(context: ScanContext) -> _RandomnessScan:
     seed_declaration: Evidence | None = None
 
     for source in _python_sources(context):
-        try:
-            tree = ast.parse(source.text)
-        except SyntaxError:
+        tree = parse_python_ast(source.text)
+        if tree is None:
             continue
         visitor = _RandomnessVisitor(source)
         visitor.visit(tree)

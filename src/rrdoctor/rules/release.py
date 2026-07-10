@@ -43,6 +43,7 @@ class VersionMetadataMissingRule(Rule):
     def check(self, context: ScanContext) -> list[Finding]:
         candidates = [
             context.root / "pyproject.toml",
+            context.root / "Cargo.toml",
             context.root / "package.json",
             context.root / "VERSION",
         ]

@@ -50,6 +50,16 @@ def test_version_metadata_rule_accepts_packed_git_tag(tmp_path) -> None:
     assert not report.findings
 
 
+def test_version_metadata_rule_accepts_cargo_package_version(tmp_path) -> None:
+    (tmp_path / "Cargo.toml").write_text(
+        '[package]\nname = "demo"\nversion = "0.1.0"\n', encoding="utf-8"
+    )
+
+    report = _scan(tmp_path, "RRD101")
+
+    assert not report.findings
+
+
 def test_version_metadata_rule_flags_missing_version_evidence(tmp_path) -> None:
     report = _scan(tmp_path, "RRD101")
 

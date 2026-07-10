@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import ast
 import re
+import warnings
 from math import log2
 from pathlib import Path
 
@@ -23,6 +25,17 @@ SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
     GENERIC_SECRET_ASSIGNMENT_RE,
     *PROVIDER_SECRET_PATTERNS,
 )
+
+
+def parse_python_ast(text: str) -> ast.AST | None:
+    """Parse untrusted source without leaking compiler warnings to scan output."""
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", SyntaxWarning)
+        try:
+            return ast.parse(text)
+        except SyntaxError:
+            return None
 
 
 def _looks_like_random_secret(value: str) -> bool:
