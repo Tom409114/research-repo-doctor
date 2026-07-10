@@ -43,6 +43,17 @@ def test_setup_rule_accepts_install_command_without_heading(tmp_path) -> None:
     assert not report.findings
 
 
+def test_setup_rule_accepts_docker_build_without_setup_heading(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n## Getting Started\n\n```bash\nsudo docker build -t artifact .\n```\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD002")
+
+    assert not report.findings
+
+
 def test_usage_rule_accepts_get_started_command_without_heading(tmp_path) -> None:
     (tmp_path / "README.md").write_text(
         "# Demo\n\n"
@@ -73,6 +84,17 @@ def test_reproduce_rule_accepts_training_command(tmp_path) -> None:
 def test_reproduce_rule_accepts_evaluation_command(tmp_path) -> None:
     (tmp_path / "README.md").write_text(
         "# Demo\n\n## Evaluation\n\n```bash\npython eval.py --checkpoint outputs/model.pt\n```\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD004")
+
+    assert not report.findings
+
+
+def test_reproduce_rule_accepts_regenerate_data_heading(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n## Regenerate the Data\n\n```bash\n./run_all.sh\n```\n",
         encoding="utf-8",
     )
 

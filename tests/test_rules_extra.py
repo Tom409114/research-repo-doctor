@@ -68,6 +68,20 @@ def test_readme_data_prepare_command_satisfies_data_docs_rule(tmp_path) -> None:
     assert not report.findings
 
 
+def test_readme_precomputed_data_location_satisfies_data_docs_rule(tmp_path) -> None:
+    (tmp_path / "README.md").write_text(
+        "# Demo\n\n"
+        "## Regenerate the Data\n\n"
+        "The precomputed data can be found in `artifact/eval/precomputed/`. "
+        "Run `./scripts/analyze_all.sh` to regenerate the figures.\n",
+        encoding="utf-8",
+    )
+
+    report = _scan(tmp_path, "RRD040")
+
+    assert not report.findings
+
+
 def test_local_absolute_path_rule_flags_real_user_path(tmp_path) -> None:
     local_path = "/home/" + "alice/private-datasets/demo"
     (tmp_path / "README.md").write_text(
@@ -367,6 +381,31 @@ def test_artifact_verify_script_counts_as_test_and_runner(tmp_path) -> None:
     report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071"}).scan(tmp_path)
 
     assert not report.findings
+
+
+def test_documented_kick_the_tires_analysis_counts_as_smoke_test(tmp_path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "analyze_all.sh").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# Artifact\n\n## Kick the Tires\n\n```bash\n./scripts/analyze_all.sh\n```\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_undocumented_analysis_script_does_not_count_as_smoke_test(tmp_path) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "analyze_all.sh").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text("# Artifact\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD070", "RRD071"}).scan(tmp_path)
+
+    assert [finding.rule_id for finding in report.findings] == ["RRD070", "RRD071"]
 
 
 def test_bazel_test_targets_and_ci_script_are_detected(tmp_path) -> None:
