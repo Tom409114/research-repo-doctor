@@ -80,6 +80,36 @@ def test_conda_yaml_manifest_satisfies_environment_rules(tmp_path) -> None:
     assert not report.findings
 
 
+def test_snakemake_per_rule_conda_env_satisfies_environment_rules(tmp_path) -> None:
+    workflow = tmp_path / "workflow"
+    envs = workflow / "envs"
+    envs.mkdir(parents=True)
+    (workflow / "Snakefile").write_text(
+        'rule all:\n    input: "results/done.txt"\n', encoding="utf-8"
+    )
+    (envs / "analysis.yaml").write_text(
+        "channels:\n  - conda-forge\ndependencies:\n  - python =3.11\n  - numpy =1.26\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030", "RRD031"}).scan(tmp_path)
+
+    assert not report.findings
+
+
+def test_snakemake_config_yaml_is_not_a_dependency_manifest(tmp_path) -> None:
+    workflow = tmp_path / "workflow"
+    workflow.mkdir()
+    (workflow / "Snakefile").write_text(
+        'rule all:\n    input: "results/done.txt"\n', encoding="utf-8"
+    )
+    (workflow / "config.yaml").write_text("samples: []\n", encoding="utf-8")
+
+    report = Scanner(DEFAULT_CONFIG, include={"RRD030"}).scan(tmp_path)
+
+    assert [finding.rule_id for finding in report.findings] == ["RRD030"]
+
+
 def test_cargo_manifest_and_rust_version_satisfy_environment_rules(tmp_path) -> None:
     (tmp_path / "Cargo.toml").write_text(
         '[package]\nname = "demo"\nversion = "0.1.0"\nrust-version = "1.85"\n',

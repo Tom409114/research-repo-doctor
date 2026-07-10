@@ -17,6 +17,7 @@ from typing import Any
 from rrdoctor.fixers import infer_fix_context
 from rrdoctor.models import ScanReport
 from rrdoctor.rules.base import read_text
+from rrdoctor.rules.environment import snakemake_environment_manifests
 from rrdoctor.verification import _entrypoint_command
 
 if sys.version_info >= (3, 11):
@@ -191,7 +192,7 @@ def _appendix_evidence(report: ScanReport) -> AppendixEvidence:
         version=metadata.get("version") or fix_context.version,
         release_doi=citation.get("doi"),
         entrypoint=entrypoint,
-        dependency_manifests=_existing_paths(root, DEPENDENCY_MANIFESTS),
+        dependency_manifests=_dependency_manifest_paths(root),
         data_docs=_existing_paths(root, DATA_DOCS),
         results_docs=_existing_paths(root, RESULTS_DOCS),
         config_files=_config_files(root),
@@ -275,6 +276,15 @@ def _readme_summary(root: Path) -> str | None:
 
 def _existing_paths(root: Path, candidates: tuple[str, ...]) -> tuple[str, ...]:
     paths = [candidate for candidate in candidates if (root / candidate).exists()]
+    return tuple(paths)
+
+
+def _dependency_manifest_paths(root: Path) -> tuple[str, ...]:
+    paths = list(_existing_paths(root, DEPENDENCY_MANIFESTS))
+    for manifest in snakemake_environment_manifests(root):
+        relative = manifest.relative_to(root).as_posix()
+        if relative not in paths:
+            paths.append(relative)
     return tuple(paths)
 
 

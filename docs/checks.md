@@ -81,7 +81,10 @@ recognizes Python, JavaScript, R, Julia, and Rust manifests, plus CMake, Meson,
 Conan, vcpkg, Docker, and Nix environment definitions. If no manifest exists but
 the README contains concrete install commands, the finding is downgraded to a
 warning rather than an error. Root manifests and common nested package manifests
-such as `package/pyproject.toml` are both recognized.
+such as `package/pyproject.toml` are both recognized. For repositories with a
+conventional `Snakefile`, per-rule Conda environments under `envs/`,
+`workflow/envs/`, or `workflows/envs/` are also dependency manifests; unrelated
+workflow configuration YAML is not.
 
 `RRD031` also reads dedicated runtime pins such as `.python-version`, `.nvmrc`,
 and `rust-toolchain.toml`. A container base tagged `latest` is not treated as a
