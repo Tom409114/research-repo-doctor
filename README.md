@@ -80,6 +80,8 @@ retain an explicit resolver preflight. With the default gate (`--fail-on error`)
 blocked dynamic L2/L3 steps return a nonzero exit code. Use `--command` when the artifact has
 a specific smoke-test or quickstart command that reviewers should run. Dynamic mode may run
 dependency build/install hooks as well as the entrypoint, so never use it on untrusted code.
+Static reports label their outcome `L1 static only`; they never claim L2/L3 passed before
+`--run` actually prepares the environment and executes the chosen command.
 `rrdoctor prepare` writes the report, agent plan, artifact appendix, and verification ladder
 into one local evidence directory.
 

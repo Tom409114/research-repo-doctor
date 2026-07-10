@@ -126,18 +126,31 @@ def test_verification_ladder_static_mode() -> None:
 
     assert "L1" in rendered and "L2" in rendered and "L3" in rendered
     assert "static" in rendered
-    assert "Gate outcome: **PASS**" in rendered
+    assert "Gate outcome: **PASS (L1 static only)**" in rendered
     assert "Failure threshold: `error`" in rendered
     assert "static mode did not execute target-repository code" in rendered
+    assert "Dynamic verification: not attempted; L2/L3 remain unverified." in rendered
     assert "L3 command source: README command." in rendered
     assert "Static mode. L3 command source: README command." in rendered
-    assert "Recommended rerun:" in rendered
+    assert "Reproduce this static report:" in rendered
+    assert "Trusted-repository dynamic gate" in rendered
     assert "cd <repository-root>" in rendered
     assert "rrdoctor verify . --profile standard --timeout 300 --fail-on error" in rendered
+    assert "rrdoctor verify . --profile standard --timeout 300 --fail-on error --run" in rendered
     assert str(root) not in rendered
     assert "python scripts/train.py --config configs/default.yaml" in rendered
     # ml-project-repo has no error findings, so L1 should not be a failure.
     assert not verification_failed(report)
+
+
+def test_static_report_recommends_a_blocking_dynamic_gate() -> None:
+    report = _report("tests/fixtures/ml-project-repo", "standard")
+    root = Path("tests/fixtures/ml-project-repo").resolve()
+
+    rendered = render_verification(report, root, run=False, fail_on="none")
+
+    assert "rrdoctor verify . --profile standard --timeout 300 --fail-on none" in rendered
+    assert "rrdoctor verify . --profile standard --timeout 300 --fail-on error --run" in rendered
 
 
 def test_verification_ladder_accepts_specified_l3_command(tmp_path) -> None:
@@ -180,6 +193,10 @@ def test_verification_summary_reports_dynamic_failure() -> None:
     rendered = render_verification(report, root, run=True, timeout=10, steps=steps)
 
     assert "Gate outcome: **FAIL**" in rendered
+    assert "L1 static only" not in rendered
+    assert "Reproduce this dynamic gate:" in rendered
+    assert "Dynamic verification: not attempted" not in rendered
+    assert "Dynamic verification: attempted; see L2/L3 results below." in rendered
     assert "dynamic mode executed target-repository commands" in rendered
     assert "L3 command source: README command." in rendered
     assert (

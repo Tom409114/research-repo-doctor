@@ -108,7 +108,9 @@ rrdoctor verify . --profile acm --output rrdoctor-verify.md --fail-on none
 This reports L1 static readiness and explains what would block L2 environment
 setup or L3 entrypoint execution. The report starts with an evidence summary:
 gate outcome, `--fail-on` threshold, timeout, L3 command source, trust boundary,
-and a copyable rerun command.
+and copyable commands for reproducing the static report and, separately, running
+a trusted dynamic gate. A static result is labeled `L1 static only`; L2/L3 stay
+unverified until `--run` actually executes them.
 
 L2 recognizes common dependency manifests used by research artifacts, including
 `pyproject.toml`, top-level and nested Python requirement files such as
