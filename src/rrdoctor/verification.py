@@ -954,12 +954,15 @@ def render_verification(
     failed = verification_failed(report, steps if run else None, fail_on)
     l3_source = _l3_source(steps)
     repo_label = root.name or "."
+    outcome = "FAIL" if failed else "PASS"
+    if not run:
+        outcome += " (L1 static only)"
     lines = [
         "# Reproducibility verification",
         "",
         f"- Repository: `{repo_label}`",
         f"- Mode: {'dynamic (--run)' if run else 'static'}",
-        f"- Gate outcome: **{'FAIL' if failed else 'PASS'}**",
+        f"- Gate outcome: **{outcome}**",
         f"- Failure threshold: `{fail_on}`",
         f"- Timeout per dynamic step: `{timeout}s`",
     ]
@@ -985,13 +988,43 @@ def render_verification(
                 if run
                 else "- Trust boundary: static mode did not execute target-repository code."
             ),
+            (
+                "- Dynamic verification: attempted; see L2/L3 results below."
+                if run
+                else "- Dynamic verification: not attempted; L2/L3 remain unverified."
+            ),
             "",
-            "Recommended rerun:",
+            f"Reproduce this {'dynamic gate' if run else 'static report'}:",
             "",
             "```bash",
             *(_rerun_commands(root, report.profile, run, timeout, command, fail_on)),
             "```",
             "",
+        ]
+    )
+    if not run:
+        dynamic_fail_on = "error" if fail_on == "none" else fail_on
+        lines.extend(
+            [
+                "Trusted-repository dynamic gate (installs dependencies and runs code):",
+                "",
+                "```bash",
+                *(
+                    _rerun_commands(
+                        root,
+                        report.profile,
+                        True,
+                        timeout,
+                        command,
+                        dynamic_fail_on,
+                    )
+                ),
+                "```",
+                "",
+            ]
+        )
+    lines.extend(
+        [
             "| Level | Check | Status | Detail |",
             "| --- | --- | --- | --- |",
         ]
