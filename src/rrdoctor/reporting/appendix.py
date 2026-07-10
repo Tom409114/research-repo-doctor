@@ -24,12 +24,26 @@ if sys.version_info >= (3, 11):
 else:  # pragma: no cover - Python 3.10 fallback
     import tomli as tomllib
 
-# Rule IDs whose *failure* blocks a given ACM Artifact Evaluation badge tier.
-# Badges are cumulative: Functional implies Available, Reproduced implies Functional.
-ACM_BADGE_RULES: dict[str, tuple[str, ...]] = {
-    "Artifact Available": ("RRD010", "RRD020", "RRD021", "RRD100", "RRD101"),
-    "Artifact Functional": ("RRD001", "RRD002", "RRD030", "RRD031", "RRD034", "RRD050"),
+ACM_POLICY_URL = "https://www.acm.org/publications/policies/artifact-review-and-badging-current"
+
+# Rule IDs used only as a static preflight for independently awarded ACM badges.
+# ACM v1.1 treats the badge classes as independent; a repository scan cannot award one.
+ACM_PREFLIGHT_RULES: dict[str, tuple[str, ...]] = {
+    "Artifacts Available": ("RRD010", "RRD020", "RRD021", "RRD100", "RRD101"),
+    "Artifacts Evaluated - Functional": (
+        "RRD001",
+        "RRD002",
+        "RRD030",
+        "RRD031",
+        "RRD034",
+        "RRD050",
+    ),
     "Results Reproduced": ("RRD004", "RRD040", "RRD051", "RRD052", "RRD053", "RRD054"),
+}
+ACM_REQUIRED_EVIDENCE: dict[str, str] = {
+    "Artifacts Available": "Permanent public archive plus DOI or unique identifier",
+    "Artifacts Evaluated - Functional": "Independent artifact audit and successful exercise",
+    "Results Reproduced": "Different team reproduced results plus peer-reviewed report",
 }
 
 # NeurIPS-style reproducibility checklist items mapped to the rule IDs that
@@ -70,13 +84,14 @@ CONFIG_SUFFIXES = {".yaml", ".yml", ".json", ".toml"}
 
 @dataclass(frozen=True)
 class TierStatus:
-    """Readiness of a single badge tier."""
+    """Static preflight evidence for an independently awarded ACM badge."""
 
     name: str
     blocking_rule_ids: list[str]
+    required_evidence: str
 
     @property
-    def ready(self) -> bool:
+    def static_clear(self) -> bool:
         return not self.blocking_rule_ids
 
 
@@ -104,13 +119,19 @@ def _failed_rule_ids(report: ScanReport) -> set[str]:
 
 
 def badge_status(report: ScanReport) -> list[TierStatus]:
-    """Compute per-tier readiness from a scan report."""
+    """Compute static preflight blockers without inferring badge eligibility."""
 
     failed = _failed_rule_ids(report)
     tiers: list[TierStatus] = []
-    for name, rule_ids in ACM_BADGE_RULES.items():
+    for name, rule_ids in ACM_PREFLIGHT_RULES.items():
         blocking = [rid for rid in rule_ids if rid in failed]
-        tiers.append(TierStatus(name=name, blocking_rule_ids=blocking))
+        tiers.append(
+            TierStatus(
+                name=name,
+                blocking_rule_ids=blocking,
+                required_evidence=ACM_REQUIRED_EVIDENCE[name],
+            )
+        )
     return tiers
 
 
@@ -124,39 +145,41 @@ def render_checklist(report: ScanReport) -> str:
         "",
         f"- Repository: `{repo_name or report.repository_path}`",
         f"- Profile: `{report.profile}`",
-        f"- Artifact readiness: **{report.readiness.level}**",
+        f"- rrdoctor readiness: **{report.readiness.level}**",
         f"- Heuristic score: **{report.score}/100**",
         "",
         "## ACM Artifact Evaluation badges",
         "",
-        "| Badge | Status | Blocking checks |",
-        "| --- | --- | --- |",
+        "| Badge | Static preflight | Static blockers | Required external evidence |",
+        "| --- | --- | --- | --- |",
     ]
     for tier in badge_status(report):
-        status = "ready" if tier.ready else "action needed"
+        status = "no mapped blockers" if tier.static_clear else "action needed"
         blocking = ", ".join(tier.blocking_rule_ids) if tier.blocking_rule_ids else "-"
-        lines.append(f"| {tier.name} | {status} | {blocking} |")
+        lines.append(f"| {tier.name} | {status} | {blocking} | {tier.required_evidence} |")
 
     lines.extend(
         [
             "",
             "## NeurIPS reproducibility checklist",
             "",
-            "| Item | Status | Evidence checks |",
+            "| Item | Static preflight | Evidence checks |",
             "| --- | --- | --- |",
         ]
     )
     for item, rule_ids in NEURIPS_CHECKLIST:
         blocking_ids = [rid for rid in rule_ids if rid in failed]
-        status = "OK" if not blocking_ids else "TODO"
+        status = "no mapped blockers" if not blocking_ids else "action needed"
         evidence = ", ".join(rule_ids)
         lines.append(f"| {item} | {status} | {evidence} |")
 
     lines.extend(
         [
             "",
-            "> Mapping is heuristic. An OK means rrdoctor found no blocking issue for that "
-            "item; it does not certify the artifact. Reviewers make the final call.",
+            "> Static preflight only. `no mapped blockers` means the mapped rrdoctor rules "
+            "did not fail; it does not establish checklist compliance or ACM badge "
+            f"eligibility. ACM badges are independent and require venue/reviewer evidence: "
+            f"<{ACM_POLICY_URL}>.",
             "",
         ]
     )
@@ -164,10 +187,23 @@ def render_checklist(report: ScanReport) -> str:
 
 
 def _badge_summary(report: ScanReport) -> str:
-    ready = [t.name for t in badge_status(report) if t.ready]
-    if not ready:
-        return "No tier is clear yet - see the blocking checks below."
-    return "On track for: " + ", ".join(ready) + "."
+    tiers = badge_status(report)
+    clear = [tier.name for tier in tiers if tier.static_clear]
+    if not clear:
+        return (
+            "Static preflight still has blocking checks. No ACM badge eligibility is "
+            "inferred from this scan."
+        )
+    if len(clear) == len(tiers):
+        return (
+            "All mapped static preparation checks are clear. This does not establish ACM "
+            "badge eligibility; required external evidence and venue review still apply."
+        )
+    return (
+        "Static preflight has no mapped blockers for: "
+        + ", ".join(clear)
+        + ". Other mappings still have blockers, and no ACM badge eligibility is inferred."
+    )
 
 
 def _appendix_evidence(report: ScanReport) -> AppendixEvidence:
@@ -341,6 +377,20 @@ def _access_summary(evidence: AppendixEvidence, fallback: str) -> str:
     return "\n".join(lines) if lines else fallback
 
 
+def _public_availability_summary(evidence: AppendixEvidence) -> str:
+    if evidence.release_doi:
+        return (
+            f"DOI `{evidence.release_doi}` detected; confirm it resolves to the submitted "
+            "artifact archive and is publicly accessible."
+        )
+    if evidence.repository_url:
+        return (
+            f"Repository URL detected: <{evidence.repository_url}>; confirm public access "
+            "and add a permanent archive identifier."
+        )
+    return "TODO: provide a public artifact URL and permanent archive DOI or identifier."
+
+
 def render_appendix(report: ScanReport) -> str:
     """Render an ACM-style Artifact Appendix skeleton, pre-filled where possible.
 
@@ -417,11 +467,10 @@ def render_appendix(report: ScanReport) -> str:
         "- **How much disk space required (approximately)?:** TODO",
         "- **How much time is needed to prepare workflow (approximately)?:** TODO",
         "- **How much time is needed to complete experiments (approximately)?:** TODO",
-        "- **Publicly available?:** "
-        + todo_if("RRD010", "Yes - license included.", "add a license before archiving."),
+        "- **Publicly available?:** " + _public_availability_summary(evidence),
         "- **Archived (provide DOI)?:** "
         + (
-            f"`{evidence.release_doi}`"
+            f"`{evidence.release_doi}` detected; confirm it identifies this artifact archive."
             if evidence.release_doi
             else "TODO: deposit on Zenodo/Figshare/Dryad and add the DOI."
         ),
