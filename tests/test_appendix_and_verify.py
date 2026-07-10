@@ -110,6 +110,22 @@ def test_appendix_uses_setup_py_metadata_without_executing(tmp_path) -> None:
     assert "Version: `0.5.0`." in rendered
 
 
+def test_appendix_lists_snakemake_per_rule_conda_env(tmp_path) -> None:
+    workflow = tmp_path / "workflow"
+    envs = workflow / "envs"
+    envs.mkdir(parents=True)
+    (workflow / "Snakefile").write_text("rule all:\n    input: []\n", encoding="utf-8")
+    (envs / "analysis.yaml").write_text(
+        "channels:\n  - conda-forge\ndependencies:\n  - python =3.11\n",
+        encoding="utf-8",
+    )
+
+    report = Scanner(DEFAULT_CONFIG).scan(tmp_path)
+    rendered = render_appendix(report)
+
+    assert "`workflow/envs/analysis.yaml`" in rendered
+
+
 def test_badge_status_blocks_on_missing_basics() -> None:
     report = _report("tests/fixtures/missing-basics-repo", "standard")
     tiers = {t.name: t for t in badge_status(report)}

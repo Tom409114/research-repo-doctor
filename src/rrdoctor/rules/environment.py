@@ -56,6 +56,12 @@ DEPENDENCY_FILES = [
     "flake.lock",
 ]
 NESTED_MANIFEST_DIRS = ("package",)
+SNAKEMAKE_ENV_LAYOUTS = (
+    ("Snakefile", "envs"),
+    ("workflow/Snakefile", "workflow/envs"),
+    ("workflows/Snakefile", "workflows/envs"),
+)
+SNAKEMAKE_ENV_SUFFIXES = {".yaml", ".yml"}
 RUNTIME_HINT_FILES = (
     "runtime.txt",
     ".python-version",
@@ -333,9 +339,33 @@ def _declared_distributions(context: ScanContext) -> set[str]:
 
 
 def _existing_dependency_manifests(root: Path) -> list[Path]:
-    return [
+    manifests = [
         path for path in _candidate_manifest_paths(root, tuple(DEPENDENCY_FILES)) if path.exists()
     ]
+    manifests.extend(snakemake_environment_manifests(root))
+    return manifests
+
+
+def snakemake_environment_manifests(root: Path) -> list[Path]:
+    """Return per-rule Conda environments from conventional Snakemake layouts.
+
+    RRD034 does not use this list because it cannot yet map each script to its
+    rule-specific environment without parsing the workflow graph.
+    """
+
+    manifests: list[Path] = []
+    for snakefile, env_dir in SNAKEMAKE_ENV_LAYOUTS:
+        if not (root / snakefile).is_file():
+            continue
+        base = root / env_dir
+        if not base.is_dir():
+            continue
+        manifests.extend(
+            path
+            for path in sorted(base.rglob("*"), key=lambda candidate: candidate.as_posix())
+            if path.is_file() and path.suffix.lower() in SNAKEMAKE_ENV_SUFFIXES
+        )
+    return manifests
 
 
 def _existing_runtime_hints(root: Path) -> list[Path]:

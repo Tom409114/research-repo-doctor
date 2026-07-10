@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Recognized conventional Snakemake per-rule Conda environments under `envs/`,
+  `workflow/envs/`, and `workflows/envs/` as dependency manifests, while keeping
+  unrelated workflow YAML out of RRD030 and dependency-manifest evidence.
 - Fixed hosted web-demo scans for repositories whose `.rrdoctor.yml` defines a
   report output: the demo now writes JSON to an explicit temporary file outside
   the clone and keeps its public `standard` profile deterministic.
