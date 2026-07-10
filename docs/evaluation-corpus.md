@@ -61,7 +61,10 @@ where a single noisy finding can undermine confidence in a first scan.
 
 ## Current Maintainer Snapshot
 
-Latest local maintainer smoke run, generated on 2026-07-09:
+Latest full local maintainer smoke run, generated on 2026-07-09. Four focused
+RRD090 review records were reconciled against fixed public files on 2026-07-10
+as described below; a new full 80-repository run is still required before
+changing the aggregate score or rule-frequency snapshot.
 
 ```bash
 python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
@@ -104,11 +107,20 @@ build target projects, or execute target repository code. It uses a GitHub
 archive fallback only as a static transport mechanism when `git clone` is
 unavailable or flaky.
 
-Manual review flags captured in this snapshot:
+The full snapshot originally carried four manual false-positive flags for
+RRD090. Focused static reruns on 2026-07-10 reported zero RRD090 findings for
+the exact formerly noisy files:
 
-| Type | Rule | Count |
-| --- | --- | ---: |
-| False positive | RRD090 | 4 |
+| Repository | Fixed public commit | Rechecked evidence |
+| --- | --- | --- |
+| ArchR | `6feec354ad6c8052ddbc4626a2ca2d858ed465bf` | `R/RcppExports.R` |
+| DADA2 | `72da7700b58290e40cdce4b0856314aecf2b9dc4` | `R/RcppExports.R` |
+| Monocle3 | `536f1033d6de7c957f26a1f403f81efbd825e0db` | `R/RcppExports.R` |
+| Seurat | `79c466c0e61e89aa299ee767fec3b69afda47301` | `R/RcppExports.R`, `_pkgdown.yaml` |
+
+Their review notes now record `RRD090` as confirmed absent and their manifest
+entries make it an expected-absent regression gate. These focused checks do not
+replace a full repository scan and are not counted as external-user evidence.
 
 Focused reviews currently cover BERT, CLIP, guided-diffusion,
 improved-diffusion, vision-transformer, MAE, AlphaFold, DETR, YOLOv5,

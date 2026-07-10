@@ -74,6 +74,7 @@ repositories:
     url: https://github.com/satijalab/seurat
     ecosystem: r-bioinformatics
     reason: R research software used for single-cell genomics.
+    expected_absent: [RRD090]
     review_focus: [r-environment, citation, docs]
   - name: dynamicalsystems-jl
     url: https://github.com/JuliaDynamics/DynamicalSystems.jl
@@ -253,11 +254,13 @@ repositories:
     url: https://github.com/cole-trapnell-lab/monocle3
     ecosystem: r-bioinformatics
     reason: R single-cell analysis artifact with package metadata and tutorials.
+    expected_absent: [RRD090]
     review_focus: [r-environment, notebooks, citation]
   - name: dada2
     url: https://github.com/benjjneb/dada2
     ecosystem: r-bioinformatics
     reason: R/Bioconductor microbiome workflow package with citation and examples.
+    expected_absent: [RRD090]
     review_focus: [r-environment, citation, examples]
   - name: clusterprofiler
     url: https://github.com/YuLab-SMU/clusterProfiler
@@ -269,6 +272,7 @@ repositories:
     url: https://github.com/GreenleafLab/ArchR
     ecosystem: r-bioinformatics
     reason: R single-cell ATAC-seq analysis toolkit with data and installation complexity.
+    expected_absent: [RRD090]
     review_focus: [r-environment, data-docs, dependency-docs]
   - name: nf-core-atacseq
     url: https://github.com/nf-core/atacseq

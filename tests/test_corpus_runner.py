@@ -35,6 +35,19 @@ def test_load_corpus_manifest() -> None:
     assert any(ecosystem.startswith("julia-") for ecosystem in ecosystems)
 
 
+def test_resolved_rrd090_reviews_are_regression_gated() -> None:
+    runner = _load_runner()
+    resolved_cases = {"archr", "dada2", "monocle3", "seurat"}
+
+    entries = {entry.name: entry for entry in runner.load_corpus(Path("evaluation/corpus.yml"))}
+    reviews = runner.load_review_notes(Path("evaluation/reviews"))
+
+    for name in resolved_cases:
+        assert "RRD090" in entries[name].expected_absent
+        assert not any(item["rule_id"] == "RRD090" for item in reviews[name]["false_positives"])
+        assert any(item["rule_id"] == "RRD090" for item in reviews[name]["confirmed_absent"])
+
+
 def test_expected_absent_violations_are_reported() -> None:
     runner = _load_runner()
     entry = runner.CorpusEntry(
