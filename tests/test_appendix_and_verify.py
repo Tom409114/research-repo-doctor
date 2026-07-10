@@ -63,8 +63,13 @@ def test_checklist_lists_acm_badges() -> None:
     rendered = render_checklist(report)
 
     assert "ACM Artifact Evaluation badges" in rendered
-    assert "Artifact Available" in rendered
+    assert "Artifacts Available" in rendered
+    assert "Artifacts Evaluated - Functional" in rendered
     assert "Results Reproduced" in rendered
+    assert "no mapped blockers" in rendered
+    assert "Different team reproduced results plus peer-reviewed report" in rendered
+    assert "| Results Reproduced | ready |" not in rendered
+    assert "artifact-review-and-badging-current" in rendered
     assert "NeurIPS reproducibility checklist" in rendered
 
 
@@ -75,6 +80,11 @@ def test_appendix_has_required_sections() -> None:
     for heading in ("# Artifact Appendix", "## Artifact check-list", "## Installation"):
         assert heading in rendered
     assert "This artifact package contains `ml-project-repo`" in rendered
+    assert "All mapped static preparation checks are clear" in rendered
+    assert "This does not establish ACM badge eligibility" in rendered
+    assert "On track for:" not in rendered
+    assert "Yes - license included" not in rendered
+    assert "TODO: provide a public artifact URL and permanent archive DOI" in rendered
     assert "ML fixture" in rendered
     assert "`pyproject.toml`" in rendered
     assert "`data/README.md`" in rendered
@@ -107,6 +117,10 @@ def test_appendix_uses_setup_py_metadata_without_executing(tmp_path) -> None:
 
     assert "This artifact package contains `setup-py-demo`" in rendered
     assert "Repository URL: <https://github.com/example/setup-py-demo>." in rendered
+    assert (
+        "Repository URL detected: <https://github.com/example/setup-py-demo>; "
+        "confirm public access and add a permanent archive identifier."
+    ) in rendered
     assert "Version: `0.5.0`." in rendered
 
 
@@ -114,9 +128,12 @@ def test_badge_status_blocks_on_missing_basics() -> None:
     report = _report("tests/fixtures/missing-basics-repo", "standard")
     tiers = {t.name: t for t in badge_status(report)}
 
-    # A repo missing license/manifest cannot be Available or Functional.
-    assert not tiers["Artifact Available"].ready
-    assert not tiers["Artifact Functional"].ready
+    # A repo missing license/manifest cannot clear those static preflights.
+    assert not tiers["Artifacts Available"].static_clear
+    assert not tiers["Artifacts Evaluated - Functional"].static_clear
+    assert (
+        "Independent artifact audit" in tiers["Artifacts Evaluated - Functional"].required_evidence
+    )
 
 
 def test_verification_ladder_static_mode() -> None:

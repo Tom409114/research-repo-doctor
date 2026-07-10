@@ -89,6 +89,14 @@ statically and is never executed. Fill in the human parts that rrdoctor cannot
 know, such as hardware expectations, expected runtime, dataset access
 restrictions, and result interpretation.
 
+The badge table is a static preflight, not an eligibility decision. ACM v1.1
+treats its badge classes as independent: Artifacts Available needs a permanent
+public archive and identifier, Artifacts Evaluated - Functional needs an
+independent audit, and Results Reproduced needs another team plus peer-reviewed
+evidence. rrdoctor lists these external requirements and never marks a badge
+`ready` from repository files alone. See the
+[current ACM policy](https://www.acm.org/publications/policies/artifact-review-and-badging-current).
+
 For another venue, switch profiles:
 
 ```bash
