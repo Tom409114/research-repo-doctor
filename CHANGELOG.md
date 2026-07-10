@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Fixed hosted web-demo scans for repositories whose `.rrdoctor.yml` defines a
+  report output: the demo now writes JSON to an explicit temporary file outside
+  the clone and keeps its public `standard` profile deterministic.
+- Published `io.github.Tom409114/rrdoctor` version `0.2.24` to the Official MCP
+  Registry with an exact `rrdoctor[mcp]==0.2.24` PyPI command. Registry listing
+  remains distribution metadata, not endorsement or adoption evidence.
+
 ## v0.2.24 - 2026-07-10
 
 - Reduced first-run noise for systems and programming-languages artifacts by

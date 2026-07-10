@@ -28,7 +28,7 @@ the MCP SDK in the `mcp` extra; the registry launch metadata therefore resolves
 to the same explicit command shown above instead of adding the SDK to every CLI
 installation.
 
-The official MCP Registry is currently a preview service. Version `0.2.23` is
+The official MCP Registry is currently a preview service. Version `0.2.24` is
 published with active status under
 [`io.github.Tom409114/rrdoctor`](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.Tom409114/rrdoctor).
 That public record is a distribution mechanism, not an endorsement or evidence

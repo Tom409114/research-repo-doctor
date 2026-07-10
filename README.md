@@ -239,7 +239,7 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
 - **A shorter feedback loop**: completed web-demo scans link to a structured
   10-minute trial report for useful findings, false positives, false negatives,
   and real deadline fit.
-- **Official MCP Registry distribution**: `v0.2.23` is published as
+- **Official MCP Registry distribution**: `v0.2.24` is published as
   [`io.github.Tom409114/rrdoctor`](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.Tom409114/rrdoctor),
   with MCP support remaining an optional extra rather than a core scanner
   dependency. Registry inclusion is distribution metadata, not endorsement or
