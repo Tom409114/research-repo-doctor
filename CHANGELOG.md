@@ -22,6 +22,11 @@
 - Made CLI and MCP scans discover `.rrdoctor.yml` from the target repository,
   even when invoked from another working directory, while keeping explicit
   `--config` paths authoritative.
+- Activated the documented configuration contract: scan profile, format,
+  output, and failure threshold now supply defaults beneath explicit CLI
+  options; MCP inherits the repository profile when omitted; and
+  `paths.include` now limits collected files as documented. Repository-local
+  report output is excluded from its own scan to prevent self-generated findings.
 
 ## v0.2.23 - 2026-07-10
 

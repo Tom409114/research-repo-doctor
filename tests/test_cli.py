@@ -120,13 +120,66 @@ def test_scan_discovers_target_config_and_explicit_config_wins(tmp_path) -> None
     assert "RRD001" in {finding["rule_id"] for finding in overridden_payload["findings"]}
 
 
+def test_scan_uses_config_defaults_and_cli_options_override_them(tmp_path) -> None:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    (repository / ".rrdoctor.yml").write_text(
+        """profile: minimal
+fail_on: none
+report:
+  format: json
+  output: configured-report.json
+""",
+        encoding="utf-8",
+    )
+
+    configured = runner.invoke(app, ["scan", str(repository), "--quiet"])
+
+    assert configured.exit_code == 0
+    configured_output = repository / "configured-report.json"
+    configured_payload = json.loads(configured_output.read_text(encoding="utf-8"))
+    assert configured_payload["profile"] == "minimal"
+
+    repeated = runner.invoke(app, ["scan", str(repository), "--quiet"])
+
+    assert repeated.exit_code == 0
+    repeated_payload = json.loads(configured_output.read_text(encoding="utf-8"))
+    assert "configured-report.json" not in {
+        finding["file"] for finding in repeated_payload["findings"]
+    }
+
+    explicit_output = tmp_path / "explicit-report.md"
+    overridden = runner.invoke(
+        app,
+        [
+            "scan",
+            str(repository),
+            "--profile",
+            "standard",
+            "--format",
+            "markdown",
+            "--output",
+            str(explicit_output),
+            "--fail-on",
+            "error",
+            "--quiet",
+        ],
+    )
+
+    assert overridden.exit_code == 1
+    explicit_text = explicit_output.read_text(encoding="utf-8")
+    assert "- Profile: `standard`" in explicit_text
+
+
 def test_init_creates_config(tmp_path) -> None:
     config_path = tmp_path / "rrdoctor.yml"
 
     result = runner.invoke(app, ["init", "--output", str(config_path), "--profile", "minimal"])
 
     assert result.exit_code == 0
-    assert "profile: minimal" in config_path.read_text(encoding="utf-8")
+    text = config_path.read_text(encoding="utf-8")
+    assert "profile: minimal" in text
+    assert "output: rrdoctor-report.md" in text
 
 
 def test_list_rules_and_explain() -> None:

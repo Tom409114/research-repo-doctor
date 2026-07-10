@@ -36,7 +36,6 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "fail_on": "error",
     "report": {
         "format": "markdown",
-        "output": "rrdoctor-report.md",
     },
 }
 
@@ -143,4 +142,5 @@ def default_config_text(profile: str = "standard") -> str:
 
     config = deepcopy(DEFAULT_CONFIG)
     config["profile"] = profile
+    config.setdefault("report", {})["output"] = "rrdoctor-report.md"
     return str(yaml.safe_dump(config, sort_keys=False))

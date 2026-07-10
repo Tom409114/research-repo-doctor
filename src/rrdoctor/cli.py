@@ -8,7 +8,7 @@ import shlex
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 from rich.console import Console
@@ -17,6 +17,7 @@ from rich.table import Table
 from rrdoctor import __version__
 from rrdoctor.baseline import diff_against_baseline
 from rrdoctor.config import (
+    FAIL_ON_VALUES,
     FORMAT_VALUES,
     PROFILES,
     apply_cli_overrides,
@@ -43,6 +44,7 @@ console = Console()
 err_console = Console(stderr=True)
 PROFILE_HELP = "Profile: " + ", ".join(PROFILES) + "."
 CONFIG_HELP = "Path to .rrdoctor.yml; defaults to the scanned repository root."
+CONFIG_PROFILE_HELP = PROFILE_HELP + " Defaults to .rrdoctor.yml or standard."
 
 
 def _version_callback(value: bool) -> None:
@@ -147,10 +149,69 @@ def _diff_should_fail(diff: DiffResult, fail_on_new: str) -> bool:
     return False
 
 
-def _build_report(path: str | Path, profile: str, config: Path | None = None) -> ScanReport:
+def _resolve_profile(
+    loaded: dict[str, Any], requested: str | None, *, default: str = "standard"
+) -> str:
+    raw = requested if requested is not None else loaded.get("profile", default)
+    if not isinstance(raw, str) or raw not in PROFILES:
+        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
+    return raw
+
+
+def _resolve_report_format(loaded: dict[str, Any], requested: str | None) -> str:
+    report_config = loaded.get("report", {})
+    raw = requested
+    if raw is None and isinstance(report_config, dict):
+        raw = report_config.get("format", "markdown")
+    if not isinstance(raw, str) or raw not in FORMAT_VALUES:
+        raise typer.BadParameter(f"--format must be one of: {', '.join(FORMAT_VALUES)}")
+    return raw
+
+
+def _resolve_fail_on(loaded: dict[str, Any], requested: str | None) -> str:
+    raw = requested if requested is not None else loaded.get("fail_on", "error")
+    if not isinstance(raw, str) or raw not in FAIL_ON_VALUES:
+        raise typer.BadParameter(f"--fail-on must be one of: {', '.join(FAIL_ON_VALUES)}")
+    return raw
+
+
+def _resolve_report_output(
+    repository: str | Path, loaded: dict[str, Any], requested: Path | None
+) -> Path | None:
+    if requested is not None:
+        return requested
+    report_config = loaded.get("report", {})
+    raw = report_config.get("output") if isinstance(report_config, dict) else None
+    if raw in (None, ""):
+        return None
+    if not isinstance(raw, str):
+        raise typer.BadParameter("report.output in .rrdoctor.yml must be a path string")
+    output = Path(raw)
+    return output if output.is_absolute() else Path(repository).resolve() / output
+
+
+def _exclude_report_output(
+    effective: dict[str, Any], repository: str | Path, output: Path | None
+) -> None:
+    if output is None:
+        return
+    root = Path(repository).resolve()
+    try:
+        relative = output.resolve().relative_to(root).as_posix()
+    except ValueError:
+        return
+    path_config = effective.setdefault("paths", {})
+    excludes = list(path_config.get("exclude", []))
+    if relative not in excludes:
+        excludes.append(relative)
+        path_config["exclude"] = excludes
+
+
+def _build_report(path: str | Path, profile: str | None, config: Path | None = None) -> ScanReport:
     """Load config, apply the profile, and scan a path into a report."""
 
     loaded = load_config(config, root=path)
+    profile = _resolve_profile(loaded, profile)
     effective = apply_cli_overrides(loaded, profile=profile)
     return Scanner(effective).scan(path)
 
@@ -180,19 +241,23 @@ def scan(
     path: Annotated[Path, typer.Argument(help="Repository path to scan.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
     output_format: Annotated[
-        str,
+        str | None,
         typer.Option(
             "--format",
-            help="Report format: markdown, json, sarif, or agent.",
+            help="Report format: markdown, json, sarif, or agent. Defaults to config.",
             rich_help_panel="Report",
         ),
-    ] = "markdown",
+    ] = None,
     output: Annotated[
         Path | None, typer.Option("--output", help="Write report to this path.")
     ] = None,
     fail_on: Annotated[
-        str, typer.Option("--fail-on", help="Failure threshold: none, error, warning.")
-    ] = "error",
+        str | None,
+        typer.Option(
+            "--fail-on",
+            help="Failure threshold: none, error, warning. Defaults to config.",
+        ),
+    ] = None,
     fail_on_new: Annotated[
         str | None,
         typer.Option(
@@ -206,7 +271,7 @@ def scan(
             "--baseline", help="Compare against a JSON report and show new/fixed findings."
         ),
     ] = None,
-    profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
+    profile: Annotated[str | None, typer.Option("--profile", help=CONFIG_PROFILE_HELP)] = None,
     include: Annotated[
         str | None, typer.Option("--include", help="Comma-separated rule IDs to include.")
     ] = None,
@@ -218,18 +283,16 @@ def scan(
 ) -> None:
     """Scan a repository and emit a structured report."""
 
-    if output_format not in FORMAT_VALUES:
-        raise typer.BadParameter(f"--format must be one of: {', '.join(FORMAT_VALUES)}")
-    if profile not in PROFILES:
-        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
-    if fail_on not in ("none", "error", "warning"):
-        raise typer.BadParameter("--fail-on must be one of: none, error, warning")
-    if fail_on_new is not None and fail_on_new not in ("none", "error", "warning"):
+    if fail_on_new is not None and fail_on_new not in FAIL_ON_VALUES:
         raise typer.BadParameter("--fail-on-new must be one of: none, error, warning")
     if fail_on_new is not None and baseline is None:
         raise typer.BadParameter("--fail-on-new requires --baseline.")
 
     loaded = load_config(config, root=path)
+    profile = _resolve_profile(loaded, profile)
+    output_format = _resolve_report_format(loaded, output_format)
+    fail_on = _resolve_fail_on(loaded, fail_on)
+    output = _resolve_report_output(path, loaded, output)
     effective = apply_cli_overrides(
         loaded,
         profile=profile,
@@ -237,6 +300,7 @@ def scan(
         output=str(output) if output else None,
         fail_on=fail_on,
     )
+    _exclude_report_output(effective, path, output)
     scanner = Scanner(effective, include=_parse_rule_ids(include), exclude=_parse_rule_ids(exclude))
     report = scanner.scan(path)
     rendered = _render(report, output_format)
@@ -276,7 +340,7 @@ def scan(
 def fix(
     path: Annotated[Path, typer.Argument(help="Repository path to fix.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
-    profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
+    profile: Annotated[str | None, typer.Option("--profile", help=CONFIG_PROFILE_HELP)] = None,
     write: Annotated[
         bool, typer.Option("--write", help="Apply fixes (default is a dry-run preview).")
     ] = False,
@@ -301,10 +365,8 @@ def fix(
     never overwritten. Run without --write to preview, then re-run with --write.
     """
 
-    if profile not in PROFILES:
-        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
-
     loaded = load_config(config, root=path)
+    profile = _resolve_profile(loaded, profile)
     effective = apply_cli_overrides(loaded, profile=profile)
     scanner = Scanner(effective)
     report = scanner.scan(path)
@@ -359,7 +421,7 @@ def fix(
 def plan(
     path: Annotated[Path, typer.Argument(help="Repository path to plan.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
-    profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
+    profile: Annotated[str | None, typer.Option("--profile", help=CONFIG_PROFILE_HELP)] = None,
     output_format: Annotated[
         str, typer.Option("--format", help="Plan format: markdown or json.")
     ] = "markdown",
@@ -369,12 +431,11 @@ def plan(
 ) -> None:
     """Emit a tool-agnostic fix plan for any coding agent or human to execute."""
 
-    if profile not in PROFILES:
-        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
     if output_format not in ("markdown", "json"):
         raise typer.BadParameter("--format must be one of: markdown, json")
 
     loaded = load_config(config, root=path)
+    profile = _resolve_profile(loaded, profile)
     effective = apply_cli_overrides(loaded, profile=profile)
     report = Scanner(effective).scan(path)
     rendered = (
@@ -522,7 +583,7 @@ def prepare(
 def badge(
     path: Annotated[Path, typer.Argument(help="Repository path to summarize.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
-    profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
+    profile: Annotated[str | None, typer.Option("--profile", help=CONFIG_PROFILE_HELP)] = None,
     output_format: Annotated[
         str, typer.Option("--format", help="Badge format: endpoint (Shields.io JSON) or svg.")
     ] = "endpoint",
@@ -532,12 +593,11 @@ def badge(
 ) -> None:
     """Emit an artifact-readiness badge (Shields.io endpoint JSON or SVG)."""
 
-    if profile not in PROFILES:
-        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
     if output_format not in ("endpoint", "svg"):
         raise typer.BadParameter("--format must be one of: endpoint, svg")
 
     loaded = load_config(config, root=path)
+    profile = _resolve_profile(loaded, profile)
     effective = apply_cli_overrides(loaded, profile=profile)
     report = Scanner(effective).scan(path)
     rendered = render_badge_svg(report) if output_format == "svg" else render_badge_endpoint(report)
@@ -578,9 +638,7 @@ def init(
 def verify(
     path: Annotated[Path, typer.Argument(help="Repository path to verify.")] = Path("."),
     config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
-    profile: Annotated[
-        str, typer.Option("--profile", help=PROFILE_HELP + " Default: standard.")
-    ] = "standard",
+    profile: Annotated[str | None, typer.Option("--profile", help=CONFIG_PROFILE_HELP)] = None,
     run: Annotated[
         bool,
         typer.Option(
@@ -616,8 +674,6 @@ def verify(
     preflight. Only use --run on repositories you trust.
     """
 
-    if profile not in PROFILES:
-        raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
     if fail_on not in ("none", "error", "warning"):
         raise typer.BadParameter("--fail-on must be one of: none, error, warning")
     _validate_verify_command(command)

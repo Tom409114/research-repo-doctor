@@ -98,8 +98,8 @@ If you installed rrdoctor into the environment already, use:
 
 | Tool | Purpose |
 | --- | --- |
-| `scan(path=".", profile="standard")` | Return the Markdown reproducibility audit. |
-| `verify(path=".", profile="standard", run=false, command=null, timeout=300)` | Return the L1/L2/L3 verification ladder. |
+| `scan(path=".", profile=null)` | Return the Markdown reproducibility audit; an omitted profile uses repository config or `standard`. |
+| `verify(path=".", profile=null, run=false, command=null, timeout=300)` | Return the L1/L2/L3 verification ladder; an omitted profile uses repository config or `standard`. |
 | `appendix(path=".", profile="acm")` | Return the ACM-style Artifact Appendix plus checklist mapping. |
 
 ## Safety

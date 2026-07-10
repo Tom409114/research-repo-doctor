@@ -224,9 +224,10 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
 - **An explicit JOSS boundary**: the draft-paper notes now separate the
   more-than-six-month public-history gate from research-use, authorship,
   conflict-of-interest, and AI-disclosure evidence that maintainers must supply.
-- **Reliable repository config discovery**: CLI and MCP scans now load the
-  target repository's `.rrdoctor.yml` even when launched from another working
-  directory; an explicit `--config` still wins.
+- **A configuration file that actually governs the scan**: CLI and MCP calls
+  load the target repository's `.rrdoctor.yml` from any working directory;
+  profile, report, threshold, failure, include/exclude, and rule settings now
+  work beneath explicit CLI overrides.
 
 ## What's new in 0.2.23
 
