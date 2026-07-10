@@ -73,5 +73,5 @@ The corpus manifest keeps nanoGPT as a regression seed:
 Run the focused gate before changing entrypoint or notebook-secret rules:
 
 ```bash
-python scripts/scan_corpus.py --only nanoGPT --fail-on-expected-absent
+python scripts/scan_corpus.py --only nanoGPT --fail-on-scan-error --fail-on-expected-absent
 ```

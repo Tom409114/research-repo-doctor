@@ -7,6 +7,7 @@ installed.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -35,10 +36,21 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
 )
 
 
+def subprocess_environment() -> dict[str, str]:
+    """Prefer this checkout's source tree over any editable install elsewhere."""
+
+    env = os.environ.copy()
+    source = str(ROOT / "src")
+    existing = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = source if not existing else source + os.pathsep + existing
+    return env
+
+
 def main() -> int:
+    env = subprocess_environment()
     for command in COMMANDS:
         print("+ " + " ".join(command), flush=True)
-        completed = subprocess.run(command, cwd=ROOT, check=False)
+        completed = subprocess.run(command, cwd=ROOT, env=env, check=False)
         if completed.returncode != 0:
             return completed.returncode
     return 0

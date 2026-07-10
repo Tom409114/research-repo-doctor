@@ -6,6 +6,8 @@ import sys
 import zipfile
 from pathlib import Path
 
+import pytest
+
 from rrdoctor.config import DEFAULT_CONFIG
 from rrdoctor.scanner import Scanner
 
@@ -107,6 +109,44 @@ def test_extract_github_archive_rejects_unsafe_paths(tmp_path) -> None:
         raise AssertionError("unsafe archive path was accepted")
 
 
+class _ChunkedResponse:
+    def __init__(self, payload: bytes) -> None:
+        self.payload = payload
+
+    def read1(self, size: int) -> bytes:
+        chunk = self.payload[:size]
+        self.payload = self.payload[size:]
+        return chunk
+
+    def read(self, size: int) -> bytes:
+        return self.read1(size)
+
+
+def test_archive_reader_enforces_wall_clock_timeout(monkeypatch) -> None:
+    runner = _load_runner()
+    ticks = iter((0.0, 0.5, 1.1))
+    monkeypatch.setattr(runner.time, "monotonic", lambda: next(ticks))
+
+    with pytest.raises(TimeoutError, match="wall-clock timeout"):
+        runner._read_archive_payload(
+            _ChunkedResponse(b"still downloading"),
+            deadline=1.0,
+            max_bytes=1024,
+        )
+
+
+def test_archive_reader_stops_after_size_sentinel() -> None:
+    runner = _load_runner()
+
+    payload = runner._read_archive_payload(
+        _ChunkedResponse(b"0123456789"),
+        deadline=runner.time.monotonic() + 10,
+        max_bytes=4,
+    )
+
+    assert payload == b"01234"
+
+
 def test_clone_repo_uses_archive_fallback_on_git_timeout(tmp_path, monkeypatch) -> None:
     runner = _load_runner()
     entry = runner.CorpusEntry(
@@ -128,7 +168,7 @@ def test_clone_repo_uses_archive_fallback_on_git_timeout(tmp_path, monkeypatch) 
         destination.mkdir()
         return destination
 
-    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(runner, "_run_clone_command", fake_run)
     monkeypatch.setattr(runner, "_download_github_archive", fake_archive_fallback)
 
     destination = runner.clone_repo(entry, tmp_path, timeout=1, max_bytes=1024)
@@ -138,6 +178,38 @@ def test_clone_repo_uses_archive_fallback_on_git_timeout(tmp_path, monkeypatch) 
         "entry": "demo",
         "clone_error": "git clone timed out after 1 seconds",
     }
+
+
+class _FakeProcess:
+    pid = 4242
+
+    def __init__(self) -> None:
+        self.killed = False
+
+    def poll(self):
+        return None
+
+    def kill(self) -> None:
+        self.killed = True
+
+
+def test_terminate_process_tree_uses_taskkill_on_windows(monkeypatch) -> None:
+    runner = _load_runner()
+    process = _FakeProcess()
+    commands = []
+
+    def fake_run(command, **kwargs):
+        commands.append((command, kwargs))
+        return runner.subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(runner.os, "name", "nt")
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+
+    runner._terminate_process_tree(process)
+
+    assert commands[0][0] == ["taskkill", "/PID", "4242", "/T", "/F"]
+    assert commands[0][1]["timeout"] == 10
+    assert process.killed is False
 
 
 def test_scan_entries_progress_reports_to_stderr(tmp_path, monkeypatch, capsys) -> None:
@@ -174,13 +246,22 @@ def test_scan_entries_progress_reports_to_stderr(tmp_path, monkeypatch, capsys) 
 
 def test_focused_runs_use_named_outputs_by_default() -> None:
     runner = _load_runner()
-    args = runner.parse_args(["--only", "nanoGPT", "--fail-on-expected-absent"])
+    args = runner.parse_args(
+        [
+            "--only",
+            "nanoGPT",
+            "--fail-on-scan-error",
+            "--fail-on-expected-absent",
+        ]
+    )
 
     output, aggregate, markdown = runner.resolve_output_paths(args)
 
     assert output == Path("evaluation/reports/focused-nanogpt.json")
     assert aggregate == Path("evaluation/reports/focused-nanogpt-aggregate.json")
     assert markdown == Path("evaluation/reports/focused-nanogpt.md")
+    assert args.fail_on_scan_error is True
+    assert args.fail_on_expected_absent is True
 
 
 def test_full_runs_keep_public_report_outputs_by_default() -> None:
@@ -308,6 +389,62 @@ def test_expected_absent_failure_message_is_empty_without_regressions() -> None:
     message = runner.expected_absent_failure_message({"expected_absent_violations": []})
 
     assert message is None
+
+
+def test_scan_error_failure_message_lists_failed_repositories() -> None:
+    runner = _load_runner()
+
+    message = runner.scan_error_failure_message(
+        [
+            {"name": "healthy", "status": "scanned"},
+            {"name": "archr", "status": "error", "error": "clone timed out"},
+        ]
+    )
+
+    assert message is not None
+    assert "Corpus clone or scan error" in message
+    assert "archr: clone timed out" in message
+
+
+def test_scan_error_failure_message_is_empty_when_all_scans_complete() -> None:
+    runner = _load_runner()
+
+    message = runner.scan_error_failure_message([{"name": "healthy", "status": "scanned"}])
+
+    assert message is None
+
+
+def test_main_fail_on_scan_error_returns_nonzero(tmp_path, monkeypatch, capsys) -> None:
+    runner = _load_runner()
+    failed_summary = {
+        "name": "archr",
+        "url": "https://github.com/GreenleafLab/ArchR",
+        "ecosystem": "r-bioinformatics",
+        "status": "error",
+        "error": "clone timed out",
+        "expected_absent": ["RRD090"],
+    }
+    monkeypatch.setattr(runner, "load_corpus", lambda path: [])
+    monkeypatch.setattr(runner, "scan_entries", lambda *args, **kwargs: [failed_summary])
+    monkeypatch.setattr(runner, "load_review_notes", lambda path: {})
+
+    exit_code = runner.main(
+        [
+            "--manifest",
+            str(tmp_path / "corpus.yml"),
+            "--output",
+            str(tmp_path / "scan.json"),
+            "--aggregate-output",
+            str(tmp_path / "aggregate.json"),
+            "--markdown-output",
+            str(tmp_path / "summary.md"),
+            "--fail-on-scan-error",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "archr: clone timed out" in captured.err
 
 
 def test_pending_review_stubs_do_not_count_as_reviewed() -> None:
