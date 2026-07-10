@@ -21,7 +21,7 @@ from rrdoctor.verification import DEFAULT_TIMEOUT, render_verification
 
 
 def _scan(path: str, profile: str) -> ScanReport:
-    config = apply_cli_overrides(load_config(None), profile=profile)
+    config = apply_cli_overrides(load_config(root=Path(path)), profile=profile)
     return Scanner(config).scan(path)
 
 

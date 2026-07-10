@@ -27,6 +27,19 @@ class FakeFastMCP:
         return None
 
 
+def test_mcp_scan_discovers_target_repository_config(tmp_path) -> None:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    (repository / ".rrdoctor.yml").write_text(
+        "rules:\n  RRD001:\n    enabled: false\n",
+        encoding="utf-8",
+    )
+
+    report = mcp_server._scan(str(repository), "standard")
+
+    assert "RRD001" not in {finding.rule_id for finding in report.findings}
+
+
 def test_mcp_verify_passes_command_and_timeout(monkeypatch) -> None:
     fastmcp_module = types.ModuleType("mcp.server.fastmcp")
     fastmcp_module.FastMCP = FakeFastMCP

@@ -19,6 +19,9 @@
   AI-disclosure checks that still require human evidence.
 - Corrected the quickstart GitHub Action YAML indentation and added regression
   coverage that parses every YAML example in the README and documentation.
+- Made CLI and MCP scans discover `.rrdoctor.yml` from the target repository,
+  even when invoked from another working directory, while keeping explicit
+  `--config` paths authoritative.
 
 ## v0.2.23 - 2026-07-10
 

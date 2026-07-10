@@ -1,5 +1,10 @@
 # Configuration
 
+Commands that accept a repository path automatically load
+`<repository>/.rrdoctor.yml`, even when rrdoctor is launched from another
+working directory. Pass `--config path/to/config.yml` to use a different file;
+an explicit path always takes precedence over repository discovery.
+
 Create a config file:
 
 ```bash

@@ -73,6 +73,53 @@ def test_scan_healthy_json_is_valid() -> None:
     assert payload["score"] >= 70
 
 
+def test_scan_discovers_target_config_and_explicit_config_wins(tmp_path) -> None:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    (repository / ".rrdoctor.yml").write_text(
+        "rules:\n  RRD001:\n    enabled: false\n",
+        encoding="utf-8",
+    )
+
+    discovered = runner.invoke(
+        app,
+        [
+            "scan",
+            str(repository),
+            "--format",
+            "json",
+            "--fail-on",
+            "none",
+            "--quiet",
+        ],
+    )
+
+    assert discovered.exit_code == 0
+    discovered_payload = json.loads(discovered.stdout)
+    assert "RRD001" not in {finding["rule_id"] for finding in discovered_payload["findings"]}
+
+    explicit = tmp_path / "explicit.yml"
+    explicit.write_text("version: 1\n", encoding="utf-8")
+    overridden = runner.invoke(
+        app,
+        [
+            "scan",
+            str(repository),
+            "--config",
+            str(explicit),
+            "--format",
+            "json",
+            "--fail-on",
+            "none",
+            "--quiet",
+        ],
+    )
+
+    assert overridden.exit_code == 0
+    overridden_payload = json.loads(overridden.stdout)
+    assert "RRD001" in {finding["rule_id"] for finding in overridden_payload["findings"]}
+
+
 def test_init_creates_config(tmp_path) -> None:
     config_path = tmp_path / "rrdoctor.yml"
 

@@ -42,6 +42,7 @@ app = typer.Typer(
 console = Console()
 err_console = Console(stderr=True)
 PROFILE_HELP = "Profile: " + ", ".join(PROFILES) + "."
+CONFIG_HELP = "Path to .rrdoctor.yml; defaults to the scanned repository root."
 
 
 def _version_callback(value: bool) -> None:
@@ -146,10 +147,10 @@ def _diff_should_fail(diff: DiffResult, fail_on_new: str) -> bool:
     return False
 
 
-def _build_report(path: Path, profile: str, config: Path | None = None) -> ScanReport:
+def _build_report(path: str | Path, profile: str, config: Path | None = None) -> ScanReport:
     """Load config, apply the profile, and scan a path into a report."""
 
-    loaded = load_config(config)
+    loaded = load_config(config, root=path)
     effective = apply_cli_overrides(loaded, profile=profile)
     return Scanner(effective).scan(path)
 
@@ -177,7 +178,7 @@ def _validate_verify_command(command: str | None) -> None:
 @app.command()
 def scan(
     path: Annotated[Path, typer.Argument(help="Repository path to scan.")] = Path("."),
-    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
     output_format: Annotated[
         str,
         typer.Option(
@@ -228,7 +229,7 @@ def scan(
     if fail_on_new is not None and baseline is None:
         raise typer.BadParameter("--fail-on-new requires --baseline.")
 
-    loaded = load_config(config)
+    loaded = load_config(config, root=path)
     effective = apply_cli_overrides(
         loaded,
         profile=profile,
@@ -274,7 +275,7 @@ def scan(
 @app.command()
 def fix(
     path: Annotated[Path, typer.Argument(help="Repository path to fix.")] = Path("."),
-    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
     profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
     write: Annotated[
         bool, typer.Option("--write", help="Apply fixes (default is a dry-run preview).")
@@ -303,7 +304,7 @@ def fix(
     if profile not in PROFILES:
         raise typer.BadParameter(f"--profile must be one of: {', '.join(PROFILES)}")
 
-    loaded = load_config(config)
+    loaded = load_config(config, root=path)
     effective = apply_cli_overrides(loaded, profile=profile)
     scanner = Scanner(effective)
     report = scanner.scan(path)
@@ -357,7 +358,7 @@ def fix(
 @app.command()
 def plan(
     path: Annotated[Path, typer.Argument(help="Repository path to plan.")] = Path("."),
-    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
     profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
     output_format: Annotated[
         str, typer.Option("--format", help="Plan format: markdown or json.")
@@ -373,7 +374,7 @@ def plan(
     if output_format not in ("markdown", "json"):
         raise typer.BadParameter("--format must be one of: markdown, json")
 
-    loaded = load_config(config)
+    loaded = load_config(config, root=path)
     effective = apply_cli_overrides(loaded, profile=profile)
     report = Scanner(effective).scan(path)
     rendered = (
@@ -432,7 +433,7 @@ def _packet_index(
 @app.command()
 def prepare(
     path: Annotated[Path, typer.Argument(help="Repository path to prepare.")] = Path("."),
-    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
     profile: Annotated[
         str, typer.Option("--profile", help=PROFILE_HELP + " Default: acm.")
     ] = "acm",
@@ -520,7 +521,7 @@ def prepare(
 @app.command()
 def badge(
     path: Annotated[Path, typer.Argument(help="Repository path to summarize.")] = Path("."),
-    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
     profile: Annotated[str, typer.Option("--profile", help=PROFILE_HELP)] = "standard",
     output_format: Annotated[
         str, typer.Option("--format", help="Badge format: endpoint (Shields.io JSON) or svg.")
@@ -536,7 +537,7 @@ def badge(
     if output_format not in ("endpoint", "svg"):
         raise typer.BadParameter("--format must be one of: endpoint, svg")
 
-    loaded = load_config(config)
+    loaded = load_config(config, root=path)
     effective = apply_cli_overrides(loaded, profile=profile)
     report = Scanner(effective).scan(path)
     rendered = render_badge_svg(report) if output_format == "svg" else render_badge_endpoint(report)
@@ -576,7 +577,7 @@ def init(
 @app.command()
 def verify(
     path: Annotated[Path, typer.Argument(help="Repository path to verify.")] = Path("."),
-    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
     profile: Annotated[
         str, typer.Option("--profile", help=PROFILE_HELP + " Default: standard.")
     ] = "standard",
@@ -642,7 +643,7 @@ def verify(
 @app.command()
 def appendix(
     path: Annotated[Path, typer.Argument(help="Repository path to scan.")] = Path("."),
-    config: Annotated[Path | None, typer.Option("--config", help="Path to .rrdoctor.yml.")] = None,
+    config: Annotated[Path | None, typer.Option("--config", help=CONFIG_HELP)] = None,
     profile: Annotated[
         str, typer.Option("--profile", help=PROFILE_HELP + " Default: acm.")
     ] = "acm",
