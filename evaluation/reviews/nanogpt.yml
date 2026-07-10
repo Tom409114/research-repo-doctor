@@ -4,7 +4,7 @@ status: reviewed
 reviewed_at: 2026-07-03
 reviewer: Research Repo Doctor maintainers
 last_verified_at: 2026-07-10
-last_verified_version: 0.2.21
+last_verified_version: 0.2.23
 last_verified_result:
   readiness: Functional
   score: 76
@@ -20,6 +20,6 @@ false_positives: []
 false_negatives: []
 notes: >
   Regression seed case for the first-run trust issues found during nanoGPT
-  scanning. A PyPI v0.2.21 smoke scan reported Functional readiness, 76/100,
+  scanning. A PyPI v0.2.23 smoke scan reported Functional readiness, 76/100,
   0 errors, and no RRD050/RRD063 findings. Keep RRD050 and RRD063 absent unless
   new evidence justifies a finding.
