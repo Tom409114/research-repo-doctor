@@ -13,6 +13,9 @@ INSTALL_COMMAND_RE = re.compile(
     r"(?:(?:python\s+-m\s+)?pip|pipx|uv|uvx|conda|mamba|poetry|pdm)\s+"
     r"(?:install|add|sync|run|create|env)\b"
 )
+CONTAINER_SETUP_COMMAND_RE = re.compile(
+    r"(?im)(^|\n)\s*(?:\$|>)?\s*(?:sudo\s+)?docker\s+(?:build|compose\s+build)\b"
+)
 USAGE_COMMAND_RE = re.compile(
     r"(?im)(^|\n)\s*(?:\$|>)?\s*"
     r"(?:(?:uv|poetry|pipenv)\s+run\s+)?"
@@ -81,9 +84,11 @@ class ReadmeSetupRule(Rule):
         if path is None:
             return []
         text = read_text(path)
-        has_setup_evidence = has_any_heading(
-            text, ("install", "installation", "setup", "environment")
-        ) or INSTALL_COMMAND_RE.search(text)
+        has_setup_evidence = (
+            has_any_heading(text, ("install", "installation", "setup", "environment"))
+            or INSTALL_COMMAND_RE.search(text)
+            or CONTAINER_SETUP_COMMAND_RE.search(text)
+        )
         if not has_setup_evidence:
             return [
                 self.finding(
@@ -157,7 +162,7 @@ class ReadmeReproduceRule(Rule):
             return []
         text = read_text(path)
         has_reproducibility_evidence = (
-            has_any_heading(text, ("reproduc", "results", "replicate"))
+            has_any_heading(text, ("reproduc", "results", "replicate", "regenerate"))
             or REPRODUCE_TEXT_RE.search(text)
             or REPRODUCE_COMMAND_RE.search(text)
         )

@@ -56,10 +56,14 @@ sync with the code.
 `RRD020` accepts `CITATION.cff`, `CITATION.md`, or README citation evidence such
 as Citing sections, "please cite" text, BibTeX entries, DOI fields, or DOI links.
 
-`RRD004` accepts explicit Reproducibility/Results/Replicate sections as well as
-concrete training, evaluation, benchmark, workflow, or reproduction commands such
-as `python train.py`, `python eval.py`, `make reproduce`, `snakemake`, or
-`nextflow run ...`.
+`RRD002` accepts conventional package-manager installation commands and
+container setup commands such as `docker build`, even when they appear under a
+Getting Started heading rather than a literal Installation heading.
+
+`RRD004` accepts explicit Reproducibility/Results/Replicate/Regenerate sections
+as well as concrete training, evaluation, benchmark, workflow, or reproduction
+commands such as `python train.py`, `python eval.py`, `make reproduce`,
+`snakemake`, or `nextflow run ...`.
 
 `RRD050` recognizes common research entrypoints including root-level `train.py`,
 `main.py`, `run.py`, `demo.py`, `inference.py`, `sample.py`, `generate.py`,
@@ -97,8 +101,12 @@ check: optional imports may need maintainer review before being considered
 actionable for a specific project.
 
 `RRD040` accepts dedicated data docs and README-based evidence, including common
-dataset sections and documented `python data/.../prepare.py` style preparation
-commands.
+dataset sections, documented `python data/.../prepare.py` style preparation
+commands, and explicit locations for included raw or precomputed data.
+
+`RRD070` and `RRD071` recognize explicit verify/smoke scripts and a documented
+`analyze_all.sh` command under a Kick the Tires, Smoke Test, or Artifact Check
+heading. An undocumented analysis script alone does not count as test evidence.
 
 `RRD043` and notebook path rule `RRD062` ignore obvious documentation
 placeholders such as `/home/user/absolute_path_to_the_output_dir`, URL path

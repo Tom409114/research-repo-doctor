@@ -10,7 +10,8 @@ from rrdoctor.rules.paths import first_absolute_path, text_files
 
 DATA_README_TERMS = ("data availability", "data", "dataset", "datasets")
 DATA_ACCESS_RE = re.compile(
-    r"(?i)\b(download|prepare|preprocess|dataset|datasets|data/|wget|curl|kaggle|zenodo|doi)\b"
+    r"(?i)\b(download|prepare|preprocess|dataset|datasets|precomputed\s+data|raw\s+data|"
+    r"data/|wget|curl|kaggle|zenodo|doi)\b"
 )
 DATA_PREP_COMMAND_RE = re.compile(r"(?i)\b(python|Rscript|julia|bash)\s+[^\n`]*data/[^\n`]*prepare")
 CI_CONFIG_PATH_PREFIXES = (

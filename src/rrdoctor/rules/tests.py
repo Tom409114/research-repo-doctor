@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 
 from rrdoctor.models import Category, Evidence, Finding, ScanContext, Severity
-from rrdoctor.rules.base import Rule, definition, read_text
+from rrdoctor.rules.base import Rule, definition, has_any_heading, read_text
 from rrdoctor.rules.paths import find_files
 
 TEST_FILE_PATTERNS = [
@@ -49,6 +49,9 @@ TEST_RUNNER_TERMS = (
 BAZEL_TEST_TARGET_RE = re.compile(
     r"\b(?:py|sh|cc|java|go|multi_substrate_py)_test\s*\(|\btest_suite\s*\("
 )
+ARTIFACT_ANALYSIS_COMMAND_RE = re.compile(
+    r"(?im)(^|\n)\s*(?:\$|>)?\s*(?:\./)?(?:scripts/)?analyze_all\.sh(?:\s|$)"
+)
 
 
 def _has_julia_test_target(text: str) -> bool:
@@ -70,11 +73,21 @@ def _has_bazel_test_target(context: ScanContext) -> bool:
 
 
 def _has_artifact_smoke_script(context: ScanContext) -> bool:
+    explicit = find_files(
+        context,
+        ["verify*.sh", "smoke*.sh", "scripts/verify*.sh", "scripts/smoke*.sh"],
+    )
+    if explicit:
+        return True
+
+    readme = context.root / "README.md"
+    analysis_scripts = find_files(context, ["analyze_all.sh", "scripts/analyze_all.sh"])
+    if not readme.exists() or not analysis_scripts:
+        return False
+    text = read_text(readme)
     return bool(
-        find_files(
-            context,
-            ["verify*.sh", "smoke*.sh", "scripts/verify*.sh", "scripts/smoke*.sh"],
-        )
+        has_any_heading(text, ("kick the tires", "smoke test", "artifact check"))
+        and ARTIFACT_ANALYSIS_COMMAND_RE.search(text)
     )
 
 
@@ -85,13 +98,13 @@ class TestsMissingRule(Rule):
         Category.TESTING,
         Severity.WARNING,
         ("standard", "strict", "ml"),
-        "Checks for tests or test files.",
+        "Checks for tests, smoke scripts, or documented artifact analysis checks.",
         "Even small smoke tests help reviewers catch broken reproduction steps.",
-        "Add tests/, test/, or at least one test_*.py / *_test.py / runtests.jl file.",
+        "Add tests/, a verify/smoke script, or a documented Kick the Tires analysis check.",
     )
 
     def check(self, context: ScanContext) -> list[Finding]:
-        if not find_files(context, TEST_FILE_PATTERNS):
+        if not find_files(context, TEST_FILE_PATTERNS) and not _has_artifact_smoke_script(context):
             return [
                 self.finding(context, message="No tests directory or test files were detected.")
             ]
@@ -146,7 +159,8 @@ class TestRunnerMissingRule(Rule):
                     evidence=[
                         Evidence(
                             "Searched pyproject, tox/nox, package scripts, "
-                            "Cargo/Julia project metadata, artifact smoke scripts, and workflows."
+                            "Cargo/Julia project metadata, documented artifact checks, "
+                            "and workflows."
                         )
                     ],
                 )
