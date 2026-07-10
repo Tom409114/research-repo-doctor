@@ -517,8 +517,9 @@ rrdoctor verify . --command "python train.py config/default.py" --run --timeout 
 ```
 
 Submission profiles: `acm`, `neurips`, `icml`, `ml-paper`, `fair4rs`, `joss` (alongside the
-general `minimal`/`standard`/`strict`/`ml` tiers). Dependency and runtime checks also understand
-R (`DESCRIPTION`, `renv.lock`) and Julia (`Project.toml`), not just Python and JavaScript.
+general `minimal`/`standard`/`strict`/`ml` tiers). Static dependency and runtime checks also
+understand R, Julia, Rust/Cargo, CMake-based builds, containers, and Nix environments, not just
+Python and JavaScript.
 
 ## The audit -> fix -> verify loop
 

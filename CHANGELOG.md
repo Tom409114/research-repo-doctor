@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Reduced first-run noise for systems and programming-languages artifacts by
+  recognizing Cargo, CMake, container, and Nix environment evidence; documented
+  artifact smoke scripts and Cargo entrypoints/tests; Cargo package versions;
+  and by filtering escaped Python exception text that resembled a Windows path.
+- Suppressed compiler `SyntaxWarning` noise from untrusted target source during
+  static AST analysis; syntax-invalid files remain skipped conservatively.
 - Revalidated the nanoGPT first-run trust case against public PyPI
   `rrdoctor==0.2.23`: the scan remains `Functional` at 76/100 with 0 errors,
   while the original noisy `RRD050` and `RRD063` findings remain absent.

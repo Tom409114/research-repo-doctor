@@ -30,7 +30,7 @@ CODE_SUFFIXES = (".py", ".r", ".R", ".jl", ".m", ".sh", ".ipynb", ".yaml", ".yml
 ABSOLUTE_PATH_RE = re.compile(
     r"(?i)(/users/[a-z0-9._-][^\s'\"`]+|/home/[a-z0-9._-][^\s'\"`]+|"
     r"/mnt/[a-z]/[^\s'\"`]+|[a-z]:\\+(?:users|documents and settings|program files|"
-    r"tmp|temp|data|workspace|repo|[a-z0-9._ -]{2,})\\+[^\s'\"`]+)"
+    r"tmp|temp|data|workspace|repo|[a-z0-9._-]+(?: [a-z0-9._-]+)*)\\+[^\s'\"`]+)"
 )
 
 

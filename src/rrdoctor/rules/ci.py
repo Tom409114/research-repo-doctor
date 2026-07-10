@@ -60,6 +60,10 @@ class CiNoTestsRule(Rule):
                 "tox",
                 "nox",
                 "npm test",
+                "cargo test",
+                "cargo nextest",
+                "cargo clippy",
+                "cargo fmt",
                 "rrdoctor",
                 "julia-actions/julia-runtest",
                 "julia-runtest",
@@ -84,7 +88,7 @@ class CiNoTestsRule(Rule):
                     evidence=[
                         Evidence(
                             "Workflow text lacks pytest, ruff, tox, nox, npm test, "
-                            "rrdoctor, Julia test actions, Bazel tests, or test scripts."
+                            "rrdoctor, Cargo/Julia/Bazel tests, or test scripts."
                         )
                     ],
                 )

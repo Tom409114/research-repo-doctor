@@ -67,7 +67,8 @@ as `python train.py`, `python eval.py`, `make reproduce`, `snakemake`, or
 `tools/train.py` or `tools/test.py` entrypoints, README-documented
 `python scripts/*.py` or `python tools/*.py` commands, README-documented
 `python -m package.train` commands, pyproject-declared console scripts shown in
-the README, eval/reproduce/demo/inference scripts, Make targets,
+the README, explicit artifact verify/smoke scripts, `cargo run/test/bench`,
+eval/reproduce/demo/inference scripts, Make targets,
 Snakemake/Nextflow workflow files, and README commands such as
 `python train.py ...`. Reusable library or framework projects with
 standard package metadata, docs/tests/examples structure, and library-oriented
@@ -75,10 +76,16 @@ README language are not treated as missing a paper experiment entrypoint. Common
 monorepo-style library layouts with package metadata under `package/` are also
 recognized.
 
-`RRD030` treats a lockable dependency manifest as the strongest evidence. If no
-manifest exists but the README contains concrete install commands, the finding is
-downgraded to a warning rather than an error. Root manifests and common nested
-package manifests such as `package/pyproject.toml` are both recognized.
+`RRD030` treats a lockable dependency manifest as the strongest evidence. It
+recognizes Python, JavaScript, R, Julia, and Rust manifests, plus CMake, Meson,
+Conan, vcpkg, Docker, and Nix environment definitions. If no manifest exists but
+the README contains concrete install commands, the finding is downgraded to a
+warning rather than an error. Root manifests and common nested package manifests
+such as `package/pyproject.toml` are both recognized.
+
+`RRD031` also reads dedicated runtime pins such as `.python-version`, `.nvmrc`,
+and `rust-toolchain.toml`. A container base tagged `latest` is not treated as a
+runtime version pin.
 
 `RRD034` uses Python AST import statements rather than regex text matching, so
 comments, docstrings, notebooks, and prose examples are not treated as imports.

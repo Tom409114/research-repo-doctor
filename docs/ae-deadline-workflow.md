@@ -115,6 +115,11 @@ L2 recognizes common dependency manifests used by research artifacts, including
 `requirements/base.txt` or `requirements/main.txt`, and Conda
 `environment.yml`/`environment.yaml` files.
 
+The static L1 scan also recognizes Cargo/Rust, CMake/Meson/Conan/vcpkg,
+Dockerfile, and Nix environment evidence. Dynamic L2 installation remains a
+Python/Conda capability; for other ecosystems, use the repository's documented
+container or build command as an explicit trusted L3 gate.
+
 L3 prefers documented README run commands when they are conservative and
 file-backed, then falls back to common research entrypoints such as
 `scripts/reproduce.sh`, Make targets, root-level `train.py`/`main.py`/`run.py`,

@@ -26,7 +26,7 @@ else:  # pragma: no cover - Python 3.10 fallback
     import tomli as tomllib
 
 from rrdoctor.models import FixResult
-from rrdoctor.rules.base import read_text
+from rrdoctor.rules.base import parse_python_ast, read_text
 from rrdoctor.rules.security import COMMON_GITIGNORE_TERMS
 
 DATA_HINT_DIR_NAMES = {
@@ -175,9 +175,8 @@ def _read_setup_py_metadata(root: Path) -> Metadata:
     setup_py = root / "setup.py"
     if not setup_py.exists():
         return {}
-    try:
-        tree = ast.parse(read_text(setup_py))
-    except SyntaxError:
+    tree = parse_python_ast(read_text(setup_py))
+    if tree is None:
         return {}
 
     constants = _setup_py_string_constants(tree)
