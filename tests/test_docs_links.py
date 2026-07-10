@@ -3,8 +3,11 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import yaml
+
 _LOCAL_MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 _LOCAL_MARKDOWN_IMAGE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
+_YAML_FENCE = re.compile(r"^```ya?ml\s*\n(.*?)^```\s*$", re.MULTILINE | re.DOTALL)
 
 
 def test_readme_local_links_and_images_exist() -> None:
@@ -22,6 +25,22 @@ def test_readme_local_links_and_images_exist() -> None:
             missing.append(target)
 
     assert missing == []
+
+
+def test_markdown_yaml_examples_parse() -> None:
+    paths = [Path("README.md"), *sorted(Path("docs").rglob("*.md"))]
+    failures: list[str] = []
+
+    for path in paths:
+        text = path.read_text(encoding="utf-8")
+        for match in _YAML_FENCE.finditer(text):
+            line = text.count("\n", 0, match.start()) + 1
+            try:
+                yaml.safe_load(match.group(1))
+            except yaml.YAMLError as exc:
+                failures.append(f"{path}:{line}: {exc}")
+
+    assert failures == []
 
 
 def _is_external_or_anchor(target: str) -> bool:

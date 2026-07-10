@@ -3,7 +3,7 @@
   "name": "io.github.Tom409114/rrdoctor",
   "title": "Research Repo Doctor",
   "description": "Deterministic Artifact Evaluation preflight and run-path grader for research repositories.",
-  "version": "0.2.23",
+  "version": "0.2.24",
   "repository": {
     "url": "https://github.com/Tom409114/research-repo-doctor",
     "source": "github"
@@ -14,7 +14,7 @@
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "rrdoctor",
-      "version": "0.2.23",
+      "version": "0.2.24",
       "runtimeHint": "uvx",
       "runtimeArguments": [
         {
@@ -23,7 +23,7 @@
         },
         {
           "type": "positional",
-          "value": "rrdoctor[mcp]==0.2.23"
+          "value": "rrdoctor[mcp]==0.2.24"
         },
         {
           "type": "positional",
