@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Revalidated the nanoGPT first-run trust case against public PyPI
+  `rrdoctor==0.2.23`: the scan remains `Functional` at 76/100 with 0 errors,
+  while the original noisy `RRD050` and `RRD063` findings remain absent.
+
 ## v0.2.23 - 2026-07-10
 
 - Hardened the release sequence so the Streamlit demo can remain pinned to the
