@@ -1,13 +1,17 @@
 version: 1
 repository: seurat
 status: reviewed
-reviewed_at: 2026-07-04
+reviewed_at: 2026-07-10
 reviewer: Research Repo Doctor maintainers
-confirmed_absent: []
-false_positives:
+confirmed_absent:
   - rule_id: RRD090
-    evidence: R/RcppExports.R contains an Rcpp-generated '# Generator token:' marker, and _pkgdown.yaml contains a public docsearch api_key; neither is a committed credential.
+    evidence: >
+      At public commit 79c466c0e61e89aa299ee767fec3b69afda47301,
+      a focused static scan of R/RcppExports.R and _pkgdown.yaml reports no
+      RRD090 finding for the generated token marker or public docsearch key.
+false_positives: []
 false_negatives: []
 notes: >
-  Focused secret-heuristic review for Rcpp-generated R packages. Generator
-  tokens are build provenance markers and should not be reported as secrets.
+  Resolved first-run regressions for Rcpp provenance and public documentation
+  search configuration. The next full corpus run must enforce the
+  repository-level expected-absent gate.
