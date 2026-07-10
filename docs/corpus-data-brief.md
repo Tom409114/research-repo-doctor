@@ -27,12 +27,13 @@ actionable gaps.
 - Dynamic behavior: no dependency installation, imports, builds, notebooks, or
   target repository scripts were executed.
 - Review evidence: 80 focused manual review notes under `evaluation/reviews/`.
+- Completion gate: `--fail-on-scan-error` for clone or scan failures.
 - Regression gate: `--fail-on-expected-absent` for known first-run trust cases.
 
 Reproduce the maintainer gate:
 
 ```bash
-python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
+python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-scan-error --fail-on-expected-absent
 ```
 
 ## Snapshot Numbers

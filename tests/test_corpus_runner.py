@@ -246,13 +246,22 @@ def test_scan_entries_progress_reports_to_stderr(tmp_path, monkeypatch, capsys) 
 
 def test_focused_runs_use_named_outputs_by_default() -> None:
     runner = _load_runner()
-    args = runner.parse_args(["--only", "nanoGPT", "--fail-on-expected-absent"])
+    args = runner.parse_args(
+        [
+            "--only",
+            "nanoGPT",
+            "--fail-on-scan-error",
+            "--fail-on-expected-absent",
+        ]
+    )
 
     output, aggregate, markdown = runner.resolve_output_paths(args)
 
     assert output == Path("evaluation/reports/focused-nanogpt.json")
     assert aggregate == Path("evaluation/reports/focused-nanogpt-aggregate.json")
     assert markdown == Path("evaluation/reports/focused-nanogpt.md")
+    assert args.fail_on_scan_error is True
+    assert args.fail_on_expected_absent is True
 
 
 def test_full_runs_keep_public_report_outputs_by_default() -> None:
@@ -380,6 +389,62 @@ def test_expected_absent_failure_message_is_empty_without_regressions() -> None:
     message = runner.expected_absent_failure_message({"expected_absent_violations": []})
 
     assert message is None
+
+
+def test_scan_error_failure_message_lists_failed_repositories() -> None:
+    runner = _load_runner()
+
+    message = runner.scan_error_failure_message(
+        [
+            {"name": "healthy", "status": "scanned"},
+            {"name": "archr", "status": "error", "error": "clone timed out"},
+        ]
+    )
+
+    assert message is not None
+    assert "Corpus clone or scan error" in message
+    assert "archr: clone timed out" in message
+
+
+def test_scan_error_failure_message_is_empty_when_all_scans_complete() -> None:
+    runner = _load_runner()
+
+    message = runner.scan_error_failure_message([{"name": "healthy", "status": "scanned"}])
+
+    assert message is None
+
+
+def test_main_fail_on_scan_error_returns_nonzero(tmp_path, monkeypatch, capsys) -> None:
+    runner = _load_runner()
+    failed_summary = {
+        "name": "archr",
+        "url": "https://github.com/GreenleafLab/ArchR",
+        "ecosystem": "r-bioinformatics",
+        "status": "error",
+        "error": "clone timed out",
+        "expected_absent": ["RRD090"],
+    }
+    monkeypatch.setattr(runner, "load_corpus", lambda path: [])
+    monkeypatch.setattr(runner, "scan_entries", lambda *args, **kwargs: [failed_summary])
+    monkeypatch.setattr(runner, "load_review_notes", lambda path: {})
+
+    exit_code = runner.main(
+        [
+            "--manifest",
+            str(tmp_path / "corpus.yml"),
+            "--output",
+            str(tmp_path / "scan.json"),
+            "--aggregate-output",
+            str(tmp_path / "aggregate.json"),
+            "--markdown-output",
+            str(tmp_path / "summary.md"),
+            "--fail-on-scan-error",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "archr: clone timed out" in captured.err
 
 
 def test_pending_review_stubs_do_not_count_as_reviewed() -> None:

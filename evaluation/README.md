@@ -136,17 +136,19 @@ Run a focused smoke scan. Focused runs write named reports such as
 `focused-nanogpt.json` so they do not overwrite the full public corpus report:
 
 ```bash
-python scripts/scan_corpus.py --only nanoGPT --fail-on-expected-absent
+python scripts/scan_corpus.py --only nanoGPT --fail-on-scan-error --fail-on-expected-absent
 ```
 
 Run the current maintainer gate:
 
 ```bash
-python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
+python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-scan-error --fail-on-expected-absent
 ```
 
 The generated reports are written under `evaluation/reports/`, which is ignored
 by git. The runner shallow-clones each repository and falls back to GitHub
-archives when clone transport fails. Before publishing aggregate results,
+archives when clone transport fails. The two failure flags require every
+repository to complete and every expected-absent rule gate to remain clean.
+Before publishing aggregate results,
 manually review the findings for false positives and false negatives. Do not
 rank or shame individual maintainers.

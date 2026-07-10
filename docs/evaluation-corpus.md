@@ -56,7 +56,7 @@ reviewed repositories until a maintainer edits them and changes `status` to
 To turn manually reviewed first-run trust cases into a regression gate, run:
 
 ```bash
-python scripts/scan_corpus.py --only nanoGPT --fail-on-expected-absent
+python scripts/scan_corpus.py --only nanoGPT --fail-on-scan-error --fail-on-expected-absent
 ```
 
 Each corpus entry can list rule IDs under `expected_absent`. The gate exits
@@ -71,6 +71,16 @@ Latest local maintainer smoke run, generated on 2026-07-09:
 ```bash
 python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-expected-absent
 ```
+
+For future complete gates, also require every repository to scan:
+
+```bash
+python scripts/scan_corpus.py --limit 80 --timeout 120 --max-mb 500 --progress --fail-on-scan-error --fail-on-expected-absent
+```
+
+`--fail-on-scan-error` prevents an incomplete clone or scan from appearing to
+pass the rule-regression gate. Use both failure flags for publishable corpus
+evidence.
 
 - Repositories listed: 80
 - Scanned successfully: 80

@@ -647,6 +647,21 @@ def expected_absent_failure_message(aggregate: dict[str, Any]) -> str | None:
     return "\n".join(lines)
 
 
+def scan_error_failure_message(summaries: list[dict[str, Any]]) -> str | None:
+    """Return a gate failure message for repositories that could not be scanned."""
+
+    errors = [summary for summary in summaries if summary.get("status") != "scanned"]
+    if not errors:
+        return None
+
+    lines = ["Corpus clone or scan error(s) detected:"]
+    for summary in errors:
+        name = str(summary.get("name", "unknown"))
+        message = str(summary.get("error", "scan failed"))
+        lines.append(f"- {name}: {message}")
+    return "\n".join(lines)
+
+
 def _review_is_complete(review: dict[str, Any]) -> bool:
     status = str(review.get("status", "reviewed")).strip().lower()
     return status in {"reviewed", "complete", "completed"}
@@ -880,6 +895,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
             "Use this as a regression gate for manually reviewed first-run trust cases."
         ),
     )
+    parser.add_argument(
+        "--fail-on-scan-error",
+        action="store_true",
+        help=(
+            "Exit nonzero if any repository cannot be cloned or scanned. Use this with "
+            "--fail-on-expected-absent for a complete corpus regression gate."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -918,11 +941,18 @@ def main(argv: list[str] | None = None) -> int:
         stubs = write_review_stubs(summaries, args.review_stub_dir)
         message += f"; wrote {len(stubs)} review stub(s) to {args.review_stub_dir}"
     print(message)
+    failures: list[str] = []
+    if args.fail_on_scan_error:
+        failure = scan_error_failure_message(summaries)
+        if failure is not None:
+            failures.append(failure)
     if args.fail_on_expected_absent:
         failure = expected_absent_failure_message(aggregate)
         if failure is not None:
-            print(failure, file=sys.stderr)
-            return 1
+            failures.append(failure)
+    if failures:
+        print("\n".join(failures), file=sys.stderr)
+        return 1
     return 0
 
 
