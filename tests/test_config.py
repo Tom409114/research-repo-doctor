@@ -34,3 +34,34 @@ rules:
     assert overridden["profile"] == "strict"
     assert overridden["report"]["format"] == "json"
     assert overridden["fail_on"] == "warning"
+
+
+def test_load_config_discovers_target_repository_outside_cwd(tmp_path, monkeypatch) -> None:
+    caller = tmp_path / "caller"
+    repository = tmp_path / "repository"
+    caller.mkdir()
+    repository.mkdir()
+    (repository / ".rrdoctor.yml").write_text(
+        "thresholds:\n  large_file_mb: 7\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(caller)
+
+    config = load_config(root=repository)
+
+    assert config["thresholds"]["large_file_mb"] == 7
+
+
+def test_explicit_config_takes_precedence_over_target_repository(tmp_path) -> None:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    (repository / ".rrdoctor.yml").write_text(
+        "thresholds:\n  large_file_mb: 7\n",
+        encoding="utf-8",
+    )
+    explicit = tmp_path / "explicit.yml"
+    explicit.write_text("thresholds:\n  large_file_mb: 11\n", encoding="utf-8")
+
+    config = load_config(explicit, root=repository)
+
+    assert config["thresholds"]["large_file_mb"] == 11

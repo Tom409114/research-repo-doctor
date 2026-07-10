@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.23
+      - uses: Tom409114/research-repo-doctor@v0.2.24
         with:
           profile: standard
           fail-on: error
@@ -210,6 +210,24 @@ audit -> fix -> plan -> (your coding agent / you) -> verify -> PR
   |       rrdoctor fix --write                       --fail-on-new error
   rrdoctor scan
 ```
+
+## What's new in 0.2.24
+
+- **Better systems-artifact coverage**: existing checks now recognize Cargo,
+  CMake, Meson, container, and Nix evidence plus documented artifact scripts
+  and Cargo commands across entrypoint, test, CI, and release workflows.
+- **Quieter static scans**: target-source `SyntaxWarning` noise is suppressed,
+  and escaped Python exception text no longer looks like a local Windows path.
+- **A rechecked first-run trust case**: public PyPI `rrdoctor==0.2.23` still
+  scores nanoGPT as `Functional` at 76/100 with 0 errors, while the original
+  noisy `RRD050` and `RRD063` findings remain absent.
+- **An explicit JOSS boundary**: the draft-paper notes now separate the
+  more-than-six-month public-history gate from research-use, authorship,
+  conflict-of-interest, and AI-disclosure evidence that maintainers must supply.
+- **A configuration file that actually governs the scan**: CLI and MCP calls
+  load the target repository's `.rrdoctor.yml` from any working directory;
+  profile, report, threshold, failure, include/exclude, and rule settings now
+  work beneath explicit CLI overrides.
 
 ## What's new in 0.2.23
 
@@ -558,7 +576,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: Tom409114/research-repo-doctor@v0.2.23
+      - uses: Tom409114/research-repo-doctor@v0.2.24
         with:
           profile: standard
           fail-on: none
@@ -662,10 +680,9 @@ Do not report suspected credential exposure in a public issue. See [SECURITY.md]
 
 ## Citation
 
-Use the included [CITATION.cff](CITATION.cff) or cite the archived `v0.2.23`
-release DOI: [10.5281/zenodo.21287310](https://doi.org/10.5281/zenodo.21287310).
-For the complete version lineage, use the
-[concept DOI 10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161).
+Use the included [CITATION.cff](CITATION.cff) or cite the stable concept DOI:
+[10.5281/zenodo.21045161](https://doi.org/10.5281/zenodo.21045161). It resolves
+to the latest archived release and preserves the complete version lineage.
 
 A JOSS-style draft manuscript is available in [paper/](paper/) for review. It is
 not a submitted manuscript and intentionally avoids unverified adoption claims;
@@ -675,9 +692,9 @@ formal submission metadata will be updated only when it is true.
 @software{research_repo_doctor_2026,
   title = {Research Repo Doctor},
   author = {{Research Repo Doctor Maintainers}},
-  version = {0.2.23},
+  version = {0.2.24},
   year = {2026},
-  doi = {10.5281/zenodo.21287310},
+  doi = {10.5281/zenodo.21045161},
   url = {https://github.com/Tom409114/research-repo-doctor}
 }
 ```

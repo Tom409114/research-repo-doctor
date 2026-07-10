@@ -20,8 +20,8 @@ from rrdoctor.scanner import Scanner
 from rrdoctor.verification import DEFAULT_TIMEOUT, render_verification
 
 
-def _scan(path: str, profile: str) -> ScanReport:
-    config = apply_cli_overrides(load_config(None), profile=profile)
+def _scan(path: str, profile: str | None) -> ScanReport:
+    config = apply_cli_overrides(load_config(root=Path(path)), profile=profile)
     return Scanner(config).scan(path)
 
 
@@ -39,7 +39,7 @@ def build_server() -> Any:
     server = FastMCP("rrdoctor")
 
     @server.tool()
-    def scan(path: str = ".", profile: str = "standard") -> str:
+    def scan(path: str = ".", profile: str | None = None) -> str:
         """Audit a research repository and return a Markdown reproducibility report."""
 
         return render_markdown(_scan(path, profile))
@@ -47,7 +47,7 @@ def build_server() -> Any:
     @server.tool()
     def verify(
         path: str = ".",
-        profile: str = "standard",
+        profile: str | None = None,
         run: bool = False,
         command: str | None = None,
         timeout: int = DEFAULT_TIMEOUT,

@@ -4,9 +4,9 @@ title: "Research Repo Doctor"
 authors:
   - family-names: "Maintainers"
     given-names: "Research Repo Doctor"
-version: 0.2.23
+version: 0.2.24
 date-released: 2026-07-10
-doi: 10.5281/zenodo.21287310
-url: "https://doi.org/10.5281/zenodo.21287310"
+doi: 10.5281/zenodo.21045161
+url: "https://doi.org/10.5281/zenodo.21045161"
 license: MIT
 repository-code: "https://github.com/Tom409114/research-repo-doctor"

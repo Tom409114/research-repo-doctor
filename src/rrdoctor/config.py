@@ -36,7 +36,6 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "fail_on": "error",
     "report": {
         "format": "markdown",
-        "output": "rrdoctor-report.md",
     },
 }
 
@@ -99,12 +98,13 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
     return merged
 
 
-def load_config(path: Path | None = None) -> dict[str, Any]:
-    """Load configuration from a YAML file, returning defaults when absent."""
+def load_config(path: Path | None = None, *, root: str | Path | None = None) -> dict[str, Any]:
+    """Load YAML configuration, discovering it from ``root`` when provided."""
 
     config = deepcopy(DEFAULT_CONFIG)
     if path is None:
-        default_path = Path.cwd() / ".rrdoctor.yml"
+        search_root = Path(root) if root is not None else Path.cwd()
+        default_path = search_root.resolve() / ".rrdoctor.yml"
         path = default_path if default_path.exists() else None
     if path is None:
         return config
@@ -142,4 +142,5 @@ def default_config_text(profile: str = "standard") -> str:
 
     config = deepcopy(DEFAULT_CONFIG)
     config["profile"] = profile
+    config.setdefault("report", {})["output"] = "rrdoctor-report.md"
     return str(yaml.safe_dump(config, sort_keys=False))

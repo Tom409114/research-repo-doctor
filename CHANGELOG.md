@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.24 - 2026-07-10
+
 - Reduced first-run noise for systems and programming-languages artifacts by
   recognizing Cargo, CMake, container, and Nix environment evidence; documented
   artifact smoke scripts and Cargo entrypoints/tests; Cargo package versions;
@@ -11,6 +13,20 @@
 - Revalidated the nanoGPT first-run trust case against public PyPI
   `rrdoctor==0.2.23`: the scan remains `Functional` at 76/100 with 0 errors,
   while the original noisy `RRD050` and `RRD063` findings remain absent.
+- Documented the JOSS eligibility boundary beside the draft paper, including
+  the more-than-six-month public-history gate, the earliest possible calendar
+  window, and the separate research-use, authorship, conflict-of-interest, and
+  AI-disclosure checks that still require human evidence.
+- Corrected the quickstart GitHub Action YAML indentation and added regression
+  coverage that parses every YAML example in the README and documentation.
+- Made CLI and MCP scans discover `.rrdoctor.yml` from the target repository,
+  even when invoked from another working directory, while keeping explicit
+  `--config` paths authoritative.
+- Activated the documented configuration contract: scan profile, format,
+  output, and failure threshold now supply defaults beneath explicit CLI
+  options; MCP inherits the repository profile when omitted; and
+  `paths.include` now limits collected files as documented. Repository-local
+  report output is excluded from its own scan to prevent self-generated findings.
 
 ## v0.2.23 - 2026-07-10
 

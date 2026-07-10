@@ -18,6 +18,25 @@ def test_collect_files_respects_excludes(tmp_path) -> None:
     assert [path.name for path in files] == ["README.md"]
 
 
+def test_collect_files_respects_included_directories(tmp_path) -> None:
+    source = tmp_path / "src"
+    generated = source / "generated"
+    docs = tmp_path / "docs"
+    generated.mkdir(parents=True)
+    docs.mkdir()
+    (source / "keep.py").write_text("print('keep')\n", encoding="utf-8")
+    (generated / "skip.py").write_text("print('skip')\n", encoding="utf-8")
+    (docs / "skip.md").write_text("skip\n", encoding="utf-8")
+    config = deep_merge(
+        DEFAULT_CONFIG,
+        {"paths": {"include": ["src"], "exclude": ["src/generated"]}},
+    )
+
+    files = collect_files(tmp_path, config)
+
+    assert [path.relative_to(tmp_path).as_posix() for path in files] == ["src/keep.py"]
+
+
 def test_healthy_fixture_has_fewer_findings_than_missing_basics() -> None:
     scanner = Scanner(DEFAULT_CONFIG)
 

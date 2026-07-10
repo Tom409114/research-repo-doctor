@@ -31,15 +31,33 @@ def _is_excluded(path: Path, root: Path, excludes: list[str]) -> bool:
     return False
 
 
-def collect_files(root: Path, config: dict[str, Any]) -> list[Path]:
-    """Collect files under root while respecting configured excludes."""
+def _is_included(path: Path, root: Path, includes: list[str]) -> bool:
+    rel = path.relative_to(root).as_posix()
+    for pattern in includes:
+        normalized = pattern.strip().rstrip("/")
+        if normalized in ("", ".", "**", "**/*"):
+            return True
+        if (
+            rel == normalized
+            or rel.startswith(f"{normalized}/")
+            or fnmatch.fnmatch(rel, normalized)
+            or fnmatch.fnmatch(rel, f"{normalized}/**")
+        ):
+            return True
+    return False
 
-    excludes = list(config.get("paths", {}).get("exclude", []))
+
+def collect_files(root: Path, config: dict[str, Any]) -> list[Path]:
+    """Collect files under root while respecting configured includes and excludes."""
+
+    path_config = config.get("paths", {})
+    includes = list(path_config.get("include", ["."])) or ["."]
+    excludes = list(path_config.get("exclude", []))
     files: list[Path] = []
     for path in root.rglob("*"):
         if _is_excluded(path, root, excludes):
             continue
-        if path.is_file():
+        if path.is_file() and _is_included(path, root, includes):
             files.append(path)
     return sorted(files, key=lambda item: item.relative_to(root).as_posix())
 
