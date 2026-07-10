@@ -28,9 +28,12 @@ the MCP SDK in the `mcp` extra; the registry launch metadata therefore resolves
 to the same explicit command shown above instead of adding the SDK to every CLI
 installation.
 
-The official MCP Registry is currently a preview service. A checked-in manifest
-does not by itself mean the server is listed or endorsed. Until a public listing
-can be verified, use the direct client configuration below.
+The official MCP Registry is currently a preview service. Version `0.2.23` is
+published with active status under
+[`io.github.Tom409114/rrdoctor`](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.Tom409114/rrdoctor).
+That public record is a distribution mechanism, not an endorsement or evidence
+of user adoption. The direct client configuration below remains the most
+portable setup path.
 
 ## Smoke test
 
